@@ -5,13 +5,15 @@ from __future__ import annotations
 import importlib
 import importlib.metadata
 import os
-from pathlib import Path
 import site
 import sys
+from pathlib import Path
 from typing import Any
 
 from extractor.native_runtime import (
     preload_libstdcxx as _preload_libstdcxx,
+)
+from extractor.native_runtime import (
     runfiles_root as _runfiles_root,
 )
 
@@ -54,11 +56,10 @@ def _fixture_bytes() -> bytes:
 
 
 def _assert_hermetic_imports() -> dict[str, str]:
-    if sys.version_info[:3] != _EXPECTED_PYTHON:
-        raise RuntimeError(
-            f"unexpected Python: {sys.version_info[:3]!r}; "
-            f"expected {_EXPECTED_PYTHON!r}"
-        )
+    actual_python = sys.version_info[:3]
+    if actual_python != _EXPECTED_PYTHON:
+        message = f"unexpected Python: {actual_python!r}; expected {_EXPECTED_PYTHON!r}"
+        raise RuntimeError(message)
     if os.environ.get("PYTHONNOUSERSITE") != "1":
         raise RuntimeError("PYTHONNOUSERSITE=1 is required")
     if os.environ.get("PYTHONSAFEPATH") != "1" or not sys.flags.safe_path:
@@ -82,10 +83,12 @@ def _assert_hermetic_imports() -> dict[str, str]:
             raise RuntimeError(f"{module_name} has no inspectable import origin")
         origin = Path(raw_origin).absolute()
         if not origin.is_relative_to(runfiles_root):
-            raise RuntimeError(
-                f"{module_name} escaped Bazel runfiles: {origin} "
-                f"(root {runfiles_root})"
+            message = "{} escaped Bazel runfiles: {} (root {})".format(
+                module_name,
+                origin,
+                runfiles_root,
             )
+            raise RuntimeError(message)
         if not origin.is_file():
             raise RuntimeError(f"{module_name} import is missing: {origin}")
         module_origins[module_name] = str(origin)
@@ -94,14 +97,13 @@ def _assert_hermetic_imports() -> dict[str, str]:
         actual = importlib.metadata.version(distribution)
         if actual != expected:
             raise RuntimeError(
-                f"unexpected {distribution} version: {actual}; expected {expected}"
+                f"unexpected {distribution} version: {actual}; expected {expected}",
             )
     return module_origins
 
 
 def run_probe() -> dict[str, Any]:
     """Lift a declared AMD64 fixture and solve a small symbolic constraint."""
-
     module_origins = _assert_hermetic_imports()
     project = angr.load_shellcode(
         _fixture_bytes(),
@@ -113,10 +115,11 @@ def run_probe() -> dict[str, Any]:
     if mnemonics != ["mov", "ret"]:
         raise RuntimeError(f"unexpected Capstone decode: {mnemonics!r}")
     if block.vex.instructions != 2 or block.vex.jumpkind != "Ijk_Ret":
-        raise RuntimeError(
-            "unexpected VEX lift: "
-            f"instructions={block.vex.instructions}, jumpkind={block.vex.jumpkind}"
+        message = "unexpected VEX lift: instructions={}, jumpkind={}".format(
+            block.vex.instructions,
+            block.vex.jumpkind,
         )
+        raise RuntimeError(message)
 
     symbolic = claripy.BVS("e1_smoke_value", 64)
     solver = claripy.Solver()
