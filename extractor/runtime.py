@@ -59,7 +59,7 @@ def _fail(message: str) -> Never:
     raise RuntimeError(message)
 
 
-def _assert_hermetic_imports() -> dict[str, str]:
+def _assert_python_environment() -> None:
     actual_python = sys.version_info[:3]
     if actual_python != _EXPECTED_PYTHON:
         message = f"unexpected Python: {actual_python!r}; expected {_EXPECTED_PYTHON!r}"
@@ -71,6 +71,8 @@ def _assert_hermetic_imports() -> dict[str, str]:
     if site.ENABLE_USER_SITE:
         _fail("user site-packages are enabled")
 
+
+def _assert_clean_sys_path() -> None:
     user_site = Path(site.getusersitepackages()).resolve()
     for entry in sys.path:
         if not entry:
@@ -78,29 +80,44 @@ def _assert_hermetic_imports() -> dict[str, str]:
         if Path(entry).resolve() == user_site:
             _fail(f"user site-packages leaked into sys.path: {entry}")
 
-    runfiles_root = _runfiles_root()
-    module_origins: dict[str, str] = {}
-    for module_name in _REQUIRED_MODULES:
-        module = importlib.import_module(module_name)
-        raw_origin = getattr(module, "__file__", None)
-        if not raw_origin:
-            _fail(f"{module_name} has no inspectable import origin")
-        origin = Path(raw_origin).absolute()
-        if not origin.is_relative_to(runfiles_root):
-            message = "{} escaped Bazel runfiles: {} (root {})".format(
-                module_name,
-                origin,
-                runfiles_root,
-            )
-            _fail(message)
-        if not origin.is_file():
-            _fail(f"{module_name} import is missing: {origin}")
-        module_origins[module_name] = str(origin)
 
+def _module_origin(module_name: str, runfiles_root: Path) -> str:
+    module = importlib.import_module(module_name)
+    raw_origin = getattr(module, "__file__", None)
+    if not raw_origin:
+        _fail(f"{module_name} has no inspectable import origin")
+    origin = Path(raw_origin).absolute()
+    if not origin.is_relative_to(runfiles_root):
+        message = "{} escaped Bazel runfiles: {} (root {})".format(
+            module_name,
+            origin,
+            runfiles_root,
+        )
+        _fail(message)
+    if not origin.is_file():
+        _fail(f"{module_name} import is missing: {origin}")
+    return str(origin)
+
+
+def _assert_module_origins(runfiles_root: Path) -> dict[str, str]:
+    return {
+        module_name: _module_origin(module_name, runfiles_root)
+        for module_name in _REQUIRED_MODULES
+    }
+
+
+def _assert_versions() -> None:
     for distribution, expected in _EXPECTED_TOP_LEVEL_VERSIONS.items():
         actual = importlib.metadata.version(distribution)
         if actual != expected:
             _fail(f"unexpected {distribution} version: {actual}; expected {expected}")
+
+
+def _assert_hermetic_imports() -> dict[str, str]:
+    _assert_python_environment()
+    _assert_clean_sys_path()
+    module_origins = _assert_module_origins(_runfiles_root())
+    _assert_versions()
     return module_origins
 
 
