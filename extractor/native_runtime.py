@@ -35,9 +35,7 @@ def preload_libstdcxx() -> Path:
     if not library_runfile.is_relative_to(root):
         raise RuntimeError(f"libstdc++ escaped Bazel runfiles: {library_runfile}")
     if not library_runfile.is_file():
-        raise RuntimeError(
-            f"declared libstdc++ runfile is missing: {library_runfile}"
-        )
+        raise RuntimeError(f"declared libstdc++ runfile is missing: {library_runfile}")
 
     library_target = library_runfile.resolve()
     # Local Bazel runfiles preserve the repository rule's symlink into the
@@ -45,9 +43,8 @@ def preload_libstdcxx() -> Path:
     # file from the CAS as a regular file inside the action's runfiles tree.
     # Accept that standard materialization, but keep rejecting symlinks whose
     # target did not originate in the Nix store.
-    if (
-        library_target != library_runfile
-        and not library_target.is_relative_to(Path("/nix/store"))
+    if library_target != library_runfile and not library_target.is_relative_to(
+        Path("/nix/store")
     ):
         raise RuntimeError(
             f"libstdc++ does not resolve to the immutable Nix store: {library_target}"
