@@ -1,3 +1,4 @@
 {
-  "extraPaths": [".direnv/python-site-packages"]
+  "extraPaths": [".direnv/python-site-packages"],
+  "pythonVersion": "3.12"
 }
