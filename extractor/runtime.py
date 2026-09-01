@@ -8,7 +8,7 @@ import os
 import site
 import sys
 from pathlib import Path
-from typing import Any, Never
+from typing import TYPE_CHECKING, Never, Protocol, TypedDict, cast
 
 from extractor.native_runtime import (
     preload_libstdcxx as _preload_libstdcxx,
@@ -44,10 +44,100 @@ _REQUIRED_MODULES = (
 )
 
 
+class _Instruction(Protocol):
+    mnemonic: str
+
+
+class _CapstoneBlock(Protocol):
+    insns: list[_Instruction]
+
+
+class _VexBlock(Protocol):
+    instructions: int
+    jumpkind: str
+
+
+class _Block(Protocol):
+    capstone: _CapstoneBlock
+    vex: _VexBlock
+
+
+class _Arch(Protocol):
+    name: str
+
+
+class _Factory(Protocol):
+    def block(self, address: int, *, size: int) -> _Block: ...
+
+
+class _Project(Protocol):
+    arch: _Arch
+    factory: _Factory
+
+
+class _LoadShellcode(Protocol):
+    def __call__(
+        self,
+        shellcode: bytes,
+        *,
+        arch: str,
+        load_address: int,
+    ) -> _Project: ...
+
+
+class _Angr(Protocol):
+    load_shellcode: _LoadShellcode
+
+
+class _SymbolicValue(Protocol):
+    def __add__(self, other: int, /) -> object: ...
+
+
+class _Solver(Protocol):
+    def add(self, constraint: object) -> object: ...
+
+    def eval(self, expression: object, count: int) -> tuple[int, ...]: ...
+
+
+class _BVS(Protocol):
+    def __call__(self, name: str, size: int) -> _SymbolicValue: ...
+
+
+class _SolverFactory(Protocol):
+    def __call__(self) -> _Solver: ...
+
+
+class _Claripy(Protocol):
+    BVS: _BVS
+    Solver: _SolverFactory
+
+
+def _as_angr(module: object) -> _Angr:
+    return cast("_Angr", module)
+
+
+def _as_claripy(module: object) -> _Claripy:
+    return cast("_Claripy", module)
+
+
+class _ProbeResult(TypedDict):
+    arch: str
+    jumpkind: str
+    mnemonics: list[str]
+    module_origins: dict[str, str]
+    native_runtime: str
+    python: str
+    solution: int
+
+
 _LIBSTDCXX = _preload_libstdcxx()
 
-import angr  # noqa: E402
-import claripy  # noqa: E402
+if TYPE_CHECKING:
+    import angr
+    import claripy
+else:
+    angr = importlib.import_module("angr")
+    claripy = importlib.import_module("claripy")
 
 __all__ = ["angr", "claripy"]
 
@@ -85,16 +175,13 @@ def _assert_clean_sys_path() -> None:
 
 def _module_origin(module_name: str, runfiles_root: Path) -> str:
     module = importlib.import_module(module_name)
-    raw_origin = getattr(module, "__file__", None)
-    if not raw_origin:
+    raw_origin: object = getattr(module, "__file__", None)
+    if not isinstance(raw_origin, str):
         _fail(f"{module_name} has no inspectable import origin")
     origin = Path(raw_origin).absolute()
     if not origin.is_relative_to(runfiles_root):
-        message = "{} escaped Bazel runfiles: {} (root {})".format(
-            module_name,
-            origin,
-            runfiles_root,
-        )
+        root = runfiles_root
+        message = f"{module_name} escaped Bazel runfiles: {origin} (root {root})"
         _fail(message)
     if not origin.is_file():
         _fail(f"{module_name} import is missing: {origin}")
@@ -123,10 +210,12 @@ def _assert_hermetic_imports() -> dict[str, str]:
     return module_origins
 
 
-def run_probe() -> dict[str, Any]:
+def run_probe() -> _ProbeResult:
     """Lift a declared AMD64 fixture and solve a small symbolic constraint."""
     module_origins = _assert_hermetic_imports()
-    project = angr.load_shellcode(
+    angr_api = _as_angr(angr)
+    claripy_api = _as_claripy(claripy)
+    project = angr_api.load_shellcode(
         _fixture_bytes(),
         arch="amd64",
         load_address=0x400000,
@@ -139,15 +228,15 @@ def run_probe() -> dict[str, Any]:
         block.vex.instructions != _EXPECTED_VEX_INSTRUCTIONS
         or block.vex.jumpkind != "Ijk_Ret"
     ):
-        message = "unexpected VEX lift: instructions={}, jumpkind={}".format(
-            block.vex.instructions,
-            block.vex.jumpkind,
-        )
+        instructions = block.vex.instructions
+        jumpkind = block.vex.jumpkind
+        details = f"instructions={instructions}, jumpkind={jumpkind}"
+        message = f"unexpected VEX lift: {details}"
         _fail(message)
 
-    symbolic = claripy.BVS("e1_smoke_value", 64)
-    solver = claripy.Solver()
-    solver.add(symbolic + 1 == _EXPECTED_SOLVED_VALUE + 1)
+    symbolic = claripy_api.BVS("e1_smoke_value", 64)
+    solver = claripy_api.Solver()
+    _ = solver.add(symbolic + 1 == _EXPECTED_SOLVED_VALUE + 1)
     solved = solver.eval(symbolic, 1)
     if solved != (_EXPECTED_SOLVED_VALUE,):
         _fail(f"unexpected Claripy result: {solved!r}")
