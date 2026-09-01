@@ -1,0 +1,49 @@
+{
+  "nodes": {
+    "angr-nix": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1787085549,
+        "narHash": "sha256-JTydFJsZAJ3GvSJY3+b2dvvOX0ik/11IxaH2SAj+h9w=",
+        "owner": "heartpunk",
+        "repo": "angr-nix",
+        "rev": "3a7e87c627acdc1116e90892636b8e8d57d209d4",
+        "type": "github"
+      },
+      "original": {
+        "owner": "heartpunk",
+        "repo": "angr-nix",
+        "rev": "3a7e87c627acdc1116e90892636b8e8d57d209d4",
+        "type": "github"
+      }
+    },
+    "nixpkgs": {
+      "locked": {
+        "lastModified": 1783776592,
+        "narHash": "sha256-UgCQzxeWI75XM8G+hPrPh+MKzEPjG3SpAj7dtqSbksA=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "e7a3ca8092b61ff85b6a45bf863ea2b2d6a661b3",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "e7a3ca8092b61ff85b6a45bf863ea2b2d6a661b3",
+        "type": "github"
+      }
+    },
+    "root": {
+      "inputs": {
+        "angr-nix": "angr-nix",
+        "nixpkgs": "nixpkgs"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}
