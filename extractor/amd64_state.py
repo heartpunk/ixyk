@@ -69,16 +69,22 @@ logging.getLogger("angr.engines.successors").addFilter(
     _ExpectedSymbolicExitFilter()
 )
 
-_AMD64_OP_COPY: int = _angr_ccall.data["AMD64"]["OpTypes"][
-    "G_CC_OP_COPY"
-]
+
+def _ccall_constant(table: str, name: str) -> int:
+    value = _angr_ccall.data["AMD64"][table][name]
+    if value is None:
+        raise Amd64AdapterError(f"missing AMD64 ccall constant: {table}.{name}")
+    return value
+
+
+_AMD64_OP_COPY = _ccall_constant("OpTypes", "G_CC_OP_COPY")
 AMD64_FLAG_BIT: dict[str, int] = {
-    "CF": _angr_ccall.data["AMD64"]["CondBitOffsets"]["G_CC_SHIFT_C"],
-    "PF": _angr_ccall.data["AMD64"]["CondBitOffsets"]["G_CC_SHIFT_P"],
-    "AF": _angr_ccall.data["AMD64"]["CondBitOffsets"]["G_CC_SHIFT_A"],
-    "ZF": _angr_ccall.data["AMD64"]["CondBitOffsets"]["G_CC_SHIFT_Z"],
-    "SF": _angr_ccall.data["AMD64"]["CondBitOffsets"]["G_CC_SHIFT_S"],
-    "OF": _angr_ccall.data["AMD64"]["CondBitOffsets"]["G_CC_SHIFT_O"],
+    "CF": _ccall_constant("CondBitOffsets", "G_CC_SHIFT_C"),
+    "PF": _ccall_constant("CondBitOffsets", "G_CC_SHIFT_P"),
+    "AF": _ccall_constant("CondBitOffsets", "G_CC_SHIFT_A"),
+    "ZF": _ccall_constant("CondBitOffsets", "G_CC_SHIFT_Z"),
+    "SF": _ccall_constant("CondBitOffsets", "G_CC_SHIFT_S"),
+    "OF": _ccall_constant("CondBitOffsets", "G_CC_SHIFT_O"),
 }
 
 
