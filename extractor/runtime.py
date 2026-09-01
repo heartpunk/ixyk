@@ -1,0 +1,136 @@
+"""Hermetic Angr runtime probe used by the extractor bootstrap."""
+
+from __future__ import annotations
+
+import importlib
+import importlib.metadata
+import os
+from pathlib import Path
+import site
+import sys
+from typing import Any
+
+from extractor.native_runtime import (
+    preload_libstdcxx as _preload_libstdcxx,
+    runfiles_root as _runfiles_root,
+)
+
+_EXPECTED_PYTHON = (3, 12, 13)
+_EXPECTED_TOP_LEVEL_VERSIONS = {
+    "angr": "9.2.214",
+    "coverage": "7.15.2",
+    "hypothesis": "6.160.0",
+    "mutmut": "3.6.0",
+    "pytest": "9.1.1",
+    "unicorn": "2.1.4",
+}
+_REQUIRED_MODULES = (
+    "angr",
+    "archinfo",
+    "capstone",
+    "claripy",
+    "cle",
+    "coverage",
+    "hypothesis",
+    "mutmut",
+    "pytest",
+    "pyvex",
+    "unicorn",
+    "z3",
+)
+
+
+_LIBSTDCXX = _preload_libstdcxx()
+
+import angr  # noqa: E402
+import claripy  # noqa: E402
+
+__all__ = ["angr", "claripy"]
+
+
+def _fixture_bytes() -> bytes:
+    fixture_path = Path(__file__).with_name("amd64_smoke.hex")
+    return bytes.fromhex(fixture_path.read_text(encoding="ascii"))
+
+
+def _assert_hermetic_imports() -> dict[str, str]:
+    if sys.version_info[:3] != _EXPECTED_PYTHON:
+        raise RuntimeError(
+            f"unexpected Python: {sys.version_info[:3]!r}; "
+            f"expected {_EXPECTED_PYTHON!r}"
+        )
+    if os.environ.get("PYTHONNOUSERSITE") != "1":
+        raise RuntimeError("PYTHONNOUSERSITE=1 is required")
+    if os.environ.get("PYTHONSAFEPATH") != "1" or not sys.flags.safe_path:
+        raise RuntimeError("Python safe-path mode is required")
+    if site.ENABLE_USER_SITE:
+        raise RuntimeError("user site-packages are enabled")
+
+    user_site = Path(site.getusersitepackages()).resolve()
+    for entry in sys.path:
+        if not entry:
+            raise RuntimeError("the current working directory leaked into sys.path")
+        if Path(entry).resolve() == user_site:
+            raise RuntimeError(f"user site-packages leaked into sys.path: {entry}")
+
+    runfiles_root = _runfiles_root()
+    module_origins: dict[str, str] = {}
+    for module_name in _REQUIRED_MODULES:
+        module = importlib.import_module(module_name)
+        raw_origin = getattr(module, "__file__", None)
+        if not raw_origin:
+            raise RuntimeError(f"{module_name} has no inspectable import origin")
+        origin = Path(raw_origin).absolute()
+        if not origin.is_relative_to(runfiles_root):
+            raise RuntimeError(
+                f"{module_name} escaped Bazel runfiles: {origin} "
+                f"(root {runfiles_root})"
+            )
+        if not origin.is_file():
+            raise RuntimeError(f"{module_name} import is missing: {origin}")
+        module_origins[module_name] = str(origin)
+
+    for distribution, expected in _EXPECTED_TOP_LEVEL_VERSIONS.items():
+        actual = importlib.metadata.version(distribution)
+        if actual != expected:
+            raise RuntimeError(
+                f"unexpected {distribution} version: {actual}; expected {expected}"
+            )
+    return module_origins
+
+
+def run_probe() -> dict[str, Any]:
+    """Lift a declared AMD64 fixture and solve a small symbolic constraint."""
+
+    module_origins = _assert_hermetic_imports()
+    project = angr.load_shellcode(
+        _fixture_bytes(),
+        arch="amd64",
+        load_address=0x400000,
+    )
+    block = project.factory.block(0x400000, size=4)
+    mnemonics = [instruction.mnemonic for instruction in block.capstone.insns]
+    if mnemonics != ["mov", "ret"]:
+        raise RuntimeError(f"unexpected Capstone decode: {mnemonics!r}")
+    if block.vex.instructions != 2 or block.vex.jumpkind != "Ijk_Ret":
+        raise RuntimeError(
+            "unexpected VEX lift: "
+            f"instructions={block.vex.instructions}, jumpkind={block.vex.jumpkind}"
+        )
+
+    symbolic = claripy.BVS("e1_smoke_value", 64)
+    solver = claripy.Solver()
+    solver.add(symbolic + 1 == 0x1235)
+    solved = solver.eval(symbolic, 1)
+    if solved != (0x1234,):
+        raise RuntimeError(f"unexpected Claripy result: {solved!r}")
+
+    return {
+        "arch": project.arch.name,
+        "jumpkind": block.vex.jumpkind,
+        "mnemonics": mnemonics,
+        "module_origins": module_origins,
+        "native_runtime": str(_LIBSTDCXX),
+        "python": ".".join(str(part) for part in sys.version_info[:3]),
+        "solution": solved[0],
+    }
