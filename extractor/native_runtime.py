@@ -53,5 +53,5 @@ def preload_libstdcxx() -> Path:
             f"libstdc++ does not resolve to the immutable Nix store: {library_target}"
         )
 
-    ctypes.CDLL(str(library_runfile), mode=ctypes.RTLD_GLOBAL)
+    _ = ctypes.CDLL(str(library_runfile), mode=ctypes.RTLD_GLOBAL)
     return library_runfile
