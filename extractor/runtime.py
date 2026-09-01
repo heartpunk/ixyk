@@ -8,7 +8,7 @@ import os
 import site
 import sys
 from pathlib import Path
-from typing import Any
+from typing import Any, Never
 
 from extractor.native_runtime import (
     preload_libstdcxx as _preload_libstdcxx,
@@ -55,24 +55,28 @@ def _fixture_bytes() -> bytes:
     return bytes.fromhex(fixture_path.read_text(encoding="ascii"))
 
 
+def _fail(message: str) -> Never:
+    raise RuntimeError(message)
+
+
 def _assert_hermetic_imports() -> dict[str, str]:
     actual_python = sys.version_info[:3]
     if actual_python != _EXPECTED_PYTHON:
         message = f"unexpected Python: {actual_python!r}; expected {_EXPECTED_PYTHON!r}"
-        raise RuntimeError(message)
+        _fail(message)
     if os.environ.get("PYTHONNOUSERSITE") != "1":
-        raise RuntimeError("PYTHONNOUSERSITE=1 is required")
+        _fail("PYTHONNOUSERSITE=1 is required")
     if os.environ.get("PYTHONSAFEPATH") != "1" or not sys.flags.safe_path:
-        raise RuntimeError("Python safe-path mode is required")
+        _fail("Python safe-path mode is required")
     if site.ENABLE_USER_SITE:
-        raise RuntimeError("user site-packages are enabled")
+        _fail("user site-packages are enabled")
 
     user_site = Path(site.getusersitepackages()).resolve()
     for entry in sys.path:
         if not entry:
-            raise RuntimeError("the current working directory leaked into sys.path")
+            _fail("the current working directory leaked into sys.path")
         if Path(entry).resolve() == user_site:
-            raise RuntimeError(f"user site-packages leaked into sys.path: {entry}")
+            _fail(f"user site-packages leaked into sys.path: {entry}")
 
     runfiles_root = _runfiles_root()
     module_origins: dict[str, str] = {}
@@ -80,7 +84,7 @@ def _assert_hermetic_imports() -> dict[str, str]:
         module = importlib.import_module(module_name)
         raw_origin = getattr(module, "__file__", None)
         if not raw_origin:
-            raise RuntimeError(f"{module_name} has no inspectable import origin")
+            _fail(f"{module_name} has no inspectable import origin")
         origin = Path(raw_origin).absolute()
         if not origin.is_relative_to(runfiles_root):
             message = "{} escaped Bazel runfiles: {} (root {})".format(
@@ -88,17 +92,15 @@ def _assert_hermetic_imports() -> dict[str, str]:
                 origin,
                 runfiles_root,
             )
-            raise RuntimeError(message)
+            _fail(message)
         if not origin.is_file():
-            raise RuntimeError(f"{module_name} import is missing: {origin}")
+            _fail(f"{module_name} import is missing: {origin}")
         module_origins[module_name] = str(origin)
 
     for distribution, expected in _EXPECTED_TOP_LEVEL_VERSIONS.items():
         actual = importlib.metadata.version(distribution)
         if actual != expected:
-            raise RuntimeError(
-                f"unexpected {distribution} version: {actual}; expected {expected}",
-            )
+            _fail(f"unexpected {distribution} version: {actual}; expected {expected}")
     return module_origins
 
 
@@ -113,20 +115,20 @@ def run_probe() -> dict[str, Any]:
     block = project.factory.block(0x400000, size=4)
     mnemonics = [instruction.mnemonic for instruction in block.capstone.insns]
     if mnemonics != ["mov", "ret"]:
-        raise RuntimeError(f"unexpected Capstone decode: {mnemonics!r}")
+        _fail(f"unexpected Capstone decode: {mnemonics!r}")
     if block.vex.instructions != 2 or block.vex.jumpkind != "Ijk_Ret":
         message = "unexpected VEX lift: instructions={}, jumpkind={}".format(
             block.vex.instructions,
             block.vex.jumpkind,
         )
-        raise RuntimeError(message)
+        _fail(message)
 
     symbolic = claripy.BVS("e1_smoke_value", 64)
     solver = claripy.Solver()
     solver.add(symbolic + 1 == 0x1235)
     solved = solver.eval(symbolic, 1)
     if solved != (0x1234,):
-        raise RuntimeError(f"unexpected Claripy result: {solved!r}")
+        _fail(f"unexpected Claripy result: {solved!r}")
 
     return {
         "arch": project.arch.name,
