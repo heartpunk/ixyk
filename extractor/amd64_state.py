@@ -349,31 +349,6 @@ def _preserve_symbolic_memory_addresses(state: Any) -> None:
         state.inspect.address_concretization_add_constraints = False
 
 
-def _apply_typed_z3_replacements(state: Any, expression: z3.ExprRef) -> z3.ExprRef:
-    """Resolve summary placeholders for adapter-side address classification."""
-
-    replacements = state.globals.get("_ghot_typed_replacements", {})
-    if not replacements:
-        return expression
-    from extractor.typed_z3 import expr_from_z3, expr_to_z3, substitute_expr
-
-    typed = expr_from_z3(expression)
-    for _ in range(len(replacements) + 1):
-        replaced = substitute_expr(typed, replacements)
-        if replaced is typed or replaced == typed:
-            break
-        typed = replaced
-    variables = {
-        **{name: canonical_register(name) for name in REGISTER_NAMES},
-        **{
-            f"rflags_{name}": canonical_flag(name)
-            for name in FLAG_NAMES
-        },
-        MEMORY_NAME: canonical_memory(),
-    }
-    return expr_to_z3(typed, variables, LTS_EXTRACTION_CONTEXT)
-
-
 def _memory_read_hook(state: Any) -> None:
     address = state.inspect.mem_read_address
     if address is None:
@@ -383,7 +358,7 @@ def _memory_read_hook(state: Any) -> None:
     size = _access_size(state.inspect.mem_read_length, "memory read")
 
     address_z3 = claripy_to_z3(address)
-    classified_address_z3 = _apply_typed_z3_replacements(state, address_z3)
+    classified_address_z3 = address_z3
 
     def record(kind: str) -> None:
         events = tuple(state.globals.get("_ghot_memory_read_events", ()))
