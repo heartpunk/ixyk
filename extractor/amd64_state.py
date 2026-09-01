@@ -2,10 +2,11 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass
 from functools import lru_cache
 import logging
-from typing import Any, Mapping
+from typing import Any, ClassVar, override
 
 # This import preloads libstdc++ before the Angr imports that follow it.
 from extractor import runtime
@@ -52,11 +53,12 @@ _claripy = runtime.claripy
 class _ExpectedSymbolicExitFilter(logging.Filter):
     """Hide only Angr's expected diagnostic for our symbolic return edge."""
 
-    _PREFIX = (
+    _PREFIX: ClassVar[str] = (
         "Exit state has over 256 possible solutions. "
         "Likely unconstrained; skipping."
     )
 
+    @override
     def filter(self, record: logging.LogRecord) -> bool:
         return not record.getMessage().startswith(self._PREFIX)
 
