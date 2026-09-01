@@ -148,6 +148,30 @@ def _u64(value: Any, field: str) -> int:
     return value
 
 
+def _expect_bv(value: object, field: str) -> z3.BitVecRef:
+    if not isinstance(value, z3.BitVecRef):
+        raise Amd64AdapterError(f"{field} is not a bit-vector expression")
+    return value
+
+
+def _expect_array(value: object, field: str) -> z3.ArrayRef:
+    if not isinstance(value, z3.ArrayRef):
+        raise Amd64AdapterError(f"{field} is not an array expression")
+    return value
+
+
+def _expect_bool(value: object, field: str) -> z3.BoolRef:
+    if not isinstance(value, z3.BoolRef):
+        raise Amd64AdapterError(f"{field} is not a Boolean expression")
+    return value
+
+
+def _expect_bv_sort(value: object, field: str) -> z3.BitVecSortRef:
+    if not isinstance(value, z3.BitVecSortRef):
+        raise Amd64AdapterError(f"{field} is not a bit-vector sort")
+    return value
+
+
 def canonical_declarations() -> tuple[CanonicalDeclaration, ...]:
     return (
         tuple(
@@ -191,7 +215,7 @@ def canonical_flag(name: str) -> z3.BitVecRef:
 def canonical_memory() -> z3.ArrayRef:
     address = z3.BitVecSort(64, ctx=LTS_EXTRACTION_CONTEXT)
     byte = z3.BitVecSort(8, ctx=LTS_EXTRACTION_CONTEXT)
-    return z3.Array(MEMORY_NAME, address, byte)
+    return _expect_array(z3.Array(MEMORY_NAME, address, byte), "canonical memory")
 
 
 def claripy_to_z3(ast: Any) -> z3.ExprRef:
@@ -211,19 +235,22 @@ def load_le(
     if type(size) is not int or size <= 0:
         raise Amd64AdapterError("memory access size must be positive")
     bytes_high_to_low = tuple(
-        z3.Select(
-            memory,
-            address + z3.BitVecVal(
-                offset,
-                64,
-                ctx=LTS_EXTRACTION_CONTEXT,
+        _expect_bv(
+            z3.Select(
+                memory,
+                address + z3.BitVecVal(
+                    offset,
+                    64,
+                    ctx=LTS_EXTRACTION_CONTEXT,
+                ),
             ),
+            "memory load byte",
         )
         for offset in reversed(range(size))
     )
     if len(bytes_high_to_low) == 1:
         return bytes_high_to_low[0]
-    return z3.Concat(*bytes_high_to_low)
+    return _expect_bv(z3.Concat(*bytes_high_to_low), "memory load")
 
 
 def store_le(
@@ -245,14 +272,17 @@ def store_le(
         raise Amd64AdapterError("memory store value has the wrong width")
     result = memory
     for offset in range(size):
-        result = z3.Store(
-            result,
-            address + z3.BitVecVal(
-                offset,
-                64,
-                ctx=LTS_EXTRACTION_CONTEXT,
+        result = _expect_array(
+            z3.Store(
+                result,
+                address + z3.BitVecVal(
+                    offset,
+                    64,
+                    ctx=LTS_EXTRACTION_CONTEXT,
+                ),
+                z3.Extract(offset * 8 + 7, offset * 8, value),
             ),
-            z3.Extract(offset * 8 + 7, offset * 8, value),
+            "updated memory",
         )
     return result
 
@@ -264,8 +294,8 @@ def _require_memory_shape(
     if (
         not z3.is_array(memory)
         or memory.ctx != LTS_EXTRACTION_CONTEXT
-        or memory.domain().size() != 64
-        or memory.range().size() != 8
+        or _expect_bv_sort(memory.domain(), "memory domain").size() != 64
+        or _expect_bv_sort(memory.range(), "memory range").size() != 8
         or not z3.is_bv(address)
         or address.ctx != LTS_EXTRACTION_CONTEXT
         or address.size() != 64
@@ -277,10 +307,14 @@ def _require_memory_shape(
 
 def source_rip_guard(source: int) -> z3.BoolRef:
     source = _u64(source, "source")
-    return canonical_register("rip") == z3.BitVecVal(
-        source,
-        64,
-        ctx=LTS_EXTRACTION_CONTEXT,
+    return _expect_bool(
+        canonical_register("rip")
+        == z3.BitVecVal(
+            source,
+            64,
+            ctx=LTS_EXTRACTION_CONTEXT,
+        ),
+        "source RIP guard",
     )
 
 
@@ -288,19 +322,19 @@ def require_mirrored_rip(
     target: z3.ExprRef,
     post_rip: z3.ExprRef,
 ) -> None:
+    target_bv = _expect_bv(target, "target")
+    post_rip_bv = _expect_bv(post_rip, "post-rip")
     if (
-        not z3.is_bv(target)
-        or not z3.is_bv(post_rip)
-        or target.size() != 64
-        or post_rip.size() != 64
-        or target.ctx != LTS_EXTRACTION_CONTEXT
-        or post_rip.ctx != LTS_EXTRACTION_CONTEXT
+        target_bv.size() != 64
+        or post_rip_bv.size() != 64
+        or target_bv.ctx != LTS_EXTRACTION_CONTEXT
+        or post_rip_bv.ctx != LTS_EXTRACTION_CONTEXT
     ):
         raise Amd64AdapterError(
             "target and post-rip must be extraction-context BV64 expressions"
         )
     solver = z3.Solver(ctx=LTS_EXTRACTION_CONTEXT)
-    solver.add(target != post_rip)
+    solver.add(target_bv != post_rip_bv)
     if solver.check() != z3.unsat:
         raise Amd64AdapterError("target and post-rip disagree semantically")
 
@@ -359,7 +393,7 @@ def _memory_read_hook(state: Any) -> None:
         raise Amd64AdapterError("memory read already has a value before loading")
     size = _access_size(state.inspect.mem_read_length, "memory read")
 
-    address_z3 = claripy_to_z3(address)
+    address_z3 = _expect_bv(claripy_to_z3(address), "memory read address")
     classified_address_z3 = address_z3
 
     def record(kind: str) -> None:
@@ -420,9 +454,9 @@ def _memory_write_hook(state: Any) -> None:
     if address is None or value is None:
         raise Amd64AdapterError("memory write is missing address or value")
     size = _access_size(state.inspect.mem_write_length, "memory write")
-    address_z3 = claripy_to_z3(address)
-    value_z3 = claripy_to_z3(value)
-    current = state.globals["_ghot_memory_expr"]
+    address_z3 = _expect_bv(claripy_to_z3(address), "memory write address")
+    value_z3 = _expect_bv(claripy_to_z3(value), "memory write value")
+    current = _expect_array(state.globals["_ghot_memory_expr"], "current memory")
     updated = store_le(current, address_z3, value_z3, size)
     writes = list(state.globals.get("_ghot_memory_writes", ()))
     writes.append(MemoryWrite(address_z3, value_z3, size))
@@ -485,10 +519,16 @@ def _resolve_memory_reads(
 ) -> z3.ExprRef:
     replacements: list[tuple[z3.ExprRef, z3.ExprRef]] = []
     for name, (address, size, memory_at_read) in reads.items():
-        address_z3 = claripy_to_z3(address)
+        address_z3 = _expect_bv(claripy_to_z3(address), "memory read address")
         if replacements:
-            address_z3 = z3.substitute(address_z3, *replacements)
-            memory_at_read = z3.substitute(memory_at_read, *replacements)
+            address_z3 = _expect_bv(
+                z3.substitute(address_z3, *replacements),
+                "resolved memory read address",
+            )
+            memory_at_read = _expect_array(
+                z3.substitute(memory_at_read, *replacements),
+                "resolved memory-at-read",
+            )
         placeholder = z3.BitVec(
             name,
             size * 8,
@@ -577,8 +617,14 @@ def _resolved_writes(post: Any) -> tuple[MemoryWrite, ...]:
     reads = post.globals.get("_ghot_memory_reads", {})
     return tuple(
         MemoryWrite(
-            _resolve_memory_reads(write.address, reads),
-            _resolve_memory_reads(write.value, reads),
+            _expect_bv(
+                _resolve_memory_reads(write.address, reads),
+                "resolved memory write address",
+            ),
+            _expect_bv(
+                _resolve_memory_reads(write.value, reads),
+                "resolved memory write value",
+            ),
             write.size,
         )
         for write in post.globals.get("_ghot_memory_writes", ())
@@ -593,15 +639,18 @@ def _symbolic_target_update(
         claripy_to_z3(post.regs.rip),
         post.globals.get("_ghot_memory_reads", {}),
     )
-    if not z3.is_bv(target) or target.size() != 64:
+    target_bv = _expect_bv(target, "instruction target")
+    if target_bv.size() != 64:
         raise Amd64AdapterError("instruction target is not BV64")
-    updates["rip"] = target
-    require_mirrored_rip(target, updates["rip"])
-    simplified = z3.simplify(target)
+    updates["rip"] = target_bv
+    require_mirrored_rip(target_bv, updates["rip"])
+    simplified = z3.simplify(target_bv)
     target_value = (
-        simplified.as_long() if z3.is_bv_value(simplified) else None
+        simplified.as_long()
+        if isinstance(simplified, z3.BitVecNumRef)
+        else None
     )
-    return target, target_value
+    return target_bv, target_value
 
 
 def _concrete_target_update(
@@ -735,9 +784,12 @@ def step_instruction_outcomes(
                 raise Amd64AdapterError(
                     f"instruction at {source:#x} exit has no guard"
                 )
-            guard = _resolve_memory_reads(
-                claripy_to_z3(raw_guard),
-                post.globals.get("_ghot_memory_reads", {}),
+            guard = _expect_bool(
+                _resolve_memory_reads(
+                    claripy_to_z3(raw_guard),
+                    post.globals.get("_ghot_memory_reads", {}),
+                ),
+                "instruction exit guard",
             )
             exit_guards.append(guard)
         else:
@@ -777,10 +829,13 @@ def step_instruction_outcomes(
         raise Amd64AdapterError(
             f"instruction at {source:#x} has no default outcome"
         )
-    default_guard = (
-        z3.And(*(z3.Not(guard) for guard in exit_guards))
-        if exit_guards
-        else z3.BoolVal(True, ctx=LTS_EXTRACTION_CONTEXT)
+    default_guard = _expect_bool(
+        (
+            z3.And(*(z3.Not(guard) for guard in exit_guards))
+            if exit_guards
+            else z3.BoolVal(True, ctx=LTS_EXTRACTION_CONTEXT)
+        ),
+        "instruction default guard",
     )
     outcomes = [
         (
