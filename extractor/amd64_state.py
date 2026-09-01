@@ -768,7 +768,7 @@ def step_instruction_outcomes(
             if statement_index not in exit_indices:
                 raise Amd64AdapterError(
                     f"instruction at {source:#x} has unknown VEX exit "
-                    f"statement {statement_index}"
+                    + f"statement {statement_index}"
                 )
             identity = StaticOutcomeIdentity(
                 outcome_id=exit_indices.index(statement_index),
