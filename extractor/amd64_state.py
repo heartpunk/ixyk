@@ -19,6 +19,7 @@ from extractor.angr_boundary import (
     expect_project,
     expect_state,
 )
+from extractor import z3_boundary as _z3
 
 from angr.engines.vex.claripy import ccall as _angr_ccall
 from claripy.backends.backend_z3 import BackendZ3
@@ -210,32 +211,34 @@ def declaration(name: str) -> CanonicalDeclaration:
 def canonical_register(name: str) -> z3.BitVecRef:
     if name not in REGISTER_NAMES:
         raise Amd64AdapterError(f"unknown canonical AMD64 register {name!r}")
-    return z3.BitVec(name, 64, ctx=LTS_EXTRACTION_CONTEXT)
+    return _z3.bit_vec(name, 64, LTS_EXTRACTION_CONTEXT)
 
 
 @lru_cache(maxsize=None)
 def canonical_flag(name: str) -> z3.BitVecRef:
     if name not in FLAG_NAMES:
         raise Amd64AdapterError(f"unknown canonical AMD64 flag {name!r}")
-    return z3.BitVec(
+    return _z3.bit_vec(
         f"rflags_{name}",
         1,
-        ctx=LTS_EXTRACTION_CONTEXT,
+        LTS_EXTRACTION_CONTEXT,
     )
 
 
 @lru_cache(maxsize=None)
 def canonical_memory() -> z3.ArrayRef:
-    address = z3.BitVecSort(64, ctx=LTS_EXTRACTION_CONTEXT)
-    byte = z3.BitVecSort(8, ctx=LTS_EXTRACTION_CONTEXT)
-    return _expect_array(z3.Array(MEMORY_NAME, address, byte), "canonical memory")
+    address = _z3.bit_vec_sort(64, LTS_EXTRACTION_CONTEXT)
+    byte = _z3.bit_vec_sort(8, LTS_EXTRACTION_CONTEXT)
+    return _z3.array(MEMORY_NAME, address, byte)
 
 
 def claripy_to_z3(ast: object) -> z3.ExprRef:
     """Cross the Angr boundary into the dedicated extraction context."""
 
-    return _BZ3.convert(expect_ast(ast, "Claripy expression")).translate(
-        LTS_EXTRACTION_CONTEXT
+    return _z3.translate(
+        _BZ3,
+        expect_ast(ast, "Claripy expression"),
+        LTS_EXTRACTION_CONTEXT,
     )
 
 
@@ -251,12 +254,12 @@ def load_le(
         raise Amd64AdapterError("memory access size must be positive")
     bytes_high_to_low = tuple(
         _expect_bv(
-            z3.Select(
+            _z3.select(
                 memory,
-                address + z3.BitVecVal(
+                address + _z3.bit_vec_val(
                     offset,
                     64,
-                    ctx=LTS_EXTRACTION_CONTEXT,
+                    LTS_EXTRACTION_CONTEXT,
                 ),
             ),
             "memory load byte",
@@ -265,7 +268,7 @@ def load_le(
     )
     if len(bytes_high_to_low) == 1:
         return bytes_high_to_low[0]
-    return _expect_bv(z3.Concat(*bytes_high_to_low), "memory load")
+    return _z3.concat(*bytes_high_to_low)
 
 
 def store_le(
@@ -280,7 +283,6 @@ def store_le(
     if (
         type(size) is not int
         or size <= 0
-        or not z3.is_bv(value)
         or value.ctx != LTS_EXTRACTION_CONTEXT
         or value.size() != size * 8
     ):
@@ -288,14 +290,14 @@ def store_le(
     result = memory
     for offset in range(size):
         result = _expect_array(
-            z3.Store(
+            _z3.store(
                 result,
-                address + z3.BitVecVal(
+                address + _z3.bit_vec_val(
                     offset,
                     64,
-                    ctx=LTS_EXTRACTION_CONTEXT,
+                    LTS_EXTRACTION_CONTEXT,
                 ),
-                z3.Extract(offset * 8 + 7, offset * 8, value),
+                _z3.extract(offset * 8 + 7, offset * 8, value),
             ),
             "updated memory",
         )
@@ -311,7 +313,6 @@ def _require_memory_shape(
         or memory.ctx != LTS_EXTRACTION_CONTEXT
         or _expect_bv_sort(memory.domain(), "memory domain").size() != 64
         or _expect_bv_sort(memory.range(), "memory range").size() != 8
-        or not z3.is_bv(address)
         or address.ctx != LTS_EXTRACTION_CONTEXT
         or address.size() != 64
     ):
@@ -324,10 +325,10 @@ def source_rip_guard(source: int) -> z3.BoolRef:
     source = _u64(source, "source")
     return _expect_bool(
         canonical_register("rip")
-        == z3.BitVecVal(
+        == _z3.bit_vec_val(
             source,
             64,
-            ctx=LTS_EXTRACTION_CONTEXT,
+            LTS_EXTRACTION_CONTEXT,
         ),
         "source RIP guard",
     )
@@ -349,8 +350,9 @@ def require_mirrored_rip(
             "target and post-rip must be extraction-context BV64 expressions"
         )
     solver = z3.Solver(ctx=LTS_EXTRACTION_CONTEXT)
-    solver.add(target_bv != post_rip_bv)
-    if solver.check() != z3.unsat:
+    disagreement = _expect_bool(target_bv != post_rip_bv, "RIP disagreement")
+    _z3.solver_add(solver, disagreement)
+    if _z3.solver_check(solver) != z3.unsat:
         raise Amd64AdapterError("target and post-rip disagree semantically")
 
 
@@ -418,20 +420,24 @@ def _memory_read_hook(raw_state: object) -> None:
     def record(kind: str) -> None:
         events = _memory_read_events(state)
         state.globals["_ghot_memory_read_events"] = events + (
-            (kind, size, str(z3.simplify(classified_address_z3))),
+            (kind, size, str(_z3.simplify(classified_address_z3))),
         )
 
     fixed_bytes: list[int] = []
     for offset in range(size):
-        byte_address = classified_address_z3 + z3.BitVecVal(
+        byte_address = classified_address_z3 + _z3.bit_vec_val(
             offset,
             classified_address_z3.size(),
-            ctx=LTS_EXTRACTION_CONTEXT,
+            LTS_EXTRACTION_CONTEXT,
         )
         matches = [
             value
             for expected, value in _fixed_byte_reads(state)
-            if z3.is_true(z3.simplify(byte_address == expected))
+            if z3.is_true(
+                _z3.simplify(
+                    _expect_bool(byte_address == expected, "fixed-byte match")
+                )
+            )
         ]
         if len(matches) > 1:
             raise Amd64AdapterError("memory read matches multiple fixed input bytes")
@@ -580,23 +586,23 @@ def _resolve_memory_reads(
         address_z3 = _expect_bv(claripy_to_z3(address), "memory read address")
         if replacements:
             address_z3 = _expect_bv(
-                z3.substitute(address_z3, *replacements),
+                _z3.substitute(address_z3, *replacements),
                 "resolved memory read address",
             )
             memory_at_read = _expect_array(
-                z3.substitute(memory_at_read, *replacements),
+                _z3.substitute(memory_at_read, *replacements),
                 "resolved memory-at-read",
             )
-        placeholder = z3.BitVec(
+        placeholder = _z3.bit_vec(
             name,
             size * 8,
-            ctx=LTS_EXTRACTION_CONTEXT,
+            LTS_EXTRACTION_CONTEXT,
         )
         replacements.append(
             (placeholder, load_le(memory_at_read, address_z3, size))
         )
     if replacements:
-        return z3.substitute(expression, *replacements)
+        return _z3.substitute(expression, *replacements)
     return expression
 
 
@@ -623,7 +629,7 @@ def _post_flag_updates(
             claripy_to_z3(_claripy.Extract(bit, bit, post_rflags)),
             reads,
         )
-        if not value.eq(canonical_flag(name)):
+        if not _z3.structurally_equal(value, canonical_flag(name)):
             updates[f"rflags_{name}"] = value
     return updates
 
@@ -659,7 +665,7 @@ def _post_updates(post: State, source: int) -> dict[str, z3.ExprRef]:
             claripy_to_z3(post.regs.__getattr__(name)),
             reads,
         )
-        if not value.eq(canonical_register(name)):
+        if not _z3.structurally_equal(value, canonical_register(name)):
             updates[name] = value
     updates.update(_post_flag_updates(post, source, reads))
     return updates
@@ -696,7 +702,7 @@ def _symbolic_target_update(
         raise Amd64AdapterError("instruction target is not BV64")
     updates["rip"] = target_bv
     require_mirrored_rip(target_bv, updates["rip"])
-    simplified = z3.simplify(target_bv)
+    simplified = _z3.simplify(target_bv)
     target_value = (
         simplified.as_long()
         if isinstance(simplified, z3.BitVecNumRef)
@@ -717,10 +723,10 @@ def _concrete_target_update(
         )
     target = _u64(post_rip_ast.args[0], "target")
     post_rip = claripy_to_z3(post_rip_ast)
-    target_expr = z3.BitVecVal(
+    target_expr = _z3.bit_vec_val(
         target,
         64,
-        ctx=LTS_EXTRACTION_CONTEXT,
+        LTS_EXTRACTION_CONTEXT,
     )
     require_mirrored_rip(target_expr, post_rip)
     updates["rip"] = post_rip
@@ -858,7 +864,7 @@ def step_instruction_outcomes(
                 kind="default",
                 vex_exit_statement_index=None,
             )
-            guard = z3.BoolVal(True, ctx=LTS_EXTRACTION_CONTEXT)
+            guard = _z3.bool_val(True, LTS_EXTRACTION_CONTEXT)
 
         updates = _post_updates(post, source)
         writes = _resolved_writes(post)
@@ -886,9 +892,9 @@ def step_instruction_outcomes(
         )
     default_guard = _expect_bool(
         (
-            z3.And(*(z3.Not(guard) for guard in exit_guards))
+            _z3.conjunction(*(_z3.negate(guard) for guard in exit_guards))
             if exit_guards
-            else z3.BoolVal(True, ctx=LTS_EXTRACTION_CONTEXT)
+            else _z3.bool_val(True, LTS_EXTRACTION_CONTEXT)
         ),
         "instruction default guard",
     )
