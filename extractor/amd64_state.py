@@ -7,8 +7,10 @@ from functools import lru_cache
 import logging
 from typing import Any, Mapping
 
+# This import preloads libstdc++ before the Angr imports that follow it.
 from extractor import runtime
 
+from angr.engines.vex.claripy import ccall as _angr_ccall
 from claripy.backends.backend_z3 import BackendZ3
 import z3
 
@@ -50,7 +52,6 @@ _U64_MAX = (1 << 64) - 1
 
 _angr = runtime.angr
 _claripy = runtime.claripy
-from angr.engines.vex.claripy import ccall as _angr_ccall  # noqa: E402
 
 
 class _ExpectedSymbolicExitFilter(logging.Filter):
