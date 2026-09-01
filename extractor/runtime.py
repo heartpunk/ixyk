@@ -8,7 +8,7 @@ import os
 import site
 import sys
 from pathlib import Path
-from typing import TYPE_CHECKING, Never, Protocol, TypedDict, cast
+from typing import Never, Protocol, TypedDict, cast
 
 from extractor.native_runtime import (
     preload_libstdcxx as _preload_libstdcxx,
@@ -132,12 +132,8 @@ class _ProbeResult(TypedDict):
 
 _LIBSTDCXX = _preload_libstdcxx()
 
-if TYPE_CHECKING:
-    import angr
-    import claripy
-else:
-    angr = importlib.import_module("angr")
-    claripy = importlib.import_module("claripy")
+angr = importlib.import_module("angr")
+claripy = importlib.import_module("claripy")
 
 __all__ = ["angr", "claripy"]
 
