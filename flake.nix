@@ -36,6 +36,7 @@
               pkgs.buildifier
               pkgs.git
               pkgs.jujutsu
+              pkgs.ruff
             ];
             PYTHONNOUSERSITE = "1";
             PYTHONSAFEPATH = "1";
