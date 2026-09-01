@@ -18,6 +18,8 @@ from extractor.native_runtime import (
 )
 
 _EXPECTED_PYTHON = (3, 12, 13)
+_EXPECTED_SOLVED_VALUE = 0x1234
+_EXPECTED_VEX_INSTRUCTIONS = 2
 _EXPECTED_TOP_LEVEL_VERSIONS = {
     "angr": "9.2.214",
     "coverage": "7.15.2",
@@ -133,7 +135,10 @@ def run_probe() -> dict[str, Any]:
     mnemonics = [instruction.mnemonic for instruction in block.capstone.insns]
     if mnemonics != ["mov", "ret"]:
         _fail(f"unexpected Capstone decode: {mnemonics!r}")
-    if block.vex.instructions != 2 or block.vex.jumpkind != "Ijk_Ret":
+    if (
+        block.vex.instructions != _EXPECTED_VEX_INSTRUCTIONS
+        or block.vex.jumpkind != "Ijk_Ret"
+    ):
         message = "unexpected VEX lift: instructions={}, jumpkind={}".format(
             block.vex.instructions,
             block.vex.jumpkind,
@@ -142,9 +147,9 @@ def run_probe() -> dict[str, Any]:
 
     symbolic = claripy.BVS("e1_smoke_value", 64)
     solver = claripy.Solver()
-    solver.add(symbolic + 1 == 0x1235)
+    solver.add(symbolic + 1 == _EXPECTED_SOLVED_VALUE + 1)
     solved = solver.eval(symbolic, 1)
-    if solved != (0x1234,):
+    if solved != (_EXPECTED_SOLVED_VALUE,):
         _fail(f"unexpected Claripy result: {solved!r}")
 
     return {
