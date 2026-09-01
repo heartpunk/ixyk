@@ -38,6 +38,7 @@
               pkgs.jujutsu
               pkgs.ruff
             ];
+            IXYK_NIX_PYTHON_ROOT = "${python}";
             PYTHONNOUSERSITE = "1";
             PYTHONSAFEPATH = "1";
           };
