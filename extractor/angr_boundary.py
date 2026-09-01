@@ -1,0 +1,148 @@
+"""The small Angr/Claripy surface used by the AMD64 adapter."""
+
+from __future__ import annotations
+
+from collections.abc import Callable, MutableMapping, MutableSet, Sequence
+from typing import Protocol, cast
+
+from extractor import runtime
+
+
+class Ast(Protocol):
+    op: str
+    args: tuple[object, ...]
+
+
+class Registers(Protocol):
+    rip: Ast
+    rflags: Ast
+    cc_op: Ast
+    cc_dep1: Ast
+    cc_dep2: Ast
+    cc_ndep: Ast
+
+    def __getattr__(self, name: str) -> Ast: ...
+
+
+class Inspector(Protocol):
+    address_concretization_action: str | None
+    address_concretization_add_constraints: bool
+    mem_read_address: Ast | None
+    mem_read_expr: Ast | None
+    mem_read_length: int | Ast
+    mem_write_address: Ast | None
+    mem_write_expr: Ast | None
+    mem_write_length: int | Ast
+
+    def b(
+        self,
+        event: str,
+        *,
+        when: object,
+        action: Callable[[object], None],
+    ) -> None: ...
+
+
+class HistoryAction(Protocol):
+    type: str
+    action: str
+
+
+class History(Protocol):
+    recent_actions: Sequence[HistoryAction]
+    jump_guard: Ast | None
+
+
+class Scratch(Protocol):
+    exit_stmt_idx: int
+
+
+class State(Protocol):
+    globals: MutableMapping[str, object]
+    history: History
+    inspect: Inspector
+    options: MutableSet[object]
+    regs: Registers
+    scratch: Scratch
+
+
+class CapstoneBlock(Protocol):
+    insns: Sequence[object]
+
+
+class VexBlock(Protocol):
+    instructions: int
+    jumpkind: str
+    statements: Sequence[object]
+
+
+class Block(Protocol):
+    capstone: CapstoneBlock
+    vex: VexBlock
+
+
+class Successors(Protocol):
+    all_successors: Sequence[State]
+
+
+class Factory(Protocol):
+    def blank_state(self, *, addr: int) -> State: ...
+    def block(self, address: int, *, num_inst: int) -> Block: ...
+    def successors(self, state: State, *, num_inst: int) -> Successors: ...
+
+
+class Arch(Protocol):
+    name: str
+    bits: int
+
+
+class Project(Protocol):
+    arch: Arch
+    factory: Factory
+
+
+class AngrOptions(Protocol):
+    SYMBOLIC_WRITE_ADDRESSES: object
+    TRACK_MEMORY_ACTIONS: object
+    TRACK_REGISTER_ACTIONS: object
+    UNDER_CONSTRAINED_SYMEXEC: object
+    UNICORN: object
+
+
+class Angr(Protocol):
+    BP_AFTER: object
+    BP_BEFORE: object
+    options: AngrOptions
+
+
+class Claripy(Protocol):
+    def BVS(self, name: str, size: int, *, explicit_name: bool) -> Ast: ...
+    def BVV(self, value: int, size: int) -> Ast: ...
+    def Concat(self, *pieces: Ast) -> Ast: ...
+    def Extract(self, high: int, low: int, value: Ast) -> Ast: ...
+
+
+angr = cast(Angr, cast(object, runtime.angr))
+claripy = cast(Claripy, cast(object, runtime.claripy))
+
+
+def expect_ast(value: object, field: str) -> Ast:
+    base = getattr(runtime.claripy, "ast", None)
+    base = getattr(base, "Base", None)
+    if not isinstance(base, type) or not isinstance(value, base):
+        raise TypeError(f"{field} is not a Claripy AST")
+    return cast(Ast, value)
+
+
+def expect_project(value: object) -> Project:
+    project = getattr(runtime.angr, "Project", None)
+    if not isinstance(project, type) or not isinstance(value, project):
+        raise TypeError("project is not an Angr Project")
+    return cast(Project, value)
+
+
+def expect_state(value: object) -> State:
+    state = getattr(runtime.angr, "SimState", None)
+    if not isinstance(state, type) or not isinstance(value, state):
+        raise TypeError("state is not an Angr SimState")
+    return cast(State, value)

@@ -6,10 +6,19 @@ from collections.abc import Mapping
 from dataclasses import dataclass
 from functools import lru_cache
 import logging
-from typing import Any, ClassVar, override
+from typing import ClassVar, cast, override
 
-# This import preloads libstdc++ before the Angr imports that follow it.
-from extractor import runtime
+# Importing the boundary preloads libstdc++ before the Angr import below.
+from extractor.angr_boundary import (
+    Ast,
+    Project,
+    State,
+    angr as _angr,
+    claripy as _claripy,
+    expect_ast,
+    expect_project,
+    expect_state,
+)
 
 from angr.engines.vex.claripy import ccall as _angr_ccall
 from claripy.backends.backend_z3 import BackendZ3
@@ -45,10 +54,6 @@ MEMORY_NAME = "mem"
 LTS_EXTRACTION_CONTEXT = z3.Context()
 _BZ3 = BackendZ3()
 _U64_MAX = (1 << 64) - 1
-
-_angr = runtime.angr
-_claripy = runtime.claripy
-
 
 class _ExpectedSymbolicExitFilter(logging.Filter):
     """Hide only Angr's expected diagnostic for our symbolic return edge."""
@@ -144,9 +149,15 @@ class InstructionOutcomeFamily:
     outcomes: tuple[InstructionOutcome, ...]
 
 
-def _u64(value: Any, field: str) -> int:
+def _u64(value: object, field: str) -> int:
     if type(value) is not int or not 0 <= value <= _U64_MAX:
         raise Amd64AdapterError(f"{field} must be an unsigned 64-bit integer")
+    return value
+
+
+def _integer(value: object, field: str) -> int:
+    if type(value) is not int:
+        raise Amd64AdapterError(f"{field} is not an integer")
     return value
 
 
@@ -220,10 +231,12 @@ def canonical_memory() -> z3.ArrayRef:
     return _expect_array(z3.Array(MEMORY_NAME, address, byte), "canonical memory")
 
 
-def claripy_to_z3(ast: Any) -> z3.ExprRef:
+def claripy_to_z3(ast: object) -> z3.ExprRef:
     """Cross the Angr boundary into the dedicated extraction context."""
 
-    return _BZ3.convert(ast).translate(LTS_EXTRACTION_CONTEXT)
+    return _BZ3.convert(expect_ast(ast, "Claripy expression")).translate(
+        LTS_EXTRACTION_CONTEXT
+    )
 
 
 def load_le(
@@ -341,7 +354,7 @@ def require_mirrored_rip(
         raise Amd64AdapterError("target and post-rip disagree semantically")
 
 
-def _seed_flag_bvs() -> dict[str, Any]:
+def _seed_flag_bvs() -> dict[str, Ast]:
     return {
         name: _claripy.BVS(
             f"rflags_{name}",
@@ -352,8 +365,8 @@ def _seed_flag_bvs() -> dict[str, Any]:
     }
 
 
-def _initial_cc_dep1(flag_bvs: Mapping[str, Any]) -> Any:
-    pieces: list[Any] = []
+def _initial_cc_dep1(flag_bvs: Mapping[str, Ast]) -> Ast:
+    pieces: list[Ast] = []
     next_bit = 63
     for name, bit in sorted(
         AMD64_FLAG_BIT.items(),
@@ -368,11 +381,13 @@ def _initial_cc_dep1(flag_bvs: Mapping[str, Any]) -> Any:
     return _claripy.Concat(*pieces)
 
 
-def _access_size(value: Any, field: str) -> int:
+def _access_size(value: object, field: str) -> int:
     try:
-        size = int(value) if not hasattr(value, "op") else (
-            int(value.args[0]) if value.op == "BVV" else 0
-        )
+        if type(value) is int:
+            size = value
+        else:
+            ast = expect_ast(value, field)
+            size = _integer(ast.args[0], field) if ast.op == "BVV" else 0
     except (TypeError, ValueError):
         size = 0
     if size <= 0:
@@ -380,14 +395,16 @@ def _access_size(value: Any, field: str) -> int:
     return size
 
 
-def _preserve_symbolic_memory_addresses(state: Any) -> None:
+def _preserve_symbolic_memory_addresses(raw_state: object) -> None:
     """Keep hooked memory accesses parametric in their symbolic addresses."""
 
+    state = expect_state(raw_state)
     if state.inspect.address_concretization_action in {"load", "store"}:
         state.inspect.address_concretization_add_constraints = False
 
 
-def _memory_read_hook(state: Any) -> None:
+def _memory_read_hook(raw_state: object) -> None:
+    state = expect_state(raw_state)
     address = state.inspect.mem_read_address
     if address is None:
         raise Amd64AdapterError("memory read is missing its address")
@@ -399,12 +416,12 @@ def _memory_read_hook(state: Any) -> None:
     classified_address_z3 = address_z3
 
     def record(kind: str) -> None:
-        events = tuple(state.globals.get("_ghot_memory_read_events", ()))
+        events = _memory_read_events(state)
         state.globals["_ghot_memory_read_events"] = events + (
             (kind, size, str(z3.simplify(classified_address_z3))),
         )
 
-    fixed_bytes = []
+    fixed_bytes: list[int] = []
     for offset in range(size):
         byte_address = classified_address_z3 + z3.BitVecVal(
             offset,
@@ -413,7 +430,7 @@ def _memory_read_hook(state: Any) -> None:
         )
         matches = [
             value
-            for expected, value in state.globals.get("_ghot_fixed_byte_reads", ())
+            for expected, value in _fixed_byte_reads(state)
             if z3.is_true(z3.simplify(byte_address == expected))
         ]
         if len(matches) > 1:
@@ -429,28 +446,29 @@ def _memory_read_hook(state: Any) -> None:
         )
         state.inspect.mem_read_expr = _claripy.BVV(little_endian, size * 8)
         record("fixed")
-        counts = dict(state.globals.get("_ghot_memory_read_counts", {}))
+        counts = _memory_read_counts(state)
         counts["fixed"] = counts.get("fixed", 0) + 1
         state.globals["_ghot_memory_read_counts"] = counts
         return
 
     record("symbolic")
-    counts = dict(state.globals.get("_ghot_memory_read_counts", {}))
+    counts = _memory_read_counts(state)
     counts["symbolic"] = counts.get("symbolic", 0) + 1
     state.globals["_ghot_memory_read_counts"] = counts
-    placeholders = dict(state.globals.get("_ghot_memory_reads", {}))
+    placeholders = _memory_reads(state)
     name = f"__ghot_memory_read_{len(placeholders)}__"
     placeholder = _claripy.BVS(name, size * 8, explicit_name=True)
     placeholders[name] = (
         address,
         size,
-        state.globals["_ghot_memory_expr"],
+        _memory_expression(state),
     )
     state.globals["_ghot_memory_reads"] = placeholders
     state.inspect.mem_read_expr = placeholder
 
 
-def _memory_write_hook(state: Any) -> None:
+def _memory_write_hook(raw_state: object) -> None:
+    state = expect_state(raw_state)
     address = state.inspect.mem_write_address
     value = state.inspect.mem_write_expr
     if address is None or value is None:
@@ -458,17 +476,18 @@ def _memory_write_hook(state: Any) -> None:
     size = _access_size(state.inspect.mem_write_length, "memory write")
     address_z3 = _expect_bv(claripy_to_z3(address), "memory write address")
     value_z3 = _expect_bv(claripy_to_z3(value), "memory write value")
-    current = _expect_array(state.globals["_ghot_memory_expr"], "current memory")
+    current = _memory_expression(state)
     updated = store_le(current, address_z3, value_z3, size)
-    writes = list(state.globals.get("_ghot_memory_writes", ()))
+    writes = list(_memory_writes(state))
     writes.append(MemoryWrite(address_z3, value_z3, size))
     state.globals["_ghot_memory_expr"] = updated
     state.globals["_ghot_memory_writes"] = tuple(writes)
 
 
-def fresh_instruction_state(project: Any, source: int) -> Any:
+def fresh_instruction_state(raw_project: object, source: int) -> State:
     """Create the canonical symbolic pre-state for one real instruction."""
 
+    project = expect_project(raw_project)
     source = _u64(source, "source")
     if project.arch.name != "AMD64" or project.arch.bits != 64:
         raise Amd64AdapterError(
@@ -515,9 +534,46 @@ def fresh_instruction_state(project: Any, source: int) -> Any:
     return state
 
 
+MemoryReads = dict[str, tuple[Ast, int, z3.ArrayRef]]
+
+
+def _memory_expression(state: State) -> z3.ArrayRef:
+    return _expect_array(state.globals["_ghot_memory_expr"], "current memory")
+
+
+def _memory_reads(state: State) -> MemoryReads:
+    return cast(MemoryReads, state.globals.get("_ghot_memory_reads", {})).copy()
+
+
+def _memory_writes(state: State) -> tuple[MemoryWrite, ...]:
+    return cast(
+        tuple[MemoryWrite, ...], state.globals.get("_ghot_memory_writes", ())
+    )
+
+
+def _fixed_byte_reads(state: State) -> tuple[tuple[z3.BitVecRef, int], ...]:
+    return cast(
+        tuple[tuple[z3.BitVecRef, int], ...],
+        state.globals.get("_ghot_fixed_byte_reads", ()),
+    )
+
+
+def _memory_read_counts(state: State) -> dict[str, int]:
+    return cast(
+        dict[str, int], state.globals.get("_ghot_memory_read_counts", {})
+    ).copy()
+
+
+def _memory_read_events(state: State) -> tuple[tuple[str, int, str], ...]:
+    return cast(
+        tuple[tuple[str, int, str], ...],
+        state.globals.get("_ghot_memory_read_events", ()),
+    )
+
+
 def _resolve_memory_reads(
     expression: z3.ExprRef,
-    reads: Mapping[str, tuple[Any, int, z3.ArrayRef]],
+    reads: Mapping[str, tuple[Ast, int, z3.ArrayRef]],
 ) -> z3.ExprRef:
     replacements: list[tuple[z3.ExprRef, z3.ExprRef]] = []
     for name, (address, size, memory_at_read) in reads.items():
@@ -545,9 +601,9 @@ def _resolve_memory_reads(
 
 
 def _post_flag_updates(
-    post: Any,
+    post: State,
     source: int,
-    reads: Mapping[str, tuple[Any, int, z3.ArrayRef]],
+    reads: Mapping[str, tuple[Ast, int, z3.ArrayRef]],
 ) -> dict[str, z3.ExprRef]:
     from angr.errors import SimCCallError, SimError
 
@@ -573,9 +629,9 @@ def _post_flag_updates(
 
 
 def _single_successor(
-    project: Any,
+    project: Project,
     source: int,
-) -> Any:
+) -> State:
     source = _u64(source, "source")
     block = project.factory.block(source, num_inst=1)
     instructions = list(block.capstone.insns)
@@ -595,12 +651,12 @@ def _single_successor(
     return successors[0]
 
 
-def _post_updates(post: Any, source: int) -> dict[str, z3.ExprRef]:
-    reads = post.globals.get("_ghot_memory_reads", {})
+def _post_updates(post: State, source: int) -> dict[str, z3.ExprRef]:
+    reads = _memory_reads(post)
     updates: dict[str, z3.ExprRef] = {}
     for name in GPR64:
         value = _resolve_memory_reads(
-            claripy_to_z3(getattr(post.regs, name)),
+            claripy_to_z3(post.regs.__getattr__(name)),
             reads,
         )
         if not value.eq(canonical_register(name)):
@@ -609,8 +665,8 @@ def _post_updates(post: Any, source: int) -> dict[str, z3.ExprRef]:
     return updates
 
 
-def _resolved_writes(post: Any) -> tuple[MemoryWrite, ...]:
-    reads = post.globals.get("_ghot_memory_reads", {})
+def _resolved_writes(post: State) -> tuple[MemoryWrite, ...]:
+    reads = _memory_reads(post)
     return tuple(
         MemoryWrite(
             _expect_bv(
@@ -623,17 +679,17 @@ def _resolved_writes(post: Any) -> tuple[MemoryWrite, ...]:
             ),
             write.size,
         )
-        for write in post.globals.get("_ghot_memory_writes", ())
+        for write in _memory_writes(post)
     )
 
 
 def _symbolic_target_update(
-    post: Any,
+    post: State,
     updates: dict[str, z3.ExprRef],
 ) -> tuple[z3.BitVecRef, int | None]:
     target = _resolve_memory_reads(
         claripy_to_z3(post.regs.rip),
-        post.globals.get("_ghot_memory_reads", {}),
+        _memory_reads(post),
     )
     target_bv = _expect_bv(target, "instruction target")
     if target_bv.size() != 64:
@@ -650,7 +706,7 @@ def _symbolic_target_update(
 
 
 def _concrete_target_update(
-    post: Any,
+    post: State,
     source: int,
     updates: dict[str, z3.ExprRef],
 ) -> int:
@@ -659,7 +715,7 @@ def _concrete_target_update(
         raise Amd64AdapterError(
             f"instruction at {source:#x} has symbolic post-rip"
         )
-    target = _u64(int(post_rip_ast.args[0]), "target")
+    target = _u64(post_rip_ast.args[0], "target")
     post_rip = claripy_to_z3(post_rip_ast)
     target_expr = z3.BitVecVal(
         target,
@@ -672,11 +728,12 @@ def _concrete_target_update(
 
 
 def step_register_instruction(
-    project: Any,
+    raw_project: object,
     source: int,
 ) -> RegisterInstructionStep:
     """Execute one exact non-memory-writing instruction."""
 
+    project = expect_project(raw_project)
     source = _u64(source, "source")
     post = _single_successor(project, source)
     memory_writes = [
@@ -701,15 +758,16 @@ def step_register_instruction(
 
 
 def step_memory_instruction(
-    project: Any,
+    raw_project: object,
     source: int,
 ) -> MemoryInstructionStep:
     """Execute one exact memory-reading or memory-writing instruction."""
 
+    project = expect_project(raw_project)
     source = _u64(source, "source")
     post = _single_successor(project, source)
-    reads = post.globals.get("_ghot_memory_reads", {})
-    raw_writes = tuple(post.globals.get("_ghot_memory_writes", ()))
+    reads = _memory_reads(post)
+    raw_writes = _memory_writes(post)
     if not reads and not raw_writes:
         raise Amd64AdapterError(
             f"instruction at {source:#x} has no memory effect"
@@ -718,7 +776,7 @@ def step_memory_instruction(
     writes = _resolved_writes(post)
     if writes:
         updates[MEMORY_NAME] = _resolve_memory_reads(
-            post.globals["_ghot_memory_expr"],
+            _memory_expression(post),
             reads,
         )
     target = _concrete_target_update(post, source, updates)
@@ -733,11 +791,12 @@ def step_memory_instruction(
 
 
 def step_instruction_outcomes(
-    project: Any,
+    raw_project: object,
     source: int,
 ) -> InstructionOutcomeFamily:
     """Capture every structural VEX exit/default outcome of one instruction."""
 
+    project = expect_project(raw_project)
     source = _u64(source, "source")
     block = project.factory.block(source, num_inst=1)
     instructions = list(block.capstone.insns)
@@ -783,7 +842,7 @@ def step_instruction_outcomes(
             guard = _expect_bool(
                 _resolve_memory_reads(
                     claripy_to_z3(raw_guard),
-                    post.globals.get("_ghot_memory_reads", {}),
+                    _memory_reads(post),
                 ),
                 "instruction exit guard",
             )
@@ -805,8 +864,8 @@ def step_instruction_outcomes(
         writes = _resolved_writes(post)
         if writes:
             updates[MEMORY_NAME] = _resolve_memory_reads(
-                post.globals["_ghot_memory_expr"],
-                post.globals.get("_ghot_memory_reads", {}),
+                _memory_expression(post),
+                _memory_reads(post),
             )
         target, target_value = _symbolic_target_update(post, updates)
         outcomes.append(
