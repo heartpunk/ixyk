@@ -40,11 +40,6 @@ GPR64 = (
 FLAG_NAMES = ("CF", "ZF", "SF", "OF", "PF", "AF")
 REGISTER_NAMES = GPR64 + ("rip",)
 MEMORY_NAME = "mem"
-CANONICAL_NAMES = (
-    REGISTER_NAMES
-    + tuple(f"rflags_{name}" for name in FLAG_NAMES)
-    + (MEMORY_NAME,)
-)
 
 LTS_EXTRACTION_CONTEXT = z3.Context()
 _BZ3 = BackendZ3()
@@ -482,69 +477,6 @@ def fresh_instruction_state(project: Any, source: int) -> Any:
         action=_memory_write_hook,
     )
     return state
-
-
-def install_typed_summary_state(
-    state: Any,
-    updates: Mapping[str, Any],
-    *,
-    continuation: int,
-) -> None:
-    """Install one already-composed typed summary without re-executing it."""
-
-    continuation = _u64(continuation, "summary continuation")
-    if set(updates) != set(CANONICAL_NAMES):
-        missing = sorted(set(CANONICAL_NAMES) - set(updates))
-        extra = sorted(set(updates) - set(CANONICAL_NAMES))
-        raise Amd64AdapterError(
-            f"summary update domain changed: missing={missing}, extra={extra}"
-        )
-
-    index = int(state.globals.get("_ghot_summary_state_index", 0))
-    state.globals["_ghot_summary_state_index"] = index + 1
-    prefix = f"ghot_summary_{index}"
-    replacements = dict(state.globals.get("_ghot_typed_replacements", {}))
-
-    for name in GPR64:
-        synthetic_name = f"{prefix}_{name}__"
-        if synthetic_name in replacements:
-            raise Amd64AdapterError("summary register placeholder is not fresh")
-        setattr(
-            state.regs,
-            name,
-            _claripy.BVS(synthetic_name, 64, explicit_name=True),
-        )
-        replacements[synthetic_name] = updates[name]
-
-    flag_bvs = {}
-    for name in FLAG_NAMES:
-        synthetic_name = f"{prefix}_rflags_{name}__"
-        if synthetic_name in replacements:
-            raise Amd64AdapterError("summary flag placeholder is not fresh")
-        flag_bvs[name] = _claripy.BVS(
-            synthetic_name,
-            1,
-            explicit_name=True,
-        )
-        replacements[synthetic_name] = updates[f"rflags_{name}"]
-    state.regs.cc_op = _claripy.BVV(_AMD64_OP_COPY, 64)
-    state.regs.cc_dep1 = _initial_cc_dep1(flag_bvs)
-    state.regs.cc_dep2 = _claripy.BVV(0, 64)
-    state.regs.cc_ndep = _claripy.BVV(0, 64)
-    state.globals["_ghot_flag_bvs"] = flag_bvs
-
-    memory_name = f"{prefix}_{MEMORY_NAME}__"
-    if memory_name in replacements:
-        raise Amd64AdapterError("summary memory placeholder is not fresh")
-    memory = z3.Array(
-        memory_name,
-        canonical_memory().sort().domain(),
-        canonical_memory().sort().range(),
-    )
-    replacements[memory_name] = updates[MEMORY_NAME]
-    state.globals["_ghot_memory_expr"] = memory
-    state.globals["_ghot_typed_replacements"] = replacements
-    state.regs.rip = _claripy.BVV(continuation, 64)
 
 
 def _resolve_memory_reads(
