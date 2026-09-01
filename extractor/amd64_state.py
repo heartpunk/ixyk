@@ -550,12 +550,6 @@ def _post_flag_updates(
     from angr.errors import SimCCallError, SimError
 
     errors: tuple[type[BaseException], ...] = (SimError, SimCCallError)
-    try:
-        from angr.errors import CCallMultivaluedException
-
-        errors += (CCallMultivaluedException,)
-    except ImportError:
-        pass
 
     try:
         post_rflags = post.regs.rflags
