@@ -120,8 +120,34 @@ py_library(
         ":typed_z3",
         ":unicorn_boundary",
         ":z3_boundary",
+        requirement("hypothesis"),
         requirement("z3-solver"),
     ],
+)
+
+py_library(
+    name = "fuzz_cli",
+    srcs = ["fuzz_cli.py"],
+    target_compatible_with = _LINUX_X86_64,
+    deps = [
+        ":artifact",
+        ":fuzzer",
+        ":z3_runtime",
+    ],
+)
+
+py_binary(
+    name = "fuzz_model",
+    srcs = ["fuzz_main.py"],
+    data = ["@nix_native_deps//:libstdcxx"],
+    env = {
+        "GHOT_LIBSTDCXX_RLOCATION": "$(rlocationpath @nix_native_deps//:libstdcxx)",
+        "PYTHONNOUSERSITE": "1",
+        "PYTHONSAFEPATH": "1",
+    },
+    main = "fuzz_main.py",
+    target_compatible_with = _LINUX_X86_64,
+    deps = [":fuzz_cli"],
 )
 
 py_library(
@@ -185,7 +211,6 @@ py_test(
         ":fuzzer",
         ":runtime",
         ":unicorn_boundary",
-        requirement("hypothesis"),
     ],
 )
 

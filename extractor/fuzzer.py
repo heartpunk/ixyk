@@ -4,6 +4,9 @@ from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
+from typing import Literal, NotRequired, TypedDict
+
+from hypothesis import given, settings, strategies as st
 
 from extractor import z3_boundary as _z3
 from extractor.amd64_state import (
@@ -29,7 +32,25 @@ class ConcreteState:
     memory: Mapping[int, int]
 
 
+class FuzzReport(TypedDict):
+    schema: str
+    status: Literal["pass", "mismatch"]
+    instruction_hex: str
+    examples_requested: int
+    executions: int
+    differences: NotRequired[list[str]]
+    witness: NotRequired[dict[str, int]]
+
+
 _PAGE_SIZE = 0x1000
+_U64 = st.integers(min_value=0, max_value=(1 << 64) - 1)
+
+
+class _Mismatch(AssertionError):
+    def __init__(self, before: ConcreteState, differences: Sequence[str]) -> None:
+        super().__init__("; ".join(differences))
+        self.before: ConcreteState = before
+        self.differences: tuple[str, ...] = tuple(differences)
 
 
 def emulate(instruction: bytes, before: ConcreteState) -> ConcreteState:
@@ -102,6 +123,65 @@ def emulate(instruction: bytes, before: ConcreteState) -> ConcreteState:
         for name in FLAG_NAMES
     }
     return ConcreteState(scalars, memory)
+
+
+def fuzz(artifact: InstructionModel, instruction: bytes, examples: int) -> FuzzReport:
+    """Shrink the first model/Unicorn disagreement into a structured result."""
+
+    if examples <= 0:
+        raise ValueError("examples must be positive")
+    compiled, executions = CompiledModel(artifact), 0
+    code_memory = dict(enumerate(instruction, artifact.source))
+
+    @settings(
+        max_examples=examples,
+        derandomize=True,
+        deadline=None,
+        database=None,
+        report_multiple_bugs=False,
+    )
+    @given(
+        registers=st.lists(_U64, min_size=len(GPR64), max_size=len(GPR64)),
+        flags=st.lists(
+            st.booleans(), min_size=len(FLAG_NAMES), max_size=len(FLAG_NAMES)
+        ),
+    )
+    def agrees(registers: list[int], flags: list[bool]) -> None:
+        nonlocal executions
+        executions += 1
+        scalars = (
+            dict(zip(GPR64, registers, strict=True))
+            | {"rip": artifact.source}
+            | {
+                f"rflags_{name}": int(value)
+                for name, value in zip(FLAG_NAMES, flags, strict=True)
+            }
+        )
+        before = ConcreteState(scalars, code_memory)
+        try:
+            after = emulate(instruction, before)
+        except Exception as error:
+            details = f"emulator {type(error).__name__}: {error}"
+            raise _Mismatch(before, (details,)) from error
+        differences = compiled.differences(before, after)
+        if differences:
+            raise _Mismatch(before, differences)
+
+    report: FuzzReport = {
+        "schema": "ixyk.differential_fuzz.v1",
+        "status": "pass",
+        "instruction_hex": instruction.hex(),
+        "examples_requested": examples,
+        "executions": 0,
+    }
+    try:
+        agrees()
+    except _Mismatch as mismatch:
+        report["status"] = "mismatch"
+        report["differences"] = list(mismatch.differences)
+        report["witness"] = dict(mismatch.before.scalars)
+    report["executions"] = executions
+    return report
 
 
 @dataclass(frozen=True)
