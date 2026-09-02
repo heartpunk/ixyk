@@ -15,6 +15,10 @@ class ArtifactError(ValueError):
     """A typed semantic artifact violated its structural contract."""
 
 
+class UnsupportedTheoryError(ArtifactError):
+    """An otherwise valid expression escapes the admitted QF_ABV theory."""
+
+
 def _object(value: object, field: str) -> dict[str, object]:
     if not isinstance(value, dict):
         raise ArtifactError(f"{field} must be an object")

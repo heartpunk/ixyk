@@ -19,6 +19,7 @@ from extractor.artifact import (
     Target,
     TermSort,
     TypedExpr,
+    UnsupportedTheoryError,
 )
 import z3
 
@@ -74,9 +75,11 @@ def sort_from_z3(sort: z3.SortRef) -> TermSort:
         if not isinstance(domain, z3.BitVecSortRef) or not isinstance(
             range_sort, z3.BitVecSortRef
         ):
-            raise ArtifactError("only BV-indexed BV-valued arrays are admitted")
+            raise UnsupportedTheoryError(
+                "only BV-indexed BV-valued arrays are admitted"
+            )
         return TermSort.array(domain.size(), range_sort.size())
-    raise ArtifactError(f"unsupported Z3 sort: {sort}")
+    raise UnsupportedTheoryError(f"unsupported Z3 sort: {sort}")
 
 
 def _fold(op: str, arguments: tuple[TypedExpr, ...], identity: bool) -> TypedExpr:
@@ -199,7 +202,9 @@ def expr_from_z3(expression: z3.ExprRef) -> TypedExpr:
             return TypedExpr("select", sort, children)
         if kind == z3.Z3_OP_STORE:
             return TypedExpr("store", sort, children)
-        raise ArtifactError(f"unsupported Z3 operator {declaration.name()} ({kind})")
+        raise UnsupportedTheoryError(
+            f"unsupported Z3 operator {declaration.name()} ({kind})"
+        )
 
     return visit(expression)
 

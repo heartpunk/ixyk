@@ -183,6 +183,7 @@ py_library(
     target_compatible_with = _LINUX_X86_64,
     deps = [
         ":amd64_state",
+        ":artifact",
         ":extract_cli",
         ":extractor",
         ":runtime",

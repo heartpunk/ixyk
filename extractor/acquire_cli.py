@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Literal, Protocol, TypedDict, cast
 
 from extractor.amd64_state import Amd64AdapterError
+from extractor.artifact import UnsupportedTheoryError
 from extractor.extract_cli import DEFAULT_SOURCE, source_address
 from extractor.extractor import extract
 
@@ -53,7 +54,7 @@ def main(arguments: Sequence[str] | None = None) -> None:
     try:
         model = extract(load_shellcode(instruction, options.source), options.source)
         model_value: object = model.to_data()
-    except Amd64AdapterError as error:
+    except (Amd64AdapterError, UnsupportedTheoryError) as error:
         status, error_text = "unsupported", str(error)
         model_value = {
             "schema": "ixyk.unavailable_instruction_model.v1",
