@@ -138,6 +138,16 @@ claripy = importlib.import_module("claripy")
 __all__ = ["angr", "claripy"]
 
 
+def load_shellcode(shellcode: bytes, load_address: int) -> object:
+    """Create the exact AMD64 shellcode project consumed by the extractor."""
+
+    return _as_angr(angr).load_shellcode(
+        shellcode,
+        arch="amd64",
+        load_address=load_address,
+    )
+
+
 def _fixture_bytes() -> bytes:
     fixture_path = Path(__file__).with_name("amd64_smoke.hex")
     return bytes.fromhex(fixture_path.read_text(encoding="ascii"))

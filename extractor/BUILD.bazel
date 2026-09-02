@@ -1,0 +1,129 @@
+load("@ixyk_pypi//:requirements.bzl", "requirement")
+load("@rules_python//python:defs.bzl", "py_binary", "py_library", "py_test")
+
+package(default_visibility = ["//visibility:public"])
+
+_LINUX_X86_64 = [
+    "@platforms//os:linux",
+    "@platforms//cpu:x86_64",
+]
+
+py_library(
+    name = "package",
+    srcs = ["__init__.py"],
+)
+
+py_library(
+    name = "artifact",
+    srcs = ["artifact.py"],
+    deps = [":package"],
+)
+
+py_library(
+    name = "z3_boundary",
+    srcs = ["z3_boundary.py"],
+    target_compatible_with = _LINUX_X86_64,
+    deps = [
+        ":package",
+        requirement("z3-solver"),
+    ],
+)
+
+py_library(
+    name = "typed_z3",
+    srcs = ["typed_z3.py"],
+    target_compatible_with = _LINUX_X86_64,
+    deps = [
+        ":artifact",
+        requirement("z3-solver"),
+    ],
+)
+
+py_library(
+    name = "native_runtime",
+    srcs = ["native_runtime.py"],
+    target_compatible_with = _LINUX_X86_64,
+    deps = [":package"],
+)
+
+py_library(
+    name = "runtime",
+    srcs = ["runtime.py"],
+    data = ["amd64_smoke.hex"],
+    target_compatible_with = _LINUX_X86_64,
+    deps = [
+        ":native_runtime",
+        requirement("angr"),
+    ],
+)
+
+py_library(
+    name = "angr_boundary",
+    srcs = ["angr_boundary.py"],
+    target_compatible_with = _LINUX_X86_64,
+    deps = [":runtime"],
+)
+
+py_library(
+    name = "amd64_state",
+    srcs = ["amd64_state.py"],
+    target_compatible_with = _LINUX_X86_64,
+    deps = [
+        ":angr_boundary",
+        ":artifact",
+        ":z3_boundary",
+        requirement("angr"),
+        requirement("z3-solver"),
+    ],
+)
+
+py_library(
+    name = "extractor",
+    srcs = ["extractor.py"],
+    target_compatible_with = _LINUX_X86_64,
+    deps = [
+        ":amd64_state",
+        ":angr_boundary",
+        ":artifact",
+        ":typed_z3",
+        ":z3_boundary",
+        requirement("angr"),
+        requirement("z3-solver"),
+    ],
+)
+
+py_binary(
+    name = "extract_add",
+    srcs = ["main.py"],
+    data = ["@nix_native_deps//:libstdcxx"],
+    env = {
+        "GHOT_LIBSTDCXX_RLOCATION": "$(rlocationpath @nix_native_deps//:libstdcxx)",
+        "PYTHONNOUSERSITE": "1",
+        "PYTHONSAFEPATH": "1",
+    },
+    main = "main.py",
+    target_compatible_with = _LINUX_X86_64,
+    deps = [
+        ":extractor",
+        ":runtime",
+    ],
+)
+
+py_test(
+    name = "artifact_test",
+    srcs = ["artifact_test.py"],
+    data = ["@nix_native_deps//:libstdcxx"],
+    env = {
+        "GHOT_LIBSTDCXX_RLOCATION": "$(rlocationpath @nix_native_deps//:libstdcxx)",
+        "PYTHONNOUSERSITE": "1",
+        "PYTHONSAFEPATH": "1",
+    },
+    target_compatible_with = _LINUX_X86_64,
+    deps = [
+        ":artifact",
+        ":typed_z3",
+        ":z3_boundary",
+        requirement("pytest"),
+        requirement("z3-solver"),
+    ],
+)
