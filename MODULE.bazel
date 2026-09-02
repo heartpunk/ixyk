@@ -35,9 +35,11 @@ nix_python_toolchains = use_repo_rule(
     "local_runtime_toolchains_repo",
 )
 
+_REAPI_PYTHON = "/nix/store/r4a53a1bvn9ysxj2sf7s1i9qpkf4yycz-ghot-reapi-worker-runtime/bin/python3.12"
+
 nix_python_runtime(
     name = "nix_python_3_12",
-    interpreter_path = "python3.12",
+    interpreter_path = _REAPI_PYTHON,
     on_failure = "fail",
 )
 
