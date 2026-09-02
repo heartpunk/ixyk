@@ -23,15 +23,19 @@ def runfiles_root() -> Path:
 
 def preload_libstdcxx() -> Path:
     raw_rlocation = os.environ.get(_LIBSTDCXX_RLOCATION_ENV)
-    if not raw_rlocation:
-        raise RuntimeError(f"{_LIBSTDCXX_RLOCATION_ENV} is required")
-
     root = runfiles_root()
-    relative_runfile = Path(raw_rlocation)
-    if relative_runfile.is_absolute() or ".." in relative_runfile.parts:
-        raise RuntimeError(f"invalid libstdc++ runfile path: {raw_rlocation}")
-
-    library_runfile = (root / relative_runfile).absolute()
+    if raw_rlocation:
+        relative_runfile = Path(raw_rlocation)
+        if relative_runfile.is_absolute() or ".." in relative_runfile.parts:
+            raise RuntimeError(f"invalid libstdc++ runfile path: {raw_rlocation}")
+        library_runfile = (root / relative_runfile).absolute()
+    else:
+        candidates = tuple(root.glob("*nix_native_deps*/lib/libstdc++.so.6"))
+        if len(candidates) != 1:
+            raise RuntimeError(
+                f"expected one declared libstdc++ runfile, found {len(candidates)}"
+            )
+        library_runfile = candidates[0].absolute()
     if not library_runfile.is_relative_to(root):
         raise RuntimeError(f"libstdc++ escaped Bazel runfiles: {library_runfile}")
     if not library_runfile.is_file():
