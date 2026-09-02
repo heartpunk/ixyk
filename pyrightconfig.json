@@ -1,4 +1,6 @@
 {
+  "exclude": ["third_party"],
   "extraPaths": [".direnv/python-site-packages"],
+  "include": ["extractor"],
   "pythonVersion": "3.12"
 }

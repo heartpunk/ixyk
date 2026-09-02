@@ -1,0 +1,9 @@
+module(
+    name = "ixyk_vendored_arpy",
+    version = "1.1.1",
+)
+
+bazel_dep(
+    name = "rules_python",
+    version = "1.7.0",
+)

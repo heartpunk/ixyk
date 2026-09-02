@@ -39,6 +39,8 @@
               pkgs.ruff
             ];
             IXYK_NIX_PYTHON_ROOT = "${python}";
+            IXYK_NIX_LIBSTDCXX_ROOT =
+              if pkgs.stdenv.isLinux then "${pkgs.stdenv.cc.cc.lib}" else "";
             PYTHONNOUSERSITE = "1";
             PYTHONSAFEPATH = "1";
           };

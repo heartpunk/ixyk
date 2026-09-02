@@ -1,0 +1,9 @@
+module(
+    name = "ixyk_vendored_mulpyplexer",
+    version = "0.9",
+)
+
+bazel_dep(
+    name = "rules_python",
+    version = "1.7.0",
+)

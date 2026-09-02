@@ -1,0 +1,78 @@
+module(
+    name = "ixyk",
+    version = "0.1.0",
+)
+
+bazel_dep(name = "platforms", version = "1.1.0")
+bazel_dep(name = "rules_python", version = "1.7.0")
+bazel_dep(name = "ixyk_vendored_arpy", version = "1.1.1")
+bazel_dep(name = "ixyk_vendored_mulpyplexer", version = "0.9")
+
+local_path_override(
+    module_name = "ixyk_vendored_arpy",
+    path = "third_party/arpy",
+)
+
+local_path_override(
+    module_name = "ixyk_vendored_mulpyplexer",
+    path = "third_party/mulpyplexer",
+)
+
+python = use_extension(
+    "@rules_python//python/extensions:python.bzl",
+    "python",
+)
+python.defaults(python_version = "3.12")
+
+nix_python_runtime = use_repo_rule(
+    "@rules_python//python/local_toolchains:repos.bzl",
+    "local_runtime_repo",
+)
+
+nix_python_toolchains = use_repo_rule(
+    "@rules_python//python/local_toolchains:repos.bzl",
+    "local_runtime_toolchains_repo",
+)
+
+nix_python_runtime(
+    name = "nix_python_3_12",
+    interpreter_path = "python3.12",
+    on_failure = "fail",
+)
+
+nix_python_toolchains(
+    name = "nix_python_toolchains",
+    runtimes = ["nix_python_3_12"],
+    target_compatible_with = {
+        "nix_python_3_12": ["HOST_CONSTRAINTS"],
+    },
+)
+
+register_toolchains("@nix_python_toolchains//:all")
+
+pip = use_extension(
+    "@rules_python//python/extensions:pip.bzl",
+    "pip",
+)
+pip.parse(
+    hub_name = "ixyk_pypi",
+    python_interpreter = "python3.12",
+    python_version = "3.12",
+    requirements_by_platform = {
+        "//extractor:requirements_linux_x86_64.txt": "linux_x86_64",
+    },
+)
+
+override_repo(
+    pip,
+    ixyk_pypi_312_arpy = "ixyk_vendored_arpy",
+    ixyk_pypi_312_mulpyplexer = "ixyk_vendored_mulpyplexer",
+)
+
+use_repo(pip, "ixyk_pypi")
+
+nix_native_deps = use_extension(
+    "//tools:nix_native_deps.bzl",
+    "nix_native_deps",
+)
+use_repo(nix_native_deps, "nix_native_deps")

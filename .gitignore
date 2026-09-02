@@ -1,2 +1,3 @@
 .direnv/
+.bazelrc.local
 __pycache__/

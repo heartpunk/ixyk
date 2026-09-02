@@ -1,0 +1,18 @@
+common --enable_bzlmod
+common --experimental_isolated_extension_usages
+common --repo_env=GIT_CONFIG_GLOBAL=/dev/null
+common --repo_env=IXYK_NIX_LIBSTDCXX_ROOT
+
+build --incompatible_strict_action_env
+build --spawn_strategy=sandboxed
+
+build:reapi --platforms=//tools:reapi_linux_x86_64
+build:reapi --extra_execution_platforms=//tools:reapi_linux_x86_64
+build:reapi --build_python_zip=false
+build:reapi --spawn_strategy=remote
+build:reapi --strategy=CopyFile=local
+build:reapi --remote_local_fallback=false
+build:reapi --remote_download_outputs=toplevel
+build:reapi --jobs=48
+
+try-import %workspace%/.bazelrc.local
