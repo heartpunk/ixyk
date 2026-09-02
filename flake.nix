@@ -32,7 +32,7 @@
             packages = [
               python
               pkgs.basedpyright
-              pkgs.bazelisk
+              (if pkgs.stdenv.isLinux then pkgs.bazel_9 else pkgs.bazelisk)
               pkgs.buildifier
               pkgs.git
               pkgs.jujutsu
