@@ -31,6 +31,10 @@ def bit_vec(name: str, width: int, ctx: z3.Context) -> z3.BitVecRef:
     return _expect(_function("BitVec")(name, width, ctx=ctx), z3.BitVecRef, "BitVec")
 
 
+def boolean(name: str, ctx: z3.Context) -> z3.BoolRef:
+    return _expect(_function("Bool")(name, ctx=ctx), z3.BoolRef, "Bool")
+
+
 def integer(name: str, ctx: z3.Context) -> z3.ArithRef:
     return _expect(_function("Int")(name, ctx=ctx), z3.ArithRef, "Int")
 
@@ -61,6 +65,13 @@ def bit_vec_val(value: int, width: int, ctx: z3.Context) -> z3.BitVecNumRef:
 
 def bool_val(value: bool, ctx: z3.Context) -> z3.BoolRef:
     return _expect(_function("BoolVal")(value, ctx=ctx), z3.BoolRef, "BoolVal")
+
+
+def constant_array(
+    domain: z3.BitVecSortRef,
+    value: z3.BitVecRef,
+) -> z3.ArrayRef:
+    return _expect(_function("K")(domain, value), z3.ArrayRef, "K")
 
 
 def select(array_: z3.ArrayRef, index: z3.BitVecRef) -> z3.BitVecRef:
@@ -102,8 +113,97 @@ def conjunction(*terms: z3.BoolRef) -> z3.BoolRef:
     return _expect(_function("And")(*terms), z3.BoolRef, "And")
 
 
+def disjunction(*terms: z3.BoolRef) -> z3.BoolRef:
+    return _expect(_function("Or")(*terms), z3.BoolRef, "Or")
+
+
 def negate(term: z3.BoolRef) -> z3.BoolRef:
     return _expect(_function("Not")(term), z3.BoolRef, "Not")
+
+
+def equal(left: z3.ExprRef, right: z3.ExprRef) -> z3.BoolRef:
+    return _expect(left == right, z3.BoolRef, "equality")
+
+
+def conditional(
+    condition: z3.BoolRef,
+    then_value: z3.ExprRef,
+    else_value: z3.ExprRef,
+) -> z3.ExprRef:
+    return _expect(_function("If")(condition, then_value, else_value), z3.ExprRef, "If")
+
+
+def zero_extend(amount: int, value: z3.BitVecRef) -> z3.BitVecRef:
+    return _expect(_function("ZeroExt")(amount, value), z3.BitVecRef, "ZeroExt")
+
+
+def sign_extend(amount: int, value: z3.BitVecRef) -> z3.BitVecRef:
+    return _expect(_function("SignExt")(amount, value), z3.BitVecRef, "SignExt")
+
+
+def logical_shift_right(left: z3.BitVecRef, right: z3.BitVecRef) -> z3.BitVecRef:
+    return _expect(_function("LShR")(left, right), z3.BitVecRef, "LShR")
+
+
+def unsigned_remainder(left: z3.BitVecRef, right: z3.BitVecRef) -> z3.BitVecRef:
+    return _expect(_function("URem")(left, right), z3.BitVecRef, "URem")
+
+
+def unsigned_less(left: z3.BitVecRef, right: z3.BitVecRef) -> z3.BoolRef:
+    return _expect(_function("ULT")(left, right), z3.BoolRef, "ULT")
+
+
+def unsigned_less_equal(left: z3.BitVecRef, right: z3.BitVecRef) -> z3.BoolRef:
+    return _expect(_function("ULE")(left, right), z3.BoolRef, "ULE")
+
+
+def bit_vector_binary(
+    operation: str,
+    left: z3.BitVecRef,
+    right: z3.BitVecRef,
+) -> z3.BitVecRef:
+    methods = {
+        "bv_add": "__add__",
+        "bv_sub": "__sub__",
+        "bv_mul": "__mul__",
+        "bv_udiv": "__truediv__",
+        "bv_and": "__and__",
+        "bv_or": "__or__",
+        "bv_xor": "__xor__",
+        "bv_shl": "__lshift__",
+        "bv_ashr": "__rshift__",
+    }
+    method = methods.get(operation)
+    if method is None:
+        raise ValueError(f"unknown bit-vector operation {operation!r}")
+    return _expect(_method(left, method)(right), z3.BitVecRef, operation)
+
+
+def signed_compare(
+    operation: str,
+    left: z3.BitVecRef,
+    right: z3.BitVecRef,
+) -> z3.BoolRef:
+    methods = {"bv_slt": "__lt__", "bv_sle": "__le__"}
+    method = methods.get(operation)
+    if method is None:
+        raise ValueError(f"unknown signed comparison {operation!r}")
+    return _expect(_method(left, method)(right), z3.BoolRef, operation)
+
+
+def solver_model(solver: z3.Solver) -> z3.ModelRef:
+    result = _method(solver, "model")()
+    if not isinstance(result, z3.ModelRef):
+        raise TypeError(f"Z3 Solver.model returned {type(result).__name__}")
+    return result
+
+
+def model_eval(model: z3.ModelRef, expression: z3.ExprRef) -> z3.ExprRef:
+    return _expect(
+        _method(model, "eval")(expression, model_completion=True),
+        z3.ExprRef,
+        "Model.eval",
+    )
 
 
 def structurally_equal(left: z3.ExprRef, right: z3.ExprRef) -> bool:

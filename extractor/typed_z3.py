@@ -1,4 +1,4 @@
-"""One-way Z3 to typed-QF_ABV conversion.
+"""Lossless conversion between Z3 and typed QF_ABV artifacts.
 
 Semantics selectively ported from ghot-effectful-extractor-boundary revision
 6b652ff3d791a2a46cf1c487854b1c62ae20da18.
@@ -9,6 +9,7 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import cast
 
+from extractor import z3_boundary as _z3
 from extractor.artifact import (
     BOOL,
     Assignment,
@@ -47,6 +48,20 @@ _ASSOCIATIVE_BV = {
     z3.Z3_OP_BOR,
     z3.Z3_OP_BXOR,
 }
+_TYPED_BV_BINARY = {
+    "bv_add",
+    "bv_sub",
+    "bv_mul",
+    "bv_udiv",
+    "bv_urem",
+    "bv_and",
+    "bv_or",
+    "bv_xor",
+    "bv_shl",
+    "bv_lshr",
+    "bv_ashr",
+}
+_TYPED_BV_COMPARE = {"bv_ult", "bv_ule", "bv_slt", "bv_sle"}
 
 
 def sort_from_z3(sort: z3.SortRef) -> TermSort:
@@ -185,6 +200,144 @@ def expr_from_z3(expression: z3.ExprRef) -> TypedExpr:
         if kind == z3.Z3_OP_STORE:
             return TypedExpr("store", sort, children)
         raise ArtifactError(f"unsupported Z3 operator {declaration.name()} ({kind})")
+
+    return visit(expression)
+
+
+def variables_from_declarations(
+    declarations: tuple[Declaration, ...], context: z3.Context
+) -> dict[str, z3.ExprRef]:
+    """Create the exact free variables named by an artifact."""
+
+    variables: dict[str, z3.ExprRef] = {}
+    for declaration in declarations:
+        sort = declaration.sort
+        if sort == BOOL:
+            variable: z3.ExprRef = _z3.boolean(declaration.name, context)
+        elif sort.kind == "bv":
+            variable = _z3.bit_vec(declaration.name, sort.require_bv_width(), context)
+        else:
+            index_width, value_width = sort.require_array_widths()
+            variable = _z3.array(
+                declaration.name,
+                _z3.bit_vec_sort(index_width, context),
+                _z3.bit_vec_sort(value_width, context),
+            )
+        variables[declaration.name] = variable
+    return variables
+
+
+def _boolean(expression: z3.ExprRef, operation: str) -> z3.BoolRef:
+    if not isinstance(expression, z3.BoolRef):
+        raise ArtifactError(f"{operation} did not produce a Boolean")
+    return expression
+
+
+def _bit_vector(expression: z3.ExprRef, operation: str) -> z3.BitVecRef:
+    if not isinstance(expression, z3.BitVecRef):
+        raise ArtifactError(f"{operation} did not produce a bit-vector")
+    return expression
+
+
+def _array(expression: z3.ExprRef, operation: str) -> z3.ArrayRef:
+    if not isinstance(expression, z3.ArrayRef):
+        raise ArtifactError(f"{operation} did not produce an array")
+    return expression
+
+
+def expr_to_z3(
+    expression: TypedExpr,
+    variables: Mapping[str, z3.ExprRef],
+    context: z3.Context,
+) -> z3.ExprRef:
+    """Interpret the admitted typed-QF_ABV surface in Z3."""
+
+    memo: dict[TypedExpr, z3.ExprRef] = {}
+
+    def visit(node: TypedExpr) -> z3.ExprRef:
+        cached = memo.get(node)
+        if cached is not None:
+            return cached
+        result = convert(node)
+        memo[node] = result
+        return result
+
+    def convert(node: TypedExpr) -> z3.ExprRef:
+        arguments = tuple(visit(argument) for argument in node.args)
+        if node.op == "var":
+            if node.name is None or node.name not in variables:
+                raise ArtifactError(f"missing Z3 variable for {node.name!r}")
+            return variables[node.name]
+        if node.op == "bool_lit":
+            if type(node.value) is not bool:
+                raise ArtifactError("malformed Boolean literal")
+            return _z3.bool_val(node.value, context)
+        if node.op == "bv_lit":
+            if type(node.value) is not int:
+                raise ArtifactError("malformed bit-vector literal")
+            return _z3.bit_vec_val(node.value, node.sort.require_bv_width(), context)
+        if node.op == "bool_not":
+            return _z3.negate(_boolean(arguments[0], node.op))
+        if node.op == "bool_and":
+            return _z3.conjunction(*(_boolean(arg, node.op) for arg in arguments))
+        if node.op == "bool_or":
+            return _z3.disjunction(*(_boolean(arg, node.op) for arg in arguments))
+        if node.op == "eq":
+            return _z3.equal(arguments[0], arguments[1])
+        if node.op == "ite":
+            return _z3.conditional(
+                _boolean(arguments[0], node.op), arguments[1], arguments[2]
+            )
+        if node.op == "bv_not":
+            return ~_bit_vector(arguments[0], node.op)
+        if node.op in _TYPED_BV_BINARY:
+            left = _bit_vector(arguments[0], node.op)
+            right = _bit_vector(arguments[1], node.op)
+            if node.op == "bv_urem":
+                return _z3.unsigned_remainder(left, right)
+            if node.op == "bv_lshr":
+                return _z3.logical_shift_right(left, right)
+            return _z3.bit_vector_binary(node.op, left, right)
+        if node.op in _TYPED_BV_COMPARE:
+            left = _bit_vector(arguments[0], node.op)
+            right = _bit_vector(arguments[1], node.op)
+            if node.op == "bv_ult":
+                return _z3.unsigned_less(left, right)
+            if node.op == "bv_ule":
+                return _z3.unsigned_less_equal(left, right)
+            return _z3.signed_compare(node.op, left, right)
+        if node.op == "zero_extend":
+            if node.amount is None:
+                raise ArtifactError("zero_extend lacks its amount")
+            return _z3.zero_extend(node.amount, _bit_vector(arguments[0], node.op))
+        if node.op == "sign_extend":
+            if node.amount is None:
+                raise ArtifactError("sign_extend lacks its amount")
+            return _z3.sign_extend(node.amount, _bit_vector(arguments[0], node.op))
+        if node.op == "extract":
+            if node.hi is None or node.lo is None:
+                raise ArtifactError("extract lacks its bounds")
+            return _z3.extract(node.hi, node.lo, _bit_vector(arguments[0], node.op))
+        if node.op == "concat":
+            return _z3.concat(*(_bit_vector(arg, node.op) for arg in arguments))
+        if node.op == "const_array":
+            index_width, _ = node.sort.require_array_widths()
+            return _z3.constant_array(
+                _z3.bit_vec_sort(index_width, context),
+                _bit_vector(arguments[0], node.op),
+            )
+        if node.op == "select":
+            return _z3.select(
+                _array(arguments[0], node.op),
+                _bit_vector(arguments[1], node.op),
+            )
+        if node.op == "store":
+            return _z3.store(
+                _array(arguments[0], node.op),
+                _bit_vector(arguments[1], node.op),
+                _bit_vector(arguments[2], node.op),
+            )
+        raise ArtifactError(f"unsupported typed operator {node.op!r}")
 
     return visit(expression)
 
