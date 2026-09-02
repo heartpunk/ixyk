@@ -1,0 +1,2298 @@
+{
+  "schema": "ixyk.x86_64.instruction_catalog.v1",
+  "source": {
+    "url": "https://x86instructionpop.com/grouped_data.json",
+    "sha256": "f7531052413093997e0bf995801f4284c95e8b7a0807276b66fde1c949c68bcc",
+    "corpus": "Ubuntu 16.04 x86-64 ELF binaries from 9,337 packages",
+    "retrieved_on": "2026-09-01"
+  },
+  "aggregation": {
+    "identity": "canonical instruction family",
+    "score": "sum of occurrence count across every observed variant row",
+    "normalization": [
+      "MOVABS -> MOV",
+      "strip REP, REPZ, or REPNZ from source mnemonic into its family"
+    ],
+    "selection": "first 100 families by score; no feature filtering"
+  },
+  "instructions": [
+    {
+      "rank": 1,
+      "name": "MOV",
+      "occurrences": 10627770656,
+      "observed_variant_rows": 4123,
+      "observed_opcode_count": 30,
+      "observed_prefix_count": 66,
+      "observed_sizes": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13
+      ],
+      "categories": [
+        "DATA"
+      ],
+      "source_mnemonics": [
+        "MOV",
+        "MOVABS",
+        "REPNZ MOV",
+        "REPZ MOV"
+      ]
+    },
+    {
+      "rank": 2,
+      "name": "ADD",
+      "occurrences": 3529131973,
+      "observed_variant_rows": 2193,
+      "observed_opcode_count": 9,
+      "observed_prefix_count": 72,
+      "observed_sizes": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13
+      ],
+      "categories": [
+        "BINARY ARITHMETIC"
+      ],
+      "source_mnemonics": [
+        "ADD",
+        "REPNZ ADD",
+        "REPZ ADD"
+      ]
+    },
+    {
+      "rank": 3,
+      "name": "CALL",
+      "occurrences": 2235935654,
+      "observed_variant_rows": 96,
+      "observed_opcode_count": 2,
+      "observed_prefix_count": 8,
+      "observed_sizes": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "categories": [
+        "CONTROL FLOW"
+      ],
+      "source_mnemonics": [
+        "CALL"
+      ]
+    },
+    {
+      "rank": 4,
+      "name": "LEA",
+      "occurrences": 1351390642,
+      "observed_variant_rows": 685,
+      "observed_opcode_count": 1,
+      "observed_prefix_count": 26,
+      "observed_sizes": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "categories": [
+        "MISC"
+      ],
+      "source_mnemonics": [
+        "LEA"
+      ]
+    },
+    {
+      "rank": 5,
+      "name": "JE",
+      "occurrences": 1253038862,
+      "observed_variant_rows": 23,
+      "observed_opcode_count": 2,
+      "observed_prefix_count": 2,
+      "observed_sizes": [
+        2,
+        3,
+        6
+      ],
+      "categories": [
+        "CONTROL FLOW"
+      ],
+      "source_mnemonics": [
+        "JE"
+      ]
+    },
+    {
+      "rank": 6,
+      "name": "TEST",
+      "occurrences": 1125117859,
+      "observed_variant_rows": 1144,
+      "observed_opcode_count": 6,
+      "observed_prefix_count": 30,
+      "observed_sizes": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "categories": [
+        "BITWISE"
+      ],
+      "source_mnemonics": [
+        "REPZ TEST",
+        "TEST"
+      ]
+    },
+    {
+      "rank": 7,
+      "name": "JMP",
+      "occurrences": 1048626646,
+      "observed_variant_rows": 54,
+      "observed_opcode_count": 3,
+      "observed_prefix_count": 6,
+      "observed_sizes": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "categories": [
+        "CONTROL FLOW"
+      ],
+      "source_mnemonics": [
+        "JMP",
+        "REPZ JMP"
+      ]
+    },
+    {
+      "rank": 8,
+      "name": "NOP",
+      "occurrences": 1042810062,
+      "observed_variant_rows": 108,
+      "observed_opcode_count": 4,
+      "observed_prefix_count": 8,
+      "observed_sizes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "categories": [
+        "MISC"
+      ],
+      "source_mnemonics": [
+        "NOP"
+      ]
+    },
+    {
+      "rank": 9,
+      "name": "CMP",
+      "occurrences": 934686880,
+      "observed_variant_rows": 2917,
+      "observed_opcode_count": 9,
+      "observed_prefix_count": 42,
+      "observed_sizes": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "categories": [
+        "BINARY ARITHMETIC"
+      ],
+      "source_mnemonics": [
+        "CMP",
+        "REPZ CMP"
+      ]
+    },
+    {
+      "rank": 10,
+      "name": "JNE",
+      "occurrences": 843978385,
+      "observed_variant_rows": 27,
+      "observed_opcode_count": 2,
+      "observed_prefix_count": 5,
+      "observed_sizes": [
+        2,
+        3,
+        6,
+        7
+      ],
+      "categories": [
+        "CONTROL FLOW"
+      ],
+      "source_mnemonics": [
+        "JNE",
+        "REPZ JNE"
+      ]
+    },
+    {
+      "rank": 11,
+      "name": "XOR",
+      "occurrences": 657996290,
+      "observed_variant_rows": 1167,
+      "observed_opcode_count": 7,
+      "observed_prefix_count": 34,
+      "observed_sizes": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "categories": [
+        "LOGICAL"
+      ],
+      "source_mnemonics": [
+        "REPNZ XOR",
+        "REPZ XOR",
+        "XOR"
+      ]
+    },
+    {
+      "rank": 12,
+      "name": "RET",
+      "occurrences": 296410098,
+      "observed_variant_rows": 35,
+      "observed_opcode_count": 2,
+      "observed_prefix_count": 6,
+      "observed_sizes": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "categories": [
+        "CONTROL FLOW"
+      ],
+      "source_mnemonics": [
+        "REPZ RET",
+        "RET"
+      ]
+    },
+    {
+      "rank": 13,
+      "name": "AND",
+      "occurrences": 283871821,
+      "observed_variant_rows": 1318,
+      "observed_opcode_count": 9,
+      "observed_prefix_count": 41,
+      "observed_sizes": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "categories": [
+        "LOGICAL"
+      ],
+      "source_mnemonics": [
+        "AND",
+        "REPNZ AND",
+        "REPZ AND"
+      ]
+    },
+    {
+      "rank": 14,
+      "name": "MOVZX",
+      "occurrences": 279163464,
+      "observed_variant_rows": 813,
+      "observed_opcode_count": 2,
+      "observed_prefix_count": 33,
+      "observed_sizes": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "categories": [
+        "DATA"
+      ],
+      "source_mnemonics": [
+        "MOVZX"
+      ]
+    },
+    {
+      "rank": 15,
+      "name": "MOVSD",
+      "occurrences": 204657284,
+      "observed_variant_rows": 468,
+      "observed_opcode_count": 2,
+      "observed_prefix_count": 10,
+      "observed_sizes": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11
+      ],
+      "categories": [
+        "STRING"
+      ],
+      "source_mnemonics": [
+        "MOVSD"
+      ]
+    },
+    {
+      "rank": 16,
+      "name": "ROL",
+      "occurrences": 196742072,
+      "observed_variant_rows": 73,
+      "observed_opcode_count": 6,
+      "observed_prefix_count": 14,
+      "observed_sizes": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "categories": [
+        "SHIFT AND ROTATE"
+      ],
+      "source_mnemonics": [
+        "ROL"
+      ]
+    },
+    {
+      "rank": 17,
+      "name": "SUB",
+      "occurrences": 183967954,
+      "observed_variant_rows": 1388,
+      "observed_opcode_count": 9,
+      "observed_prefix_count": 45,
+      "observed_sizes": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "categories": [
+        "BINARY ARITHMETIC"
+      ],
+      "source_mnemonics": [
+        "REPNZ SUB",
+        "REPZ SUB",
+        "SUB"
+      ]
+    },
+    {
+      "rank": 18,
+      "name": "SAR",
+      "occurrences": 140511363,
+      "observed_variant_rows": 115,
+      "observed_opcode_count": 6,
+      "observed_prefix_count": 15,
+      "observed_sizes": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "categories": [
+        "SHIFT AND ROTATE"
+      ],
+      "source_mnemonics": [
+        "REPNZ SAR",
+        "SAR"
+      ]
+    },
+    {
+      "rank": 19,
+      "name": "OR",
+      "occurrences": 112605733,
+      "observed_variant_rows": 1489,
+      "observed_opcode_count": 9,
+      "observed_prefix_count": 44,
+      "observed_sizes": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13
+      ],
+      "categories": [
+        "LOGICAL"
+      ],
+      "source_mnemonics": [
+        "OR",
+        "REPNZ OR",
+        "REPZ OR"
+      ]
+    },
+    {
+      "rank": 20,
+      "name": "MOVSXD",
+      "occurrences": 107204963,
+      "observed_variant_rows": 329,
+      "observed_opcode_count": 1,
+      "observed_prefix_count": 16,
+      "observed_sizes": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "categories": [
+        "DATA"
+      ],
+      "source_mnemonics": [
+        "MOVSXD",
+        "REPNZ MOVSXD"
+      ]
+    },
+    {
+      "rank": 21,
+      "name": "JBE",
+      "occurrences": 100743554,
+      "observed_variant_rows": 25,
+      "observed_opcode_count": 2,
+      "observed_prefix_count": 3,
+      "observed_sizes": [
+        2,
+        3,
+        6,
+        7
+      ],
+      "categories": [
+        "CONTROL FLOW"
+      ],
+      "source_mnemonics": [
+        "JBE"
+      ]
+    },
+    {
+      "rank": 22,
+      "name": "JA",
+      "occurrences": 100701018,
+      "observed_variant_rows": 23,
+      "observed_opcode_count": 2,
+      "observed_prefix_count": 2,
+      "observed_sizes": [
+        2,
+        3,
+        6
+      ],
+      "categories": [
+        "CONTROL FLOW"
+      ],
+      "source_mnemonics": [
+        "JA"
+      ]
+    },
+    {
+      "rank": 23,
+      "name": "SETNE",
+      "occurrences": 87126490,
+      "observed_variant_rows": 119,
+      "observed_opcode_count": 1,
+      "observed_prefix_count": 5,
+      "observed_sizes": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "categories": [
+        "BITWISE"
+      ],
+      "source_mnemonics": [
+        "SETNE"
+      ]
+    },
+    {
+      "rank": 24,
+      "name": "DEC",
+      "occurrences": 83671772,
+      "observed_variant_rows": 163,
+      "observed_opcode_count": 2,
+      "observed_prefix_count": 18,
+      "observed_sizes": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "categories": [
+        "BINARY ARITHMETIC"
+      ],
+      "source_mnemonics": [
+        "DEC",
+        "REPNZ DEC"
+      ]
+    },
+    {
+      "rank": 25,
+      "name": "XCHG",
+      "occurrences": 64462611,
+      "observed_variant_rows": 227,
+      "observed_opcode_count": 10,
+      "observed_prefix_count": 27,
+      "observed_sizes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "categories": [
+        "DATA"
+      ],
+      "source_mnemonics": [
+        "REPZ XCHG",
+        "XCHG"
+      ]
+    },
+    {
+      "rank": 26,
+      "name": "JLE",
+      "occurrences": 59856464,
+      "observed_variant_rows": 23,
+      "observed_opcode_count": 2,
+      "observed_prefix_count": 2,
+      "observed_sizes": [
+        2,
+        3,
+        6
+      ],
+      "categories": [
+        "CONTROL FLOW"
+      ],
+      "source_mnemonics": [
+        "JLE"
+      ]
+    },
+    {
+      "rank": 27,
+      "name": "JB",
+      "occurrences": 58498822,
+      "observed_variant_rows": 29,
+      "observed_opcode_count": 2,
+      "observed_prefix_count": 8,
+      "observed_sizes": [
+        2,
+        3,
+        6
+      ],
+      "categories": [
+        "CONTROL FLOW"
+      ],
+      "source_mnemonics": [
+        "JB"
+      ]
+    },
+    {
+      "rank": 28,
+      "name": "MULSD",
+      "occurrences": 58224854,
+      "observed_variant_rows": 193,
+      "observed_opcode_count": 1,
+      "observed_prefix_count": 9,
+      "observed_sizes": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "categories": [
+        "SSE"
+      ],
+      "source_mnemonics": [
+        "MULSD"
+      ]
+    },
+    {
+      "rank": 29,
+      "name": "JAE",
+      "occurrences": 54770464,
+      "observed_variant_rows": 23,
+      "observed_opcode_count": 2,
+      "observed_prefix_count": 2,
+      "observed_sizes": [
+        2,
+        3,
+        6
+      ],
+      "categories": [
+        "CONTROL FLOW"
+      ],
+      "source_mnemonics": [
+        "JAE"
+      ]
+    },
+    {
+      "rank": 30,
+      "name": "ADDSD",
+      "occurrences": 44543198,
+      "observed_variant_rows": 183,
+      "observed_opcode_count": 1,
+      "observed_prefix_count": 9,
+      "observed_sizes": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "categories": [
+        "SSE"
+      ],
+      "source_mnemonics": [
+        "ADDSD"
+      ]
+    },
+    {
+      "rank": 31,
+      "name": "MOVAPD",
+      "occurrences": 43244542,
+      "observed_variant_rows": 149,
+      "observed_opcode_count": 2,
+      "observed_prefix_count": 8,
+      "observed_sizes": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "categories": [
+        "SSE"
+      ],
+      "source_mnemonics": [
+        "MOVAPD"
+      ]
+    },
+    {
+      "rank": 32,
+      "name": "IMUL",
+      "occurrences": 38845870,
+      "observed_variant_rows": 1046,
+      "observed_opcode_count": 4,
+      "observed_prefix_count": 30,
+      "observed_sizes": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "categories": [
+        "BINARY ARITHMETIC"
+      ],
+      "source_mnemonics": [
+        "IMUL"
+      ]
+    },
+    {
+      "rank": 33,
+      "name": "JG",
+      "occurrences": 37072506,
+      "observed_variant_rows": 24,
+      "observed_opcode_count": 2,
+      "observed_prefix_count": 3,
+      "observed_sizes": [
+        2,
+        3,
+        6
+      ],
+      "categories": [
+        "CONTROL FLOW"
+      ],
+      "source_mnemonics": [
+        "JG"
+      ]
+    },
+    {
+      "rank": 34,
+      "name": "UCOMISD",
+      "occurrences": 33845132,
+      "observed_variant_rows": 161,
+      "observed_opcode_count": 1,
+      "observed_prefix_count": 9,
+      "observed_sizes": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "categories": [
+        "SSE"
+      ],
+      "source_mnemonics": [
+        "UCOMISD"
+      ]
+    },
+    {
+      "rank": 35,
+      "name": "JS",
+      "occurrences": 31225626,
+      "observed_variant_rows": 27,
+      "observed_opcode_count": 2,
+      "observed_prefix_count": 6,
+      "observed_sizes": [
+        2,
+        3,
+        6
+      ],
+      "categories": [
+        "CONTROL FLOW"
+      ],
+      "source_mnemonics": [
+        "JS"
+      ]
+    },
+    {
+      "rank": 36,
+      "name": "PXOR",
+      "occurrences": 31085484,
+      "observed_variant_rows": 73,
+      "observed_opcode_count": 1,
+      "observed_prefix_count": 10,
+      "observed_sizes": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "categories": [
+        "MMX"
+      ],
+      "source_mnemonics": [
+        "PXOR"
+      ]
+    },
+    {
+      "rank": 37,
+      "name": "ADC",
+      "occurrences": 29953466,
+      "observed_variant_rows": 188,
+      "observed_opcode_count": 7,
+      "observed_prefix_count": 23,
+      "observed_sizes": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "categories": [
+        "BINARY ARITHMETIC"
+      ],
+      "source_mnemonics": [
+        "ADC",
+        "REPNZ ADC",
+        "REPZ ADC"
+      ]
+    },
+    {
+      "rank": 38,
+      "name": "SHL",
+      "occurrences": 28804734,
+      "observed_variant_rows": 217,
+      "observed_opcode_count": 6,
+      "observed_prefix_count": 11,
+      "observed_sizes": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "categories": [
+        "SHIFT AND ROTATE"
+      ],
+      "source_mnemonics": [
+        "SHL"
+      ]
+    },
+    {
+      "rank": 39,
+      "name": "MOVSX",
+      "occurrences": 28331958,
+      "observed_variant_rows": 1124,
+      "observed_opcode_count": 2,
+      "observed_prefix_count": 29,
+      "observed_sizes": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "categories": [
+        "DATA"
+      ],
+      "source_mnemonics": [
+        "MOVSX"
+      ]
+    },
+    {
+      "rank": 40,
+      "name": "SETE",
+      "occurrences": 28250824,
+      "observed_variant_rows": 123,
+      "observed_opcode_count": 1,
+      "observed_prefix_count": 7,
+      "observed_sizes": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "categories": [
+        "BITWISE"
+      ],
+      "source_mnemonics": [
+        "SETE"
+      ]
+    },
+    {
+      "rank": 41,
+      "name": "SUBSD",
+      "occurrences": 26304452,
+      "observed_variant_rows": 177,
+      "observed_opcode_count": 1,
+      "observed_prefix_count": 8,
+      "observed_sizes": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "categories": [
+        "SSE"
+      ],
+      "source_mnemonics": [
+        "SUBSD"
+      ]
+    },
+    {
+      "rank": 42,
+      "name": "CMOVE",
+      "occurrences": 25266068,
+      "observed_variant_rows": 315,
+      "observed_opcode_count": 1,
+      "observed_prefix_count": 11,
+      "observed_sizes": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "categories": [
+        "DATA"
+      ],
+      "source_mnemonics": [
+        "CMOVE"
+      ]
+    },
+    {
+      "rank": 43,
+      "name": "MOVAPS",
+      "occurrences": 22894136,
+      "observed_variant_rows": 230,
+      "observed_opcode_count": 2,
+      "observed_prefix_count": 8,
+      "observed_sizes": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "categories": [
+        "SSE"
+      ],
+      "source_mnemonics": [
+        "MOVAPS"
+      ]
+    },
+    {
+      "rank": 44,
+      "name": "JL",
+      "occurrences": 20870366,
+      "observed_variant_rows": 23,
+      "observed_opcode_count": 2,
+      "observed_prefix_count": 2,
+      "observed_sizes": [
+        2,
+        3,
+        6
+      ],
+      "categories": [
+        "CONTROL FLOW"
+      ],
+      "source_mnemonics": [
+        "JL"
+      ]
+    },
+    {
+      "rank": 45,
+      "name": "CMOVNE",
+      "occurrences": 20175206,
+      "observed_variant_rows": 303,
+      "observed_opcode_count": 1,
+      "observed_prefix_count": 14,
+      "observed_sizes": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "categories": [
+        "DATA"
+      ],
+      "source_mnemonics": [
+        "CMOVNE"
+      ]
+    },
+    {
+      "rank": 46,
+      "name": "MOVSS",
+      "occurrences": 19360518,
+      "observed_variant_rows": 436,
+      "observed_opcode_count": 2,
+      "observed_prefix_count": 9,
+      "observed_sizes": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "categories": [
+        "SSE"
+      ],
+      "source_mnemonics": [
+        "MOVSS"
+      ]
+    },
+    {
+      "rank": 47,
+      "name": "JGE",
+      "occurrences": 18102372,
+      "observed_variant_rows": 26,
+      "observed_opcode_count": 2,
+      "observed_prefix_count": 5,
+      "observed_sizes": [
+        2,
+        3,
+        6
+      ],
+      "categories": [
+        "CONTROL FLOW"
+      ],
+      "source_mnemonics": [
+        "JGE"
+      ]
+    },
+    {
+      "rank": 48,
+      "name": "CVTSI2SD",
+      "occurrences": 17232180,
+      "observed_variant_rows": 319,
+      "observed_opcode_count": 1,
+      "observed_prefix_count": 18,
+      "observed_sizes": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11
+      ],
+      "categories": [
+        "SSE"
+      ],
+      "source_mnemonics": [
+        "CVTSI2SD"
+      ]
+    },
+    {
+      "rank": 49,
+      "name": "UD2",
+      "occurrences": 16754816,
+      "observed_variant_rows": 11,
+      "observed_opcode_count": 1,
+      "observed_prefix_count": 1,
+      "observed_sizes": [
+        2
+      ],
+      "categories": [
+        "MISC"
+      ],
+      "source_mnemonics": [
+        "UD2"
+      ]
+    },
+    {
+      "rank": 50,
+      "name": "DIV",
+      "occurrences": 15849876,
+      "observed_variant_rows": 106,
+      "observed_opcode_count": 2,
+      "observed_prefix_count": 14,
+      "observed_sizes": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "categories": [
+        "BINARY ARITHMETIC"
+      ],
+      "source_mnemonics": [
+        "DIV"
+      ]
+    },
+    {
+      "rank": 51,
+      "name": "CVTTSD2SI",
+      "occurrences": 15667186,
+      "observed_variant_rows": 280,
+      "observed_opcode_count": 1,
+      "observed_prefix_count": 16,
+      "observed_sizes": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "categories": [
+        "SSE"
+      ],
+      "source_mnemonics": [
+        "CVTTSD2SI"
+      ]
+    },
+    {
+      "rank": 52,
+      "name": "CDQE",
+      "occurrences": 15149112,
+      "observed_variant_rows": 12,
+      "observed_opcode_count": 1,
+      "observed_prefix_count": 2,
+      "observed_sizes": [
+        2
+      ],
+      "categories": [
+        "DATA"
+      ],
+      "source_mnemonics": [
+        "CDQE"
+      ]
+    },
+    {
+      "rank": 53,
+      "name": "MUL",
+      "occurrences": 11857626,
+      "observed_variant_rows": 18,
+      "observed_opcode_count": 2,
+      "observed_prefix_count": 7,
+      "observed_sizes": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "categories": [
+        "BINARY ARITHMETIC"
+      ],
+      "source_mnemonics": [
+        "MUL"
+      ]
+    },
+    {
+      "rank": 54,
+      "name": "SBB",
+      "occurrences": 11226558,
+      "observed_variant_rows": 170,
+      "observed_opcode_count": 6,
+      "observed_prefix_count": 19,
+      "observed_sizes": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "categories": [
+        "BINARY ARITHMETIC"
+      ],
+      "source_mnemonics": [
+        "SBB"
+      ]
+    },
+    {
+      "rank": 55,
+      "name": "JNS",
+      "occurrences": 11101268,
+      "observed_variant_rows": 23,
+      "observed_opcode_count": 2,
+      "observed_prefix_count": 2,
+      "observed_sizes": [
+        2,
+        3,
+        6
+      ],
+      "categories": [
+        "CONTROL FLOW"
+      ],
+      "source_mnemonics": [
+        "JNS"
+      ]
+    },
+    {
+      "rank": 56,
+      "name": "BT",
+      "occurrences": 9558202,
+      "observed_variant_rows": 136,
+      "observed_opcode_count": 2,
+      "observed_prefix_count": 13,
+      "observed_sizes": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "categories": [
+        "BITWISE"
+      ],
+      "source_mnemonics": [
+        "BT"
+      ]
+    },
+    {
+      "rank": 57,
+      "name": "XORPD",
+      "occurrences": 8198568,
+      "observed_variant_rows": 70,
+      "observed_opcode_count": 1,
+      "observed_prefix_count": 4,
+      "observed_sizes": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "categories": [
+        "SSE"
+      ],
+      "source_mnemonics": [
+        "XORPD"
+      ]
+    },
+    {
+      "rank": 58,
+      "name": "INC",
+      "occurrences": 7931076,
+      "observed_variant_rows": 106,
+      "observed_opcode_count": 2,
+      "observed_prefix_count": 16,
+      "observed_sizes": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "categories": [
+        "BINARY ARITHMETIC"
+      ],
+      "source_mnemonics": [
+        "INC",
+        "REPNZ INC",
+        "REPZ INC"
+      ]
+    },
+    {
+      "rank": 59,
+      "name": "NEG",
+      "occurrences": 7716834,
+      "observed_variant_rows": 47,
+      "observed_opcode_count": 2,
+      "observed_prefix_count": 9,
+      "observed_sizes": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        8
+      ],
+      "categories": [
+        "BINARY ARITHMETIC"
+      ],
+      "source_mnemonics": [
+        "NEG"
+      ]
+    },
+    {
+      "rank": 60,
+      "name": "DIVSD",
+      "occurrences": 7317398,
+      "observed_variant_rows": 148,
+      "observed_opcode_count": 1,
+      "observed_prefix_count": 9,
+      "observed_sizes": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "categories": [
+        "SSE"
+      ],
+      "source_mnemonics": [
+        "DIVSD"
+      ]
+    },
+    {
+      "rank": 61,
+      "name": "JP",
+      "occurrences": 6303824,
+      "observed_variant_rows": 24,
+      "observed_opcode_count": 2,
+      "observed_prefix_count": 3,
+      "observed_sizes": [
+        2,
+        3,
+        6
+      ],
+      "categories": [
+        "CONTROL FLOW"
+      ],
+      "source_mnemonics": [
+        "JP"
+      ]
+    },
+    {
+      "rank": 62,
+      "name": "SHR",
+      "occurrences": 6066748,
+      "observed_variant_rows": 181,
+      "observed_opcode_count": 6,
+      "observed_prefix_count": 11,
+      "observed_sizes": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "categories": [
+        "SHIFT AND ROTATE"
+      ],
+      "source_mnemonics": [
+        "SHR"
+      ]
+    },
+    {
+      "rank": 63,
+      "name": "MULSS",
+      "occurrences": 5409870,
+      "observed_variant_rows": 180,
+      "observed_opcode_count": 1,
+      "observed_prefix_count": 10,
+      "observed_sizes": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11
+      ],
+      "categories": [
+        "SSE"
+      ],
+      "source_mnemonics": [
+        "MULSS"
+      ]
+    },
+    {
+      "rank": 64,
+      "name": "CMPXCHG",
+      "occurrences": 4942530,
+      "observed_variant_rows": 312,
+      "observed_opcode_count": 2,
+      "observed_prefix_count": 26,
+      "observed_sizes": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11
+      ],
+      "categories": [
+        "DATA"
+      ],
+      "source_mnemonics": [
+        "CMPXCHG"
+      ]
+    },
+    {
+      "rank": 65,
+      "name": "INT3",
+      "occurrences": 4818402,
+      "observed_variant_rows": 14,
+      "observed_opcode_count": 1,
+      "observed_prefix_count": 4,
+      "observed_sizes": [
+        1,
+        2
+      ],
+      "categories": [
+        "CONTROL FLOW"
+      ],
+      "source_mnemonics": [
+        "INT3"
+      ]
+    },
+    {
+      "rank": 66,
+      "name": "CMOVLE",
+      "occurrences": 4790260,
+      "observed_variant_rows": 307,
+      "observed_opcode_count": 1,
+      "observed_prefix_count": 20,
+      "observed_sizes": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "categories": [
+        "DATA"
+      ],
+      "source_mnemonics": [
+        "CMOVLE"
+      ]
+    },
+    {
+      "rank": 67,
+      "name": "CMOVB",
+      "occurrences": 4681904,
+      "observed_variant_rows": 135,
+      "observed_opcode_count": 1,
+      "observed_prefix_count": 10,
+      "observed_sizes": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "categories": [
+        "DATA"
+      ],
+      "source_mnemonics": [
+        "CMOVB"
+      ]
+    },
+    {
+      "rank": 68,
+      "name": "CMOVGE",
+      "occurrences": 3997948,
+      "observed_variant_rows": 295,
+      "observed_opcode_count": 1,
+      "observed_prefix_count": 26,
+      "observed_sizes": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "categories": [
+        "DATA"
+      ],
+      "source_mnemonics": [
+        "CMOVGE"
+      ]
+    },
+    {
+      "rank": 69,
+      "name": "CMOVBE",
+      "occurrences": 3592482,
+      "observed_variant_rows": 300,
+      "observed_opcode_count": 1,
+      "observed_prefix_count": 18,
+      "observed_sizes": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "categories": [
+        "DATA"
+      ],
+      "source_mnemonics": [
+        "CMOVBE"
+      ]
+    },
+    {
+      "rank": 70,
+      "name": "SETBE",
+      "occurrences": 3578910,
+      "observed_variant_rows": 72,
+      "observed_opcode_count": 1,
+      "observed_prefix_count": 5,
+      "observed_sizes": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "categories": [
+        "BITWISE"
+      ],
+      "source_mnemonics": [
+        "SETBE"
+      ]
+    },
+    {
+      "rank": 71,
+      "name": "CMOVAE",
+      "occurrences": 3493862,
+      "observed_variant_rows": 255,
+      "observed_opcode_count": 1,
+      "observed_prefix_count": 18,
+      "observed_sizes": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "categories": [
+        "DATA"
+      ],
+      "source_mnemonics": [
+        "CMOVAE"
+      ]
+    },
+    {
+      "rank": 72,
+      "name": "CLC",
+      "occurrences": 3434550,
+      "observed_variant_rows": 12,
+      "observed_opcode_count": 1,
+      "observed_prefix_count": 8,
+      "observed_sizes": [
+        1,
+        2
+      ],
+      "categories": [
+        "FLAG REGISTER INSN"
+      ],
+      "source_mnemonics": [
+        "CLC"
+      ]
+    },
+    {
+      "rank": 73,
+      "name": "CMOVG",
+      "occurrences": 3433332,
+      "observed_variant_rows": 217,
+      "observed_opcode_count": 1,
+      "observed_prefix_count": 14,
+      "observed_sizes": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "categories": [
+        "DATA"
+      ],
+      "source_mnemonics": [
+        "CMOVG"
+      ]
+    },
+    {
+      "rank": 74,
+      "name": "ADDSS",
+      "occurrences": 3421454,
+      "observed_variant_rows": 156,
+      "observed_opcode_count": 1,
+      "observed_prefix_count": 9,
+      "observed_sizes": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "categories": [
+        "SSE"
+      ],
+      "source_mnemonics": [
+        "ADDSS"
+      ]
+    },
+    {
+      "rank": 75,
+      "name": "STOS",
+      "occurrences": 3399614,
+      "observed_variant_rows": 54,
+      "observed_opcode_count": 2,
+      "observed_prefix_count": 11,
+      "observed_sizes": [
+        1,
+        2,
+        3
+      ],
+      "categories": [
+        "STRING"
+      ],
+      "source_mnemonics": [
+        "REP STOS",
+        "STOS"
+      ]
+    },
+    {
+      "rank": 76,
+      "name": "CMOVS",
+      "occurrences": 3292830,
+      "observed_variant_rows": 173,
+      "observed_opcode_count": 1,
+      "observed_prefix_count": 13,
+      "observed_sizes": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "categories": [
+        "DATA"
+      ],
+      "source_mnemonics": [
+        "CMOVS"
+      ]
+    },
+    {
+      "rank": 77,
+      "name": "XADD",
+      "occurrences": 3194446,
+      "observed_variant_rows": 147,
+      "observed_opcode_count": 2,
+      "observed_prefix_count": 18,
+      "observed_sizes": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "categories": [
+        "DATA"
+      ],
+      "source_mnemonics": [
+        "XADD"
+      ]
+    },
+    {
+      "rank": 78,
+      "name": "MOVDQA",
+      "occurrences": 3122802,
+      "observed_variant_rows": 220,
+      "observed_opcode_count": 2,
+      "observed_prefix_count": 8,
+      "observed_sizes": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "categories": [
+        "SSE"
+      ],
+      "source_mnemonics": [
+        "MOVDQA"
+      ]
+    },
+    {
+      "rank": 79,
+      "name": "CMPS",
+      "occurrences": 3075318,
+      "observed_variant_rows": 19,
+      "observed_opcode_count": 2,
+      "observed_prefix_count": 6,
+      "observed_sizes": [
+        1,
+        2
+      ],
+      "categories": [
+        "STRING"
+      ],
+      "source_mnemonics": [
+        "CMPS",
+        "REPZ CMPS"
+      ]
+    },
+    {
+      "rank": 80,
+      "name": "SETG",
+      "occurrences": 2979036,
+      "observed_variant_rows": 76,
+      "observed_opcode_count": 1,
+      "observed_prefix_count": 5,
+      "observed_sizes": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "categories": [
+        "BITWISE"
+      ],
+      "source_mnemonics": [
+        "SETG"
+      ]
+    },
+    {
+      "rank": 81,
+      "name": "CMOVA",
+      "occurrences": 2891936,
+      "observed_variant_rows": 153,
+      "observed_opcode_count": 1,
+      "observed_prefix_count": 12,
+      "observed_sizes": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "categories": [
+        "DATA"
+      ],
+      "source_mnemonics": [
+        "CMOVA"
+      ]
+    },
+    {
+      "rank": 82,
+      "name": "VADDSD",
+      "occurrences": 2771229,
+      "observed_variant_rows": 3,
+      "observed_opcode_count": 2,
+      "observed_prefix_count": 1,
+      "observed_sizes": [
+        4,
+        5,
+        8
+      ],
+      "categories": [
+        "AVX"
+      ],
+      "source_mnemonics": [
+        "VADDSD"
+      ]
+    },
+    {
+      "rank": 83,
+      "name": "MOVDQU",
+      "occurrences": 2768088,
+      "observed_variant_rows": 205,
+      "observed_opcode_count": 2,
+      "observed_prefix_count": 9,
+      "observed_sizes": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "categories": [
+        "SSE"
+      ],
+      "source_mnemonics": [
+        "MOVDQU"
+      ]
+    },
+    {
+      "rank": 84,
+      "name": "SETAE",
+      "occurrences": 2635828,
+      "observed_variant_rows": 62,
+      "observed_opcode_count": 1,
+      "observed_prefix_count": 5,
+      "observed_sizes": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "categories": [
+        "BITWISE"
+      ],
+      "source_mnemonics": [
+        "SETAE"
+      ]
+    },
+    {
+      "rank": 85,
+      "name": "SETA",
+      "occurrences": 2630946,
+      "observed_variant_rows": 81,
+      "observed_opcode_count": 1,
+      "observed_prefix_count": 5,
+      "observed_sizes": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "categories": [
+        "BITWISE"
+      ],
+      "source_mnemonics": [
+        "SETA"
+      ]
+    },
+    {
+      "rank": 86,
+      "name": "PCMPEQB",
+      "occurrences": 2494026,
+      "observed_variant_rows": 46,
+      "observed_opcode_count": 1,
+      "observed_prefix_count": 8,
+      "observed_sizes": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "categories": [
+        "MMX"
+      ],
+      "source_mnemonics": [
+        "PCMPEQB"
+      ]
+    },
+    {
+      "rank": 87,
+      "name": "PMOVMSKB",
+      "occurrences": 2447296,
+      "observed_variant_rows": 25,
+      "observed_opcode_count": 1,
+      "observed_prefix_count": 4,
+      "observed_sizes": [
+        4,
+        5
+      ],
+      "categories": [
+        "SSE"
+      ],
+      "source_mnemonics": [
+        "PMOVMSKB"
+      ]
+    },
+    {
+      "rank": 88,
+      "name": "CMOVL",
+      "occurrences": 2422020,
+      "observed_variant_rows": 141,
+      "observed_opcode_count": 1,
+      "observed_prefix_count": 10,
+      "observed_sizes": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "categories": [
+        "DATA"
+      ],
+      "source_mnemonics": [
+        "CMOVL"
+      ]
+    },
+    {
+      "rank": 89,
+      "name": "MOVUPS",
+      "occurrences": 2302032,
+      "observed_variant_rows": 216,
+      "observed_opcode_count": 2,
+      "observed_prefix_count": 8,
+      "observed_sizes": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "categories": [
+        "SSE"
+      ],
+      "source_mnemonics": [
+        "MOVUPS"
+      ]
+    },
+    {
+      "rank": 90,
+      "name": "BSR",
+      "occurrences": 2258980,
+      "observed_variant_rows": 84,
+      "observed_opcode_count": 1,
+      "observed_prefix_count": 14,
+      "observed_sizes": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "categories": [
+        "BITWISE"
+      ],
+      "source_mnemonics": [
+        "BSR"
+      ]
+    },
+    {
+      "rank": 91,
+      "name": "MAXSD",
+      "occurrences": 2247994,
+      "observed_variant_rows": 102,
+      "observed_opcode_count": 1,
+      "observed_prefix_count": 8,
+      "observed_sizes": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "categories": [
+        "SSE"
+      ],
+      "source_mnemonics": [
+        "MAXSD"
+      ]
+    },
+    {
+      "rank": 92,
+      "name": "CMOVNS",
+      "occurrences": 2205830,
+      "observed_variant_rows": 250,
+      "observed_opcode_count": 1,
+      "observed_prefix_count": 21,
+      "observed_sizes": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "categories": [
+        "DATA"
+      ],
+      "source_mnemonics": [
+        "CMOVNS"
+      ]
+    },
+    {
+      "rank": 93,
+      "name": "MULPD",
+      "occurrences": 2135924,
+      "observed_variant_rows": 52,
+      "observed_opcode_count": 1,
+      "observed_prefix_count": 8,
+      "observed_sizes": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "categories": [
+        "SSE"
+      ],
+      "source_mnemonics": [
+        "MULPD"
+      ]
+    },
+    {
+      "rank": 94,
+      "name": "SETB",
+      "occurrences": 1960876,
+      "observed_variant_rows": 59,
+      "observed_opcode_count": 1,
+      "observed_prefix_count": 4,
+      "observed_sizes": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "categories": [
+        "BITWISE"
+      ],
+      "source_mnemonics": [
+        "SETB"
+      ]
+    },
+    {
+      "rank": 95,
+      "name": "UCOMISS",
+      "occurrences": 1940968,
+      "observed_variant_rows": 140,
+      "observed_opcode_count": 1,
+      "observed_prefix_count": 8,
+      "observed_sizes": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "categories": [
+        "SSE"
+      ],
+      "source_mnemonics": [
+        "UCOMISS"
+      ]
+    },
+    {
+      "rank": 96,
+      "name": "CDQ",
+      "occurrences": 1845960,
+      "observed_variant_rows": 12,
+      "observed_opcode_count": 1,
+      "observed_prefix_count": 2,
+      "observed_sizes": [
+        1,
+        2
+      ],
+      "categories": [
+        "DATA"
+      ],
+      "source_mnemonics": [
+        "CDQ"
+      ]
+    },
+    {
+      "rank": 97,
+      "name": "SUBSS",
+      "occurrences": 1772600,
+      "observed_variant_rows": 148,
+      "observed_opcode_count": 1,
+      "observed_prefix_count": 9,
+      "observed_sizes": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "categories": [
+        "SSE"
+      ],
+      "source_mnemonics": [
+        "SUBSS"
+      ]
+    },
+    {
+      "rank": 98,
+      "name": "BSWAP",
+      "occurrences": 1703036,
+      "observed_variant_rows": 256,
+      "observed_opcode_count": 8,
+      "observed_prefix_count": 4,
+      "observed_sizes": [
+        2,
+        3
+      ],
+      "categories": [
+        "DATA"
+      ],
+      "source_mnemonics": [
+        "BSWAP"
+      ]
+    },
+    {
+      "rank": 99,
+      "name": "LEAVE",
+      "occurrences": 1693254,
+      "observed_variant_rows": 14,
+      "observed_opcode_count": 1,
+      "observed_prefix_count": 4,
+      "observed_sizes": [
+        1,
+        2
+      ],
+      "categories": [
+        "CONTROL FLOW"
+      ],
+      "source_mnemonics": [
+        "LEAVE"
+      ]
+    },
+    {
+      "rank": 100,
+      "name": "CVTSS2SD",
+      "occurrences": 1677130,
+      "observed_variant_rows": 177,
+      "observed_opcode_count": 1,
+      "observed_prefix_count": 9,
+      "observed_sizes": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "categories": [
+        "SSE"
+      ],
+      "source_mnemonics": [
+        "CVTSS2SD"
+      ]
+    }
+  ]
+}
