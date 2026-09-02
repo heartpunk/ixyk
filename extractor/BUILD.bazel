@@ -216,6 +216,7 @@ py_test(
     deps = [
         ":acquire_cli",
         ":artifact",
+        ":fuzz_cli",
     ],
 )
 
