@@ -35,7 +35,18 @@ py_library(
     target_compatible_with = _LINUX_X86_64,
     deps = [
         ":artifact",
+        ":z3_boundary",
         requirement("z3-solver"),
+    ],
+)
+
+py_library(
+    name = "unicorn_boundary",
+    srcs = ["unicorn_boundary.py"],
+    target_compatible_with = _LINUX_X86_64,
+    deps = [
+        ":package",
+        requirement("unicorn"),
     ],
 )
 
@@ -111,6 +122,7 @@ py_binary(
 
 py_test(
     name = "extract_add_test",
+    size = "medium",
     srcs = ["extract_add_test.py"],
     data = ["@nix_native_deps//:libstdcxx"],
     env = {
@@ -120,9 +132,15 @@ py_test(
     },
     target_compatible_with = _LINUX_X86_64,
     deps = [
+        ":amd64_state",
         ":artifact",
         ":extractor",
         ":runtime",
+        ":typed_z3",
+        ":unicorn_boundary",
+        ":z3_boundary",
+        requirement("hypothesis"),
+        requirement("z3-solver"),
     ],
 )
 

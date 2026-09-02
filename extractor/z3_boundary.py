@@ -191,6 +191,13 @@ def signed_compare(
     return _expect(_method(left, method)(right), z3.BoolRef, operation)
 
 
+def solver(context: z3.Context) -> z3.Solver:
+    result = _function("Solver")(ctx=context)
+    if not isinstance(result, z3.Solver):
+        raise TypeError(f"z3.Solver returned {type(result).__name__}")
+    return result
+
+
 def solver_model(solver: z3.Solver) -> z3.ModelRef:
     result = _method(solver, "model")()
     if not isinstance(result, z3.ModelRef):
@@ -204,6 +211,11 @@ def model_eval(model: z3.ModelRef, expression: z3.ExprRef) -> z3.ExprRef:
         z3.ExprRef,
         "Model.eval",
     )
+
+
+def require_sat(result: z3.CheckSatResult) -> None:
+    if result.r != z3.Z3_L_TRUE:
+        raise AssertionError(f"expected satisfiable model, got {result}")
 
 
 def structurally_equal(left: z3.ExprRef, right: z3.ExprRef) -> bool:
