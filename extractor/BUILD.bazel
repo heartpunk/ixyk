@@ -145,6 +145,25 @@ py_test(
 )
 
 py_test(
+    name = "scalar_closure_test",
+    size = "small",
+    srcs = ["scalar_closure_test.py"],
+    data = ["@nix_native_deps//:libstdcxx"],
+    env = {
+        "GHOT_LIBSTDCXX_RLOCATION": "$(rlocationpath @nix_native_deps//:libstdcxx)",
+        "PYTHONNOUSERSITE": "1",
+        "PYTHONSAFEPATH": "1",
+    },
+    target_compatible_with = _LINUX_X86_64,
+    deps = [
+        ":amd64_state",
+        ":extractor",
+        ":runtime",
+        requirement("pytest"),
+    ],
+)
+
+py_test(
     name = "artifact_test",
     srcs = ["artifact_test.py"],
     data = ["@nix_native_deps//:libstdcxx"],

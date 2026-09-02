@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable, MutableMapping, MutableSet, Sequence
+from collections.abc import Callable, Mapping, MutableMapping, MutableSet, Sequence
 from typing import Protocol, cast
 
 from extractor import runtime
@@ -74,6 +74,7 @@ class VexBlock(Protocol):
     instructions: int
     jumpkind: str
     statements: Sequence[object]
+    tyenv: object
 
 
 class Block(Protocol):
@@ -94,6 +95,7 @@ class Factory(Protocol):
 class Arch(Protocol):
     name: str
     bits: int
+    registers: Mapping[str, tuple[int, int]]
 
 
 class Project(Protocol):
