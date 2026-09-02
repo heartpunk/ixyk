@@ -155,3 +155,7 @@ def test_boolean_expression_requires_boolean_sort() -> None:
             BOOL,
             (TypedExpr.bool_lit(True), TypedExpr.bv_lit(1, 0)),
         )
+
+
+if __name__ == "__main__":
+    raise SystemExit(pytest.main([__file__]))
