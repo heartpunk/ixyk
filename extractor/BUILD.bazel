@@ -294,6 +294,11 @@ semantic_regression_test(
     instruction_hex = "660fefc1",  # pxor xmm0, xmm1
 )
 
+semantic_regression_test(
+    name = "mul_regression_test",
+    instruction_hex = "48f7e3",  # mul rbx
+)
+
 py_test(
     name = "scalar_closure_test",
     size = "small",
