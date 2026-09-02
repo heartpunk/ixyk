@@ -261,12 +261,12 @@ py_test(
 
 semantic_regression_test(
     name = "call_regression_test",
-    instruction_hex = "e800000000",
+    instruction_hex = "e800000000",  # call rel32 +0
 )
 
 semantic_regression_test(
     name = "ret_regression_test",
-    instruction_hex = "c3",
+    instruction_hex = "c3",  # ret
 )
 
 py_test(
