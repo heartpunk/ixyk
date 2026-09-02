@@ -110,6 +110,23 @@ py_binary(
 )
 
 py_test(
+    name = "extract_add_test",
+    srcs = ["extract_add_test.py"],
+    data = ["@nix_native_deps//:libstdcxx"],
+    env = {
+        "GHOT_LIBSTDCXX_RLOCATION": "$(rlocationpath @nix_native_deps//:libstdcxx)",
+        "PYTHONNOUSERSITE": "1",
+        "PYTHONSAFEPATH": "1",
+    },
+    target_compatible_with = _LINUX_X86_64,
+    deps = [
+        ":artifact",
+        ":extractor",
+        ":runtime",
+    ],
+)
+
+py_test(
     name = "artifact_test",
     srcs = ["artifact_test.py"],
     data = ["@nix_native_deps//:libstdcxx"],

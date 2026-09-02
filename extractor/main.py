@@ -1,7 +1,8 @@
 """Emit one real AMD64 instruction's typed semantic model."""
 
-from extractor.extractor import extract
+# Native runtime must preload declared libstdc++ before Z3 or Angr imports.
 from extractor.runtime import load_shellcode
+from extractor.extractor import extract
 
 
 SOURCE = 0x400000
