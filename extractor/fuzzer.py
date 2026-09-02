@@ -6,7 +6,7 @@ from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from typing import Literal, NotRequired, TypedDict
 
-from hypothesis import given, settings, strategies as st
+from hypothesis import given, seed, settings, strategies as st
 
 from extractor import z3_boundary as _z3
 from extractor.amd64_state import (
@@ -140,6 +140,7 @@ def fuzz(artifact: InstructionModel, instruction: bytes, examples: int) -> FuzzR
     compiled, executions = CompiledModel(artifact), 0
     code_memory = dict(enumerate(instruction, artifact.source))
 
+    @seed(0)
     @settings(
         max_examples=examples,
         derandomize=True,
