@@ -2,8 +2,6 @@
 
 from extractor.runtime import load_shellcode
 
-import pytest
-
 from extractor.amd64_state import Amd64AdapterError
 from extractor.extractor import extract
 
@@ -18,14 +16,24 @@ def test_scalar_instruction_remains_admitted() -> None:
     assert extract(load_shellcode(ADD_RAX_RBX, SOURCE), SOURCE).steps
 
 
-@pytest.mark.parametrize(
-    ("instruction", "operation"),
-    ((MOVQ_XMM0_RAX, "write"), (PMOVMSKB_EAX_XMM0, "read")),
-)
-def test_vector_register_access_fails_closed(
-    instruction: bytes, operation: str
-) -> None:
-    with pytest.raises(
-        Amd64AdapterError, match=rf"{operation} .* escapes scalar state"
+def test_vector_register_access_fails_closed() -> None:
+    for instruction, operation in (
+        (MOVQ_XMM0_RAX, "write"),
+        (PMOVMSKB_EAX_XMM0, "read"),
     ):
-        _ = extract(load_shellcode(instruction, SOURCE), SOURCE)
+        try:
+            _ = extract(load_shellcode(instruction, SOURCE), SOURCE)
+        except Amd64AdapterError as error:
+            assert operation in str(error)
+            assert "escapes scalar state" in str(error)
+        else:
+            raise AssertionError(f"vector {operation} was silently admitted")
+
+
+def main() -> None:
+    test_scalar_instruction_remains_admitted()
+    test_vector_register_access_fails_closed()
+
+
+if __name__ == "__main__":
+    main()

@@ -84,9 +84,9 @@ def _require_scalar_register_closure(raw_project: object, block: object) -> None
         for byte in range(offset, offset + size)
     }
 
-    def require_access(value: object, operation: str) -> None:
+    def require_access(value: object, width_source: object, operation: str) -> None:
         offset = _integer_attribute(value, "offset", f"VEX register {operation}")
-        size = _expression_width(value, tyenv, f"VEX register {operation}")
+        size = _expression_width(width_source, tyenv, f"VEX register {operation}")
         escaped = set(range(offset, offset + size)) - modeled_bytes
         if escaped:
             details = f"{operation} [{offset}, {offset + size}) escapes scalar state"
@@ -97,14 +97,14 @@ def _require_scalar_register_closure(raw_project: object, block: object) -> None
         if kind in {"PutI", "Dirty"}:
             raise Amd64AdapterError(f"VEX {kind} escapes scalar state")
         if kind == "Put":
-            require_access(statement, "write")
+            require_access(statement, getattr(statement, "data", None), "write")
         expressions = cast(Sequence[object], getattr(statement, "expressions", ()))
         for expression in expressions:
             expression_kind = expression.__class__.__name__
             if expression_kind == "GetI":
                 raise Amd64AdapterError("VEX GetI escapes scalar state")
             if expression_kind == "Get":
-                require_access(expression, "read")
+                require_access(expression, expression, "read")
 
 
 def extract(raw_project: object, source: int) -> InstructionModel:
