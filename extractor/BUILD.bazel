@@ -294,9 +294,23 @@ semantic_regression_test(
     instruction_hex = "660fefc1",  # pxor xmm0, xmm1
 )
 
-semantic_regression_test(
+py_test(
     name = "mul_regression_test",
-    instruction_hex = "48f7e3",  # mul rbx
+    size = "small",
+    srcs = ["mul_regression_test.py"],
+    data = ["@nix_native_deps//:libstdcxx"],
+    env = {
+        "GHOT_LIBSTDCXX_RLOCATION": "$(rlocationpath @nix_native_deps//:libstdcxx)",
+        "PYTHONNOUSERSITE": "1",
+        "PYTHONSAFEPATH": "1",
+    },
+    target_compatible_with = _LINUX_X86_64,
+    deps = [
+        ":amd64_state",
+        ":extractor",
+        ":fuzzer",
+        ":runtime",
+    ],
 )
 
 py_test(
