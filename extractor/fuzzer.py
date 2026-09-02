@@ -14,6 +14,7 @@ from extractor.amd64_state import (
     FLAG_NAMES,
     GPR64,
     MEMORY_NAME,
+    YMM256,
 )
 from extractor.artifact import InstructionModel, StepSummary
 from extractor.typed_z3 import expr_to_z3, variables_from_declarations
@@ -45,12 +46,17 @@ class FuzzReport(TypedDict):
 
 _PAGE_SIZE = 0x1000
 _U64 = st.integers(min_value=0, max_value=(1 << 64) - 1)
+_U256 = st.integers(min_value=0, max_value=(1 << 256) - 1)
 _STACK_POINTER = st.integers(
     min_value=_PAGE_SIZE,
     max_value=(1 << 47) - _PAGE_SIZE,
 )
+_FUZZED_REGISTERS = GPR64 + YMM256
 _REGISTERS = st.tuples(
-    *(_STACK_POINTER if name == "rsp" else _U64 for name in GPR64)
+    *(
+        _STACK_POINTER if name == "rsp" else _U256 if name in YMM256 else _U64
+        for name in _FUZZED_REGISTERS
+    )
 )
 class _Mismatch(AssertionError):
     def __init__(self, before: ConcreteState, differences: Sequence[str]) -> None:
@@ -110,7 +116,7 @@ def emulate(instruction: bytes, before: ConcreteState) -> ConcreteState:
         map_missing,
     )
     _ = emulator.hook_add(unicorn_constant("UC_HOOK_MEM_WRITE"), record_write)
-    for register in (*GPR64, "rip"):
+    for register in (*_FUZZED_REGISTERS, "rip"):
         emulator.reg_write(amd64_register(register), before.scalars[register])
     rflags = 1 << 1
     for name in FLAG_NAMES:
@@ -121,7 +127,7 @@ def emulate(instruction: bytes, before: ConcreteState) -> ConcreteState:
     emulator.emu_start(source, source + len(instruction), count=1)
     scalars = {
         register: emulator.reg_read(amd64_register(register))
-        for register in (*GPR64, "rip")
+        for register in (*_FUZZED_REGISTERS, "rip")
     } | {
         f"rflags_{name}": (
             emulator.reg_read(amd64_register("rflags")) >> AMD64_FLAG_BIT[name]
@@ -158,7 +164,7 @@ def fuzz(artifact: InstructionModel, instruction: bytes, examples: int) -> FuzzR
         nonlocal executions
         executions += 1
         scalars = (
-            dict(zip(GPR64, registers, strict=True))
+            dict(zip(_FUZZED_REGISTERS, registers, strict=True))
             | {"rip": artifact.source}
             | {
                 f"rflags_{name}": int(value)

@@ -1,8 +1,7 @@
-"""The scalar extractor must reject undeclared architectural state."""
+"""The extractor admits declared scalar and vector architectural state."""
 
 from extractor.runtime import load_shellcode
 
-from extractor.amd64_state import Amd64AdapterError
 from extractor.extractor import extract
 
 
@@ -16,23 +15,14 @@ def test_scalar_instruction_remains_admitted() -> None:
     assert extract(load_shellcode(ADD_RAX_RBX, SOURCE), SOURCE).steps
 
 
-def test_vector_register_access_fails_closed() -> None:
-    for instruction, operation in (
-        (MOVQ_XMM0_RAX, "write"),
-        (PMOVMSKB_EAX_XMM0, "read"),
-    ):
-        try:
-            _ = extract(load_shellcode(instruction, SOURCE), SOURCE)
-        except Amd64AdapterError as error:
-            assert operation in str(error)
-            assert "escapes scalar state" in str(error)
-        else:
-            raise AssertionError(f"vector {operation} was silently admitted")
+def test_vector_register_access_is_admitted() -> None:
+    for instruction in MOVQ_XMM0_RAX, PMOVMSKB_EAX_XMM0:
+        assert extract(load_shellcode(instruction, SOURCE), SOURCE).steps
 
 
 def main() -> None:
     test_scalar_instruction_remains_admitted()
-    test_vector_register_access_fails_closed()
+    test_vector_register_access_is_admitted()
 
 
 if __name__ == "__main__":

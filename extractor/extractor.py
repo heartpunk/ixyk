@@ -13,6 +13,7 @@ from extractor.amd64_state import (
     GPR64,
     LTS_EXTRACTION_CONTEXT,
     MEMORY_NAME,
+    YMM256,
     Amd64AdapterError,
     MemoryReads,
     architectural_memory_expression,
@@ -49,7 +50,15 @@ class _ExpectedSymbolicExitFilter(logging.Filter):
 logging.getLogger("angr.engines.successors").addFilter(_ExpectedSymbolicExitFilter())
 
 
-_MODELED_VEX_REGISTERS = (*GPR64, "rip", "cc_op", "cc_dep1", "cc_dep2", "cc_ndep")
+_MODELED_VEX_REGISTERS = (
+    *GPR64,
+    *YMM256,
+    "rip",
+    "cc_op",
+    "cc_dep1",
+    "cc_dep2",
+    "cc_ndep",
+)
 
 
 def _integer_attribute(value: object, name: str, field: str) -> int:
@@ -69,8 +78,8 @@ def _expression_width(value: object, tyenv: object, field: str) -> int:
     return bits // 8
 
 
-def _require_scalar_register_closure(raw_project: object, block: object) -> None:
-    """Reject instructions whose semantics escape the declared scalar state."""
+def _require_register_closure(raw_project: object, block: object) -> None:
+    """Reject instructions whose semantics escape the declared state."""
 
     project = expect_project(raw_project)
     vex: object = getattr(block, "vex", None)
@@ -88,7 +97,7 @@ def _require_scalar_register_closure(raw_project: object, block: object) -> None
         size = _expression_width(width_source, tyenv, f"VEX register {operation}")
         escaped = set(range(offset, offset + size)) - modeled_bytes
         if escaped:
-            details = f"{operation} [{offset}, {offset + size}) escapes scalar state"
+            details = f"{operation} [{offset}, {offset + size}) escapes declared state"
             raise Amd64AdapterError(details)
 
     for statement in statements:
@@ -196,7 +205,7 @@ def extract(raw_project: object, source: int) -> InstructionModel:
     block = project.factory.block(source, num_inst=1)
     if block.vex.instructions != 1 or len(block.capstone.insns) != 1:
         raise Amd64AdapterError(f"expected one decoded instruction at {source:#x}")
-    _require_scalar_register_closure(project, block)
+    _require_register_closure(project, block)
 
     exit_indices = tuple(
         index
@@ -333,7 +342,7 @@ def _extract_updates(
     reads: MemoryReads,
 ) -> dict[str, z3.ExprRef]:
     updates: dict[str, z3.ExprRef] = {}
-    for name in GPR64:
+    for name in (*GPR64, *YMM256):
         value = resolve_memory_reads(
             claripy_to_z3(post.regs.__getattr__(name)),
             reads,

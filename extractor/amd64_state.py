@@ -18,7 +18,7 @@ from extractor.angr_boundary import (
     expect_state,
 )
 from extractor import z3_boundary as _z3
-from extractor.artifact import BV64, MEM64_8, Declaration, TermSort
+from extractor.artifact import MEM64_8, Declaration, TermSort
 
 from angr.engines.vex.claripy import ccall as _angr_ccall
 from claripy.backends.backend_z3 import BackendZ3
@@ -47,8 +47,12 @@ GPR64 = (
     "r14",
     "r15",
 )
+YMM256 = tuple(f"ymm{index}" for index in range(16))
 FLAG_NAMES = ("CF", "ZF", "SF", "OF", "PF", "AF")
-REGISTER_NAMES = GPR64 + ("rip",)
+REGISTER_NAMES = GPR64 + YMM256 + ("rip",)
+REGISTER_WIDTH = {name: 64 for name in (*GPR64, "rip")} | {
+    name: 256 for name in YMM256
+}
 MEMORY_NAME = "mem"
 
 LTS_EXTRACTION_CONTEXT = z3.Context()
@@ -121,7 +125,10 @@ def _expect_bv_sort(value: object, field: str) -> z3.BitVecSortRef:
 
 def canonical_declarations() -> tuple[Declaration, ...]:
     return (
-        tuple(Declaration(name, BV64) for name in REGISTER_NAMES)
+        tuple(
+            Declaration(name, TermSort.bv(REGISTER_WIDTH[name]))
+            for name in REGISTER_NAMES
+        )
         + tuple(Declaration(f"rflags_{name}", TermSort.bv(1)) for name in FLAG_NAMES)
         + (Declaration(MEMORY_NAME, MEM64_8),)
     )
@@ -131,7 +138,7 @@ def canonical_declarations() -> tuple[Declaration, ...]:
 def canonical_register(name: str) -> z3.BitVecRef:
     if name not in REGISTER_NAMES:
         raise Amd64AdapterError(f"unknown canonical AMD64 register {name!r}")
-    return _z3.bit_vec(name, 64, LTS_EXTRACTION_CONTEXT)
+    return _z3.bit_vec(name, REGISTER_WIDTH[name], LTS_EXTRACTION_CONTEXT)
 
 
 @lru_cache(maxsize=None)
@@ -437,11 +444,11 @@ def fresh_instruction_state(
     state.options.add(_angr.options.SYMBOLIC_WRITE_ADDRESSES)
     state.options.add(_angr.options.UNDER_CONSTRAINED_SYMEXEC)
     state.options.discard(_angr.options.UNICORN)
-    for name in GPR64:
+    for name in (*GPR64, *YMM256):
         setattr(
             state.regs,
             name,
-            _claripy.BVS(name, 64, explicit_name=True),
+            _claripy.BVS(name, REGISTER_WIDTH[name], explicit_name=True),
         )
     state.regs.rip = _claripy.BVV(source, 64)
 
