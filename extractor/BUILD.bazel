@@ -1,5 +1,6 @@
 load("@ixyk_pypi//:requirements.bzl", "requirement")
 load("@rules_python//python:defs.bzl", "py_binary", "py_library", "py_test")
+load(":semantic_regression_test.bzl", "semantic_regression_test")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -256,6 +257,11 @@ py_test(
         ":runtime",
         ":unicorn_boundary",
     ],
+)
+
+semantic_regression_test(
+    name = "call_regression_test",
+    instruction_hex = "e800000000",
 )
 
 py_test(
