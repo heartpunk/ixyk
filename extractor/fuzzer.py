@@ -51,8 +51,6 @@ _STACK_POINTER = st.integers(
 _REGISTERS = st.tuples(
     *(_STACK_POINTER if name == "rsp" else _U64 for name in GPR64)
 )
-
-
 class _Mismatch(AssertionError):
     def __init__(self, before: ConcreteState, differences: Sequence[str]) -> None:
         super().__init__("; ".join(differences))
@@ -232,7 +230,9 @@ class CompiledModel:
         )
 
     def differences(
-        self, before: ConcreteState, after: ConcreteState
+        self,
+        before: ConcreteState,
+        after: ConcreteState,
     ) -> tuple[str, ...]:
         constraints = self._input_constraints(before)
         enabled = tuple(

@@ -15,14 +15,13 @@ from extractor.amd64_state import (
     MEMORY_NAME,
     Amd64AdapterError,
     MemoryReads,
+    architectural_memory_expression,
     canonical_flag,
     canonical_declarations,
     canonical_register,
     claripy_to_z3,
     fresh_instruction_state,
-    memory_expression,
     memory_reads,
-    memory_writes,
     require_bit_vector,
     require_boolean,
     require_u64,
@@ -107,6 +106,89 @@ def _require_scalar_register_closure(raw_project: object, block: object) -> None
                 require_access(expression, expression, "read")
 
 
+def _vex_tmp(value: object) -> int | None:
+    if value.__class__.__name__ != "RdTmp":
+        return None
+    tmp: object = getattr(value, "tmp", None)
+    return tmp if type(tmp) is int else None
+
+
+def _vex_constant(value: object) -> int | None:
+    if value.__class__.__name__ != "Const":
+        return None
+    constant: object = getattr(value, "con", None)
+    result: object = getattr(constant, "value", None)
+    return result if type(result) is int else None
+
+
+def _vex_binop(value: object, operation: str) -> tuple[object, object] | None:
+    arguments = cast(Sequence[object], getattr(value, "args", ()))
+    if (
+        value.__class__.__name__ != "Binop"
+        or getattr(value, "op", None) != operation
+        or len(arguments) != 2
+    ):
+        return None
+    return arguments[0], arguments[1]
+
+
+def _vex_stack_scratch_writes(raw_project: object, block: object) -> frozenset[int]:
+    """Recognize VEX's documented 288-byte client-stack scratch protocol."""
+
+    project = expect_project(raw_project)
+    vex: object = getattr(block, "vex", None)
+    statements = cast(Sequence[object], getattr(vex, "statements", ()))
+    definitions = {
+        tmp: (index, getattr(statement, "data", None))
+        for index, statement in enumerate(statements)
+        if statement.__class__.__name__ == "WrTmp"
+        and type(tmp := getattr(statement, "tmp", None)) is int
+    }
+    rsp_offset = project.arch.registers["rsp"][0]
+
+    def puts_rsp(index: int, tmp: int) -> bool:
+        return any(
+            statement.__class__.__name__ == "Put"
+            and getattr(statement, "offset", None) == rsp_offset
+            and _vex_tmp(getattr(statement, "data", None)) == tmp
+            for statement in statements[index:]
+        )
+
+    scratch: set[int] = set()
+    for store_index, statement in enumerate(statements):
+        if statement.__class__.__name__ != "Store":
+            continue
+        scratch_tmp = _vex_tmp(getattr(statement, "addr", None))
+        if scratch_tmp is None or scratch_tmp not in definitions:
+            continue
+        subtract_index, subtract = definitions[scratch_tmp]
+        operands = _vex_binop(subtract, "Iop_Sub64")
+        if operands is None or _vex_constant(operands[1]) != 288:
+            continue
+        rsp_tmp = _vex_tmp(operands[0])
+        if rsp_tmp is None or rsp_tmp not in definitions:
+            continue
+        rsp_index, rsp_get = definitions[rsp_tmp]
+        if (
+            rsp_get.__class__.__name__ != "Get"
+            or getattr(rsp_get, "offset", None) != rsp_offset
+            or not rsp_index < subtract_index < store_index
+            or not puts_rsp(subtract_index + 1, scratch_tmp)
+        ):
+            continue
+        restored = any(
+            restore_index > store_index
+            and (args := _vex_binop(value, "Iop_Add64")) is not None
+            and _vex_tmp(args[0]) == scratch_tmp
+            and _vex_constant(args[1]) == 288
+            and puts_rsp(restore_index + 1, restore_tmp)
+            for restore_tmp, (restore_index, value) in definitions.items()
+        )
+        if restored:
+            scratch.add(store_index)
+    return frozenset(scratch)
+
+
 def extract(raw_project: object, source: int) -> InstructionModel:
     """Symbolically execute one exact instruction and extract every outcome."""
 
@@ -121,7 +203,9 @@ def extract(raw_project: object, source: int) -> InstructionModel:
         for index, statement in enumerate(block.vex.statements)
         if statement.__class__.__name__ == "Exit"
     )
-    pre = fresh_instruction_state(project, source)
+    pre = fresh_instruction_state(
+        project, source, _vex_stack_scratch_writes(project, block)
+    )
     posts = tuple(project.factory.successors(pre, num_inst=1).all_successors)
     if not posts:
         raise Amd64AdapterError(f"instruction at {source:#x} has no outcomes")
@@ -191,8 +275,9 @@ def _extract_step(
 ) -> StepSummary:
     reads = memory_reads(post)
     updates = _extract_updates(post, source, reads)
-    if memory_writes(post):
-        updates[MEMORY_NAME] = resolve_memory_reads(memory_expression(post), reads)
+    memory = architectural_memory_expression(post)
+    if memory is not None:
+        updates[MEMORY_NAME] = resolve_memory_reads(memory, reads)
     target, target_value = _extract_target(post, reads)
     updates["rip"] = target
     return step_summary_from_z3(

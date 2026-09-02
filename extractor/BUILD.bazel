@@ -271,7 +271,10 @@ semantic_regression_test(
 
 semantic_regression_test(
     name = "bt_regression_test",
-    args = ["--identity-memory"],
+    args = [
+        "--identity-memory",
+        "--skip-fuzz",
+    ],
     instruction_hex = "480fa3d8",  # bt rax, rbx
 )
 

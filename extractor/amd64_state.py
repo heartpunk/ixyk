@@ -54,6 +54,7 @@ MEMORY_NAME = "mem"
 LTS_EXTRACTION_CONTEXT = z3.Context()
 _BZ3 = BackendZ3()
 _U64_MAX = (1 << 64) - 1
+_NO_STATEMENTS: frozenset[int] = frozenset()
 
 
 def _ccall_constant(table: str, name: str) -> int:
@@ -79,6 +80,7 @@ class MemoryWrite:
     address: z3.BitVecRef
     value: z3.BitVecRef
     size: int
+    statement_index: int
 
 
 def require_u64(value: object, field: str) -> int:
@@ -407,12 +409,20 @@ def _memory_write_hook(raw_state: object) -> None:
     current = memory_expression(state)
     updated = store_le(current, address_z3, value_z3, size)
     writes = list(memory_writes(state))
-    writes.append(MemoryWrite(address_z3, value_z3, size))
+    scratch: object = state.scratch
+    statement_index = _integer(
+        getattr(scratch, "stmt_idx", None), "VEX memory-write statement index"
+    )
+    writes.append(MemoryWrite(address_z3, value_z3, size, statement_index))
     state.globals["_ghot_memory_expr"] = updated
     state.globals["_ghot_memory_writes"] = tuple(writes)
 
 
-def fresh_instruction_state(raw_project: object, source: int) -> State:
+def fresh_instruction_state(
+    raw_project: object,
+    source: int,
+    vex_scratch_writes: frozenset[int] | None = None,
+) -> State:
     """Create the canonical symbolic pre-state for one real instruction."""
 
     project = expect_project(raw_project)
@@ -444,6 +454,7 @@ def fresh_instruction_state(raw_project: object, source: int) -> State:
     state.globals["_ghot_memory_expr"] = canonical_memory()
     state.globals["_ghot_memory_reads"] = {}
     state.globals["_ghot_memory_writes"] = ()
+    state.globals["_ghot_vex_scratch_writes"] = vex_scratch_writes or _NO_STATEMENTS
     state.inspect.b(
         "address_concretization",
         when=_angr.BP_BEFORE,
@@ -475,6 +486,20 @@ def memory_reads(state: State) -> MemoryReads:
 
 def memory_writes(state: State) -> tuple[MemoryWrite, ...]:
     return cast(tuple[MemoryWrite, ...], state.globals.get("_ghot_memory_writes", ()))
+
+
+def architectural_memory_expression(state: State) -> z3.ArrayRef | None:
+    """Exclude only stores tagged as documented VEX implementation scratch."""
+
+    scratch = cast(
+        frozenset[int], state.globals.get("_ghot_vex_scratch_writes", _NO_STATEMENTS)
+    )
+    result, retained = canonical_memory(), False
+    for write in memory_writes(state):
+        if write.statement_index not in scratch:
+            result = store_le(result, write.address, write.value, write.size)
+            retained = True
+    return result if retained else None
 
 
 def _fixed_byte_reads(state: State) -> tuple[tuple[z3.BitVecRef, int], ...]:
