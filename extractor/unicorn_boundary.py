@@ -14,6 +14,15 @@ class Emulator(Protocol):
     def mem_read(self, address: int, size: int) -> bytearray: ...
     def reg_write(self, register: int, value: int) -> None: ...
     def reg_read(self, register: int) -> int: ...
+    def hook_add(
+        self,
+        hook_type: int,
+        callback: Callable[..., object],
+        user_data: object | None = None,
+        begin: int = 1,
+        end: int = 0,
+        *arguments: int,
+    ) -> object: ...
     def emu_start(
         self, begin: int, until: int, timeout: int = 0, count: int = 0
     ) -> None: ...
@@ -43,3 +52,7 @@ def amd64_emulator() -> Emulator:
 
 def amd64_register(name: str) -> int:
     return _constant(_x86, f"UC_X86_REG_{name.upper()}")
+
+
+def unicorn_constant(name: str) -> int:
+    return _constant(_unicorn, name)

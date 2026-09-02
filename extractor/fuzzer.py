@@ -6,9 +6,20 @@ from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 
 from extractor import z3_boundary as _z3
-from extractor.amd64_state import MEMORY_NAME
+from extractor.amd64_state import (
+    AMD64_FLAG_BIT,
+    FLAG_NAMES,
+    GPR64,
+    MEMORY_NAME,
+)
 from extractor.artifact import InstructionModel, StepSummary
 from extractor.typed_z3 import expr_to_z3, variables_from_declarations
+from extractor.unicorn_boundary import (
+    Emulator,
+    amd64_emulator,
+    amd64_register,
+    unicorn_constant,
+)
 import z3
 
 
@@ -16,6 +27,81 @@ import z3
 class ConcreteState:
     scalars: Mapping[str, int]
     memory: Mapping[int, int]
+
+
+_PAGE_SIZE = 0x1000
+
+
+def emulate(instruction: bytes, before: ConcreteState) -> ConcreteState:
+    """Execute exactly one instruction over zero-default sparse memory."""
+
+    emulator, memory, mapped = amd64_emulator(), dict(before.memory), set[int]()
+
+    def map_range(address: int, size: int) -> None:
+        first = address & -_PAGE_SIZE
+        last = (address + size - 1) & -_PAGE_SIZE
+        for page in range(first, last + _PAGE_SIZE, _PAGE_SIZE):
+            if page not in mapped:
+                emulator.mem_map(page, _PAGE_SIZE)
+                mapped.add(page)
+
+    for address in memory:
+        map_range(address, 1)
+    for address, value in memory.items():
+        emulator.mem_write(address, bytes((value,)))
+
+    def map_missing(
+        _emulator: Emulator,
+        _access: int,
+        address: int,
+        size: int,
+        _value: int,
+        _user_data: object,
+    ) -> bool:
+        map_range(address, size)
+        return True
+
+    def record_write(
+        _emulator: Emulator,
+        _access: int,
+        address: int,
+        size: int,
+        value: int,
+        _user_data: object,
+    ) -> None:
+        for offset in range(size):
+            byte = value >> (8 * offset) & 0xFF
+            if byte:
+                memory[address + offset] = byte
+            else:
+                _ = memory.pop(address + offset, None)
+
+    _ = emulator.hook_add(
+        unicorn_constant("UC_HOOK_MEM_READ_UNMAPPED")
+        | unicorn_constant("UC_HOOK_MEM_WRITE_UNMAPPED"),
+        map_missing,
+    )
+    _ = emulator.hook_add(unicorn_constant("UC_HOOK_MEM_WRITE"), record_write)
+    for register in (*GPR64, "rip"):
+        emulator.reg_write(amd64_register(register), before.scalars[register])
+    rflags = 1 << 1
+    for name in FLAG_NAMES:
+        rflags |= before.scalars[f"rflags_{name}"] << AMD64_FLAG_BIT[name]
+    emulator.reg_write(amd64_register("rflags"), rflags)
+
+    source = before.scalars["rip"]
+    emulator.emu_start(source, source + len(instruction), count=1)
+    scalars = {
+        register: emulator.reg_read(amd64_register(register))
+        for register in (*GPR64, "rip")
+    } | {
+        f"rflags_{name}": (
+            emulator.reg_read(amd64_register("rflags")) >> AMD64_FLAG_BIT[name]
+        )
+        & 1
+        for name in FLAG_NAMES
+    }
+    return ConcreteState(scalars, memory)
 
 
 @dataclass(frozen=True)

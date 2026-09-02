@@ -118,6 +118,7 @@ py_library(
         ":amd64_state",
         ":artifact",
         ":typed_z3",
+        ":unicorn_boundary",
         ":z3_boundary",
         requirement("z3-solver"),
     ],
