@@ -176,6 +176,49 @@ py_binary(
     ],
 )
 
+py_library(
+    name = "acquire_cli",
+    srcs = ["acquire_cli.py"],
+    target_compatible_with = _LINUX_X86_64,
+    deps = [
+        ":amd64_state",
+        ":extract_cli",
+        ":extractor",
+        ":runtime",
+    ],
+)
+
+py_binary(
+    name = "acquire_model",
+    srcs = ["acquire_main.py"],
+    data = ["@nix_native_deps//:libstdcxx"],
+    env = {
+        "GHOT_LIBSTDCXX_RLOCATION": "$(rlocationpath @nix_native_deps//:libstdcxx)",
+        "PYTHONNOUSERSITE": "1",
+        "PYTHONSAFEPATH": "1",
+    },
+    main = "acquire_main.py",
+    target_compatible_with = _LINUX_X86_64,
+    deps = [":acquire_cli"],
+)
+
+py_test(
+    name = "acquire_cli_test",
+    size = "small",
+    srcs = ["acquire_cli_test.py"],
+    data = ["@nix_native_deps//:libstdcxx"],
+    env = {
+        "GHOT_LIBSTDCXX_RLOCATION": "$(rlocationpath @nix_native_deps//:libstdcxx)",
+        "PYTHONNOUSERSITE": "1",
+        "PYTHONSAFEPATH": "1",
+    },
+    target_compatible_with = _LINUX_X86_64,
+    deps = [
+        ":acquire_cli",
+        ":artifact",
+    ],
+)
+
 py_test(
     name = "extract_cli_test",
     size = "small",

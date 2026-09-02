@@ -20,7 +20,7 @@ class _Options(Protocol):
     source: int
 
 
-def _source(value: str) -> int:
+def source_address(value: str) -> int:
     source = int(value, 0)
     if not 0 <= source < 1 << 64:
         raise argparse.ArgumentTypeError("source must be an unsigned 64-bit address")
@@ -31,7 +31,7 @@ def main(arguments: Sequence[str] | None = None) -> None:
     parser = argparse.ArgumentParser()
     _ = parser.add_argument("--instruction-hex", required=True)
     _ = parser.add_argument("--output", required=True, type=Path)
-    _ = parser.add_argument("--source", default=DEFAULT_SOURCE, type=_source)
+    _ = parser.add_argument("--source", default=DEFAULT_SOURCE, type=source_address)
     options = cast(_Options, cast(object, parser.parse_args(arguments)))
     try:
         instruction = bytes.fromhex(options.instruction_hex)
