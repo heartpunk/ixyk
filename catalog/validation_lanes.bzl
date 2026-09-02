@@ -1,5 +1,21 @@
 """Independent acquire-then-fuzz actions for instruction probes."""
 
+def _fuzz_lane(name, model, acquisition, instruction_hex, examples, output):
+    native.genrule(
+        name = name,
+        srcs = [model, acquisition],
+        outs = [output],
+        cmd = " ".join([
+            "$(location //extractor:fuzz_model)",
+            "--acquisition $(location %s)" % acquisition,
+            "--model $(location %s)" % model,
+            "--instruction-hex %s" % instruction_hex,
+            "--examples %d" % examples,
+            "--output $@",
+        ]),
+        tools = ["//extractor:fuzz_model"],
+    )
+
 def validation_lanes(name, probes, examples):
     fuzz_results = []
     all_artifacts = []
@@ -20,19 +36,36 @@ def validation_lanes(name, probes, examples):
             ]),
             tools = ["//extractor:acquire_model"],
         )
-        native.genrule(
+        _fuzz_lane(
             name = "%s_fuzz" % stem,
-            srcs = [model, acquisition],
-            outs = [fuzz_result],
-            cmd = " ".join([
-                "$(location //extractor:fuzz_model)",
-                "--acquisition $(location %s)" % acquisition,
-                "--model $(location %s)" % model,
-                "--instruction-hex %s" % instruction_hex,
-                "--examples %d" % examples,
-                "--output $@",
-            ]),
-            tools = ["//extractor:fuzz_model"],
+            model = model,
+            acquisition = acquisition,
+            instruction_hex = instruction_hex,
+            examples = examples,
+            output = fuzz_result,
+        )
+        fuzz_results.append(fuzz_result)
+        all_artifacts.extend([model, acquisition, fuzz_result])
+
+    native.filegroup(name = name, srcs = fuzz_results)
+    native.filegroup(name = name + "_artifacts", srcs = all_artifacts)
+
+def validation_tier(name, probes, examples):
+    fuzz_results = []
+    all_artifacts = []
+    for rank, family, _assembly, instruction_hex in probes:
+        stem = "%d_%s" % (rank, family.lower())
+        model = "artifacts/%s.model.json" % stem
+        acquisition = "artifacts/%s.acquisition.json" % stem
+        fuzz_result = "results/%d/%s.fuzz.json" % (examples, stem)
+
+        _fuzz_lane(
+            name = "%s_%s_fuzz" % (name, stem),
+            model = model,
+            acquisition = acquisition,
+            instruction_hex = instruction_hex,
+            examples = examples,
+            output = fuzz_result,
         )
         fuzz_results.append(fuzz_result)
         all_artifacts.extend([model, acquisition, fuzz_result])

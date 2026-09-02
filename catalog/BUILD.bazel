@@ -1,4 +1,4 @@
-load(":validation_lanes.bzl", "validation_lanes")
+load(":validation_lanes.bzl", "validation_lanes", "validation_tier")
 load(":x86_64_probes.bzl", "X86_64_PROBES")
 
 package(default_visibility = ["//visibility:public"])
@@ -11,5 +11,11 @@ exports_files([
 validation_lanes(
     name = "x86_64_top_100_fuzz",
     examples = 100,
+    probes = X86_64_PROBES,
+)
+
+validation_tier(
+    name = "x86_64_top_100_fuzz_10000",
+    examples = 10000,
     probes = X86_64_PROBES,
 )
