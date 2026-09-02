@@ -2,7 +2,6 @@
 
 _ROOT_ENV = "IXYK_NIX_LIBSTDCXX_ROOT"
 
-
 def _repository_impl(repository_ctx):
     root = repository_ctx.os.environ.get(_ROOT_ENV)
     if not root or not root.startswith("/nix/store/"):
@@ -13,7 +12,7 @@ def _repository_impl(repository_ctx):
     repository_ctx.symlink(library, "lib/libstdc++.so.6")
     repository_ctx.file(
         "BUILD.bazel",
-        """+package(default_visibility = ["//visibility:public"])
+        """package(default_visibility = ["//visibility:public"])
 
 filegroup(
     name = "libstdcxx",
@@ -22,7 +21,6 @@ filegroup(
 """,
     )
 
-
 _repository = repository_rule(
     implementation = _repository_impl,
     configure = True,
@@ -30,10 +28,8 @@ _repository = repository_rule(
     local = True,
 )
 
-
 def _extension_impl(_module_ctx):
     _repository(name = "nix_native_deps")
-
 
 nix_native_deps = module_extension(
     implementation = _extension_impl,
