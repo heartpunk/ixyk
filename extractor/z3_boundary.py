@@ -31,6 +31,10 @@ def bit_vec(name: str, width: int, ctx: z3.Context) -> z3.BitVecRef:
     return _expect(_function("BitVec")(name, width, ctx=ctx), z3.BitVecRef, "BitVec")
 
 
+def integer(name: str, ctx: z3.Context) -> z3.ArithRef:
+    return _expect(_function("Int")(name, ctx=ctx), z3.ArithRef, "Int")
+
+
 def bit_vec_sort(width: int, ctx: z3.Context) -> z3.BitVecSortRef:
     return _expect(
         _function("BitVecSort")(width, ctx=ctx),

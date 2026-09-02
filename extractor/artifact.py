@@ -575,7 +575,7 @@ class InstructionModel:
     schema: ClassVar[str] = "ixyk.qf_abv.instruction.v1"
 
     def __post_init__(self) -> None:
-        if not 0 <= self.source < 1 << 64:
+        if type(self.source) is not int or not 0 <= self.source < 1 << 64:
             raise ArtifactError("instruction source must be a BV64 address")
         names = tuple(declaration.name for declaration in self.declarations)
         if not names or len(names) != len(set(names)):
