@@ -21,6 +21,7 @@ from extractor.unicorn_boundary import (
     Emulator,
     amd64_emulator,
     amd64_register,
+    is_cpu_exception,
     unicorn_constant,
 )
 import z3
@@ -167,9 +168,12 @@ def fuzz(artifact: InstructionModel, instruction: bytes, examples: int) -> FuzzR
         try:
             after = emulate(instruction, before)
         except Exception as error:
-            details = f"emulator {type(error).__name__}: {error}"
-            raise _Mismatch(before, (details,)) from error
-        differences = compiled.differences(before, after)
+            if not is_cpu_exception(error):
+                details = f"emulator {type(error).__name__}: {error}"
+                raise _Mismatch(before, (details,)) from error
+            differences = compiled.differences(before, "error")
+        else:
+            differences = compiled.differences(before, after)
         if differences:
             raise _Mismatch(before, differences)
 
@@ -232,7 +236,7 @@ class CompiledModel:
     def differences(
         self,
         before: ConcreteState,
-        after: ConcreteState,
+        after: ConcreteState | Literal["error"],
     ) -> tuple[str, ...]:
         constraints = self._input_constraints(before)
         enabled = tuple(
@@ -244,6 +248,12 @@ class CompiledModel:
             return (f"enabled edges: {len(enabled)}; expected exactly one",)
 
         step = enabled[0]
+        if after == "error":
+            return () if step.source.target.kind == "error" else (
+                f"target: model={step.source.target.kind}, emulator=error",
+            )
+        if step.source.target.kind == "error":
+            return ("target: model=error, emulator=continued",)
         solver = self._solver((*constraints, step.guard))
         _z3.require_sat(_z3.solver_check(solver))
         solution = _z3.solver_model(solver)

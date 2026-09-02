@@ -51,6 +51,7 @@ class HistoryAction(Protocol):
 class History(Protocol):
     recent_actions: Sequence[HistoryAction]
     jump_guard: Ast | None
+    jumpkind: str
 
 
 class Scratch(Protocol):

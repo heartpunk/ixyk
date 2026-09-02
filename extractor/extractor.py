@@ -284,9 +284,20 @@ def _extract_step(
         canonical_declarations(),
         guard=guard,
         updates=updates,
-        target=target if target_value is None else target_value,
+        target=_terminal_target(post) or (
+            target if target_value is None else target_value
+        ),
         mirrored_pc=target,
     )
+
+
+def _terminal_target(post: State) -> str | None:
+    jumpkind = post.history.jumpkind
+    if jumpkind in {"Ijk_Boring", "Ijk_Call", "Ijk_Ret"}:
+        return None
+    if jumpkind.startswith("Ijk_Sig"):
+        return "error"
+    raise Amd64AdapterError(f"unsupported VEX jump kind {jumpkind!r}")
 
 
 def _extract_flag_updates(

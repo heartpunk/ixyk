@@ -41,6 +41,10 @@ _factory_value: object = getattr(_unicorn, "Uc", None)
 if not callable(_factory_value):
     raise TypeError("unicorn.Uc is unavailable")
 _factory = cast(Callable[[int, int], Emulator], _factory_value)
+_error_value: object = getattr(_unicorn, "UcError", None)
+if not isinstance(_error_value, type) or not issubclass(_error_value, BaseException):
+    raise TypeError("unicorn.UcError is unavailable")
+_error = _error_value
 
 
 def amd64_emulator() -> Emulator:
@@ -56,3 +60,10 @@ def amd64_register(name: str) -> int:
 
 def unicorn_constant(name: str) -> int:
     return _constant(_unicorn, name)
+
+
+def is_cpu_exception(error: BaseException) -> bool:
+    return (
+        isinstance(error, _error)
+        and getattr(error, "errno", None) == unicorn_constant("UC_ERR_EXCEPTION")
+    )
