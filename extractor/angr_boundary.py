@@ -12,6 +12,10 @@ class Ast(Protocol):
     op: str
     args: tuple[object, ...]
 
+    def __getitem__(self, key: int | slice) -> Ast: ...
+    def __mul__(self, other: Ast) -> Ast: ...
+    def zero_extend(self, bits: int) -> Ast: ...
+
 
 class Registers(Protocol):
     rip: Ast
@@ -123,6 +127,7 @@ class Claripy(Protocol):
     def BVV(self, value: int, size: int) -> Ast: ...
     def Concat(self, *pieces: Ast) -> Ast: ...
     def Extract(self, high: int, low: int, value: Ast) -> Ast: ...
+    def If(self, condition: object, then: Ast, otherwise: Ast) -> Ast: ...
 
 
 angr = cast(Angr, cast(object, runtime.angr))
@@ -135,6 +140,12 @@ def expect_ast(value: object, field: str) -> Ast:
     if not isinstance(base, type) or not isinstance(value, base):
         raise TypeError(f"{field} is not a Claripy AST")
     return cast(Ast, value)
+
+
+def ast_not_equal(left: Ast, right: object) -> Ast:
+    """Apply Claripy's symbolic inequality across its untyped operator boundary."""
+
+    return expect_ast(cast(object, left) != right, "Claripy inequality")
 
 
 def expect_project(value: object) -> Project:

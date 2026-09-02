@@ -5,13 +5,14 @@ from __future__ import annotations
 from collections.abc import Mapping
 from dataclasses import dataclass
 from functools import lru_cache
-from typing import cast
+from typing import Protocol, cast
 
 # Importing the boundary preloads libstdc++ before the Angr import below.
 from extractor.angr_boundary import (
     Ast,
     State,
     angr as _angr,
+    ast_not_equal,
     claripy as _claripy,
     expect_ast,
     expect_project,
@@ -77,6 +78,47 @@ AMD64_FLAG_BIT: dict[str, int] = {
     "SF": _ccall_constant("CondBitOffsets", "G_CC_SHIFT_S"),
     "OF": _ccall_constant("CondBitOffsets", "G_CC_SHIFT_O"),
 }
+
+
+class _AngrFlagAction(Protocol):
+    def __call__(
+        self,
+        state: object,
+        nbits: int,
+        left: Ast,
+        right: Ast,
+        dependency: Ast,
+        *,
+        platform: str | None = None,
+    ) -> tuple[Ast, Ast, Ast, Ast, Ast, Ast]: ...
+
+
+_ANGR_UMUL = cast(_AngrFlagAction, _angr_ccall.pc_actions_UMUL)
+
+
+def _correct_angr_umul(
+    state: object,
+    nbits: int,
+    left: Ast,
+    right: Ast,
+    dependency: Ast,
+    *,
+    platform: str | None = None,
+) -> tuple[Ast, Ast, Ast, Ast, Ast, Ast]:
+    """Recover the high half that Angr drops before computing UMUL CF/OF."""
+
+    _, parity, auxiliary, zero, sign, _ = _ANGR_UMUL(
+        state, nbits, left, right, dependency, platform=platform
+    )
+    product = left.zero_extend(nbits) * right.zero_extend(nbits)
+    high = product[2 * nbits - 1 : nbits]
+    carry = _claripy.If(
+        ast_not_equal(high, 0), _claripy.BVV(1, 1), _claripy.BVV(0, 1)
+    )
+    return carry, parity, auxiliary, zero, sign, carry
+
+
+_angr_ccall.pc_actions_UMUL = _correct_angr_umul
 
 
 @dataclass(frozen=True, eq=False)
