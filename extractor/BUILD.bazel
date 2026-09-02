@@ -103,8 +103,18 @@ py_library(
     ],
 )
 
+py_library(
+    name = "extract_cli",
+    srcs = ["extract_cli.py"],
+    target_compatible_with = _LINUX_X86_64,
+    deps = [
+        ":extractor",
+        ":runtime",
+    ],
+)
+
 py_binary(
-    name = "extract_add",
+    name = "extract_model",
     srcs = ["main.py"],
     data = ["@nix_native_deps//:libstdcxx"],
     env = {
@@ -115,8 +125,24 @@ py_binary(
     main = "main.py",
     target_compatible_with = _LINUX_X86_64,
     deps = [
-        ":extractor",
-        ":runtime",
+        ":extract_cli",
+    ],
+)
+
+py_test(
+    name = "extract_cli_test",
+    size = "small",
+    srcs = ["extract_cli_test.py"],
+    data = ["@nix_native_deps//:libstdcxx"],
+    env = {
+        "GHOT_LIBSTDCXX_RLOCATION": "$(rlocationpath @nix_native_deps//:libstdcxx)",
+        "PYTHONNOUSERSITE": "1",
+        "PYTHONSAFEPATH": "1",
+    },
+    target_compatible_with = _LINUX_X86_64,
+    deps = [
+        ":artifact",
+        ":extract_cli",
     ],
 )
 
