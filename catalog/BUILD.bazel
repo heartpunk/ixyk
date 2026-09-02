@@ -1,0 +1,15 @@
+load(":validation_lanes.bzl", "validation_lanes")
+load(":x86_64_probes.bzl", "X86_64_PROBES")
+
+package(default_visibility = ["//visibility:public"])
+
+exports_files([
+    "x86_64_probes.json",
+    "x86_64_top_100.json",
+])
+
+validation_lanes(
+    name = "x86_64_top_100_fuzz",
+    examples = 100,
+    probes = X86_64_PROBES,
+)
