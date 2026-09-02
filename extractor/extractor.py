@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping
-from dataclasses import dataclass
 import logging
 from typing import ClassVar, override
 
@@ -16,8 +14,8 @@ from extractor.amd64_state import (
     MEMORY_NAME,
     Amd64AdapterError,
     MemoryReads,
-    MemoryWrite,
     canonical_flag,
+    canonical_declarations,
     canonical_register,
     claripy_to_z3,
     fresh_instruction_state,
@@ -28,9 +26,10 @@ from extractor.amd64_state import (
     require_boolean,
     require_u64,
     resolve_memory_reads,
-    source_rip_guard,
 )
 from extractor.angr_boundary import State, claripy as _claripy, expect_project
+from extractor.artifact import InstructionModel, StepSummary
+from extractor.typed_z3 import step_summary_from_z3
 
 import z3
 
@@ -50,32 +49,7 @@ class _ExpectedSymbolicExitFilter(logging.Filter):
 logging.getLogger("angr.engines.successors").addFilter(_ExpectedSymbolicExitFilter())
 
 
-@dataclass(frozen=True)
-class StaticOutcomeIdentity:
-    outcome_id: int
-    kind: str
-    vex_exit_statement_index: int | None
-
-
-@dataclass(frozen=True)
-class InstructionOutcome:
-    identity: StaticOutcomeIdentity
-    guard: z3.BoolRef
-    updates: Mapping[str, z3.ExprRef]
-    target: z3.BitVecRef
-    target_value: int | None
-    jumpkind: str
-    writes: tuple[MemoryWrite, ...]
-
-
-@dataclass(frozen=True)
-class InstructionOutcomeFamily:
-    source: int
-    source_guard: z3.BoolRef
-    outcomes: tuple[InstructionOutcome, ...]
-
-
-def extract(raw_project: object, source: int) -> InstructionOutcomeFamily:
+def extract(raw_project: object, source: int) -> InstructionModel:
     """Symbolically execute one exact instruction and extract every outcome."""
 
     project, source = expect_project(raw_project), require_u64(source, "source")
@@ -108,38 +82,34 @@ def extract(raw_project: object, source: int) -> InstructionOutcomeFamily:
         "instruction default guard",
     )
 
-    outcomes = [
-        _extract_outcome(
-            post,
-            identity,
-            default_guard if guard is None else guard,
-            source,
-            block.vex.jumpkind,
-        )
-        for post, identity, guard in classified
-    ]
-    outcomes.sort(key=lambda outcome: outcome.identity.outcome_id)
-    if tuple(outcome.identity.outcome_id for outcome in outcomes) != tuple(
-        range(len(exit_indices) + 1)
-    ):
+    outcome_ids = tuple(outcome_id for _, outcome_id, _ in classified)
+    if tuple(sorted(outcome_ids)) != tuple(range(len(classified))):
         raise Amd64AdapterError(
             f"instruction at {source:#x} outcome identities are incomplete"
         )
-    return InstructionOutcomeFamily(
-        source,
-        source_rip_guard(source),
-        tuple(outcomes),
+    indexed_steps = (
+        (
+            outcome_id,
+            _extract_step(
+                post,
+                default_guard if guard is None else guard,
+                source,
+            ),
+        )
+        for post, outcome_id, guard in classified
     )
+    ordered = tuple(step for _, step in sorted(indexed_steps, key=lambda item: item[0]))
+    return InstructionModel(source, canonical_declarations(), ordered)
 
 
 def _classify(
     post: State,
     source: int,
     exit_indices: tuple[int, ...],
-) -> tuple[StaticOutcomeIdentity, z3.BoolRef | None]:
+) -> tuple[int, z3.BoolRef | None]:
     statement_index = int(post.scratch.exit_stmt_idx)
     if statement_index < 0:
-        return StaticOutcomeIdentity(len(exit_indices), "default", None), None
+        return len(exit_indices), None
     if statement_index not in exit_indices:
         details = f"unknown VEX exit statement {statement_index}"
         raise Amd64AdapterError(f"instruction at {source:#x} has {details}")
@@ -147,11 +117,7 @@ def _classify(
     if raw_guard is None:
         raise Amd64AdapterError(f"instruction at {source:#x} exit has no guard")
     return (
-        StaticOutcomeIdentity(
-            exit_indices.index(statement_index),
-            "exit",
-            statement_index,
-        ),
+        exit_indices.index(statement_index),
         require_boolean(
             resolve_memory_reads(claripy_to_z3(raw_guard), memory_reads(post)),
             "instruction exit guard",
@@ -159,28 +125,23 @@ def _classify(
     )
 
 
-def _extract_outcome(
+def _extract_step(
     post: State,
-    identity: StaticOutcomeIdentity,
     guard: z3.BoolRef,
     source: int,
-    jumpkind: str,
-) -> InstructionOutcome:
+) -> StepSummary:
     reads = memory_reads(post)
     updates = _extract_updates(post, source, reads)
-    writes = _extract_writes(post, reads)
-    if writes:
+    if memory_writes(post):
         updates[MEMORY_NAME] = resolve_memory_reads(memory_expression(post), reads)
     target, target_value = _extract_target(post, reads)
     updates["rip"] = target
-    return InstructionOutcome(
-        identity,
-        guard,
-        updates,
-        target,
-        target_value,
-        jumpkind,
-        writes,
+    return step_summary_from_z3(
+        canonical_declarations(),
+        guard=guard,
+        updates=updates,
+        target=target if target_value is None else target_value,
+        mirrored_pc=target,
     )
 
 
@@ -226,26 +187,6 @@ def _extract_updates(
             updates[name] = value
     updates.update(_extract_flag_updates(post, source, reads))
     return updates
-
-
-def _extract_writes(
-    post: State,
-    reads: MemoryReads,
-) -> tuple[MemoryWrite, ...]:
-    return tuple(
-        MemoryWrite(
-            require_bit_vector(
-                resolve_memory_reads(write.address, reads),
-                "resolved memory write address",
-            ),
-            require_bit_vector(
-                resolve_memory_reads(write.value, reads),
-                "resolved memory write value",
-            ),
-            write.size,
-        )
-        for write in memory_writes(post)
-    )
 
 
 def _extract_target(

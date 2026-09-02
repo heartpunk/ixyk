@@ -18,6 +18,7 @@ from extractor.angr_boundary import (
     expect_state,
 )
 from extractor import z3_boundary as _z3
+from extractor.artifact import BV64, MEM64_8, Declaration, TermSort
 
 from angr.engines.vex.claripy import ccall as _angr_ccall
 from claripy.backends.backend_z3 import BackendZ3
@@ -73,14 +74,6 @@ AMD64_FLAG_BIT: dict[str, int] = {
 }
 
 
-@dataclass(frozen=True)
-class CanonicalDeclaration:
-    name: str
-    sort: str
-    width: int
-    index_width: int | None = None
-
-
 @dataclass(frozen=True, eq=False)
 class MemoryWrite:
     address: z3.BitVecRef
@@ -124,19 +117,12 @@ def _expect_bv_sort(value: object, field: str) -> z3.BitVecSortRef:
     return value
 
 
-def canonical_declarations() -> tuple[CanonicalDeclaration, ...]:
+def canonical_declarations() -> tuple[Declaration, ...]:
     return (
-        tuple(CanonicalDeclaration(name, "bv", 64) for name in REGISTER_NAMES)
-        + tuple(CanonicalDeclaration(f"rflags_{name}", "bv", 1) for name in FLAG_NAMES)
-        + (CanonicalDeclaration(MEMORY_NAME, "array", 8, 64),)
+        tuple(Declaration(name, BV64) for name in REGISTER_NAMES)
+        + tuple(Declaration(f"rflags_{name}", TermSort.bv(1)) for name in FLAG_NAMES)
+        + (Declaration(MEMORY_NAME, MEM64_8),)
     )
-
-
-def declaration(name: str) -> CanonicalDeclaration:
-    for item in canonical_declarations():
-        if item.name == name:
-            return item
-    raise Amd64AdapterError(f"unknown canonical AMD64 declaration {name!r}")
 
 
 @lru_cache(maxsize=None)
