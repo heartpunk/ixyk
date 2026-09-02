@@ -238,6 +238,13 @@ def solver_check(solver: z3.Solver) -> z3.CheckSatResult:
     return result
 
 
+def check_status(result: z3.CheckSatResult) -> int:
+    status: object = getattr(result, "r", None)
+    if type(status) is not int:
+        raise TypeError(f"Z3 check result has invalid status {status!r}")
+    return status
+
+
 def translate(backend: object, ast: object, ctx: z3.Context) -> z3.ExprRef:
     converted = _method(backend, "convert")(ast)
     return _expect(_method(converted, "translate")(ctx), z3.ExprRef, "translate")

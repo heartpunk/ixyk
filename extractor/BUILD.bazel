@@ -104,6 +104,19 @@ py_library(
 )
 
 py_library(
+    name = "fuzzer",
+    srcs = ["fuzzer.py"],
+    target_compatible_with = _LINUX_X86_64,
+    deps = [
+        ":amd64_state",
+        ":artifact",
+        ":typed_z3",
+        ":z3_boundary",
+        requirement("z3-solver"),
+    ],
+)
+
+py_library(
     name = "extract_cli",
     srcs = ["extract_cli.py"],
     target_compatible_with = _LINUX_X86_64,
@@ -161,12 +174,10 @@ py_test(
         ":amd64_state",
         ":artifact",
         ":extractor",
+        ":fuzzer",
         ":runtime",
-        ":typed_z3",
         ":unicorn_boundary",
-        ":z3_boundary",
         requirement("hypothesis"),
-        requirement("z3-solver"),
     ],
 )
 
