@@ -269,6 +269,12 @@ semantic_regression_test(
     instruction_hex = "c3",  # ret
 )
 
+semantic_regression_test(
+    name = "bt_regression_test",
+    args = ["--identity-memory"],
+    instruction_hex = "480fa3d8",  # bt rax, rbx
+)
+
 py_test(
     name = "scalar_closure_test",
     size = "small",
