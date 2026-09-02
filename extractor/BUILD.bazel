@@ -264,6 +264,11 @@ semantic_regression_test(
     instruction_hex = "e800000000",
 )
 
+semantic_regression_test(
+    name = "ret_regression_test",
+    instruction_hex = "c3",
+)
+
 py_test(
     name = "scalar_closure_test",
     size = "small",
