@@ -283,6 +283,16 @@ semantic_regression_test(
     instruction_hex = "cc",  # int3
 )
 
+semantic_regression_test(
+    name = "vector_move_regression_test",
+    instruction_hex = "66480f6ec0",  # movq xmm0, rax
+)
+
+semantic_regression_test(
+    name = "integer_simd_regression_test",
+    instruction_hex = "660fefc1",  # pxor xmm0, xmm1
+)
+
 py_test(
     name = "scalar_closure_test",
     size = "small",
