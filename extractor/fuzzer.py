@@ -44,6 +44,13 @@ class FuzzReport(TypedDict):
 
 _PAGE_SIZE = 0x1000
 _U64 = st.integers(min_value=0, max_value=(1 << 64) - 1)
+_STACK_POINTER = st.integers(
+    min_value=_PAGE_SIZE,
+    max_value=(1 << 47) - _PAGE_SIZE,
+)
+_REGISTERS = st.tuples(
+    *(_STACK_POINTER if name == "rsp" else _U64 for name in GPR64)
+)
 
 
 class _Mismatch(AssertionError):
@@ -141,12 +148,12 @@ def fuzz(artifact: InstructionModel, instruction: bytes, examples: int) -> FuzzR
         report_multiple_bugs=False,
     )
     @given(
-        registers=st.lists(_U64, min_size=len(GPR64), max_size=len(GPR64)),
+        registers=_REGISTERS,
         flags=st.lists(
             st.booleans(), min_size=len(FLAG_NAMES), max_size=len(FLAG_NAMES)
         ),
     )
-    def agrees(registers: list[int], flags: list[bool]) -> None:
+    def agrees(registers: tuple[int, ...], flags: list[bool]) -> None:
         nonlocal executions
         executions += 1
         scalars = (
