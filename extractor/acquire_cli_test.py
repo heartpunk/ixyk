@@ -28,59 +28,50 @@ def _acquire(instruction_hex: str, directory: Path) -> tuple[Path, dict[str, obj
     return model, cast(dict[str, object], raw)
 
 
+def _fuzz(
+    instruction_hex: str, model: Path, directory: Path
+) -> dict[str, object]:
+    output = directory / "fuzz.json"
+    fuzz_main(
+        (
+            "--acquisition",
+            str(directory / "result.json"),
+            "--model",
+            str(model),
+            "--instruction-hex",
+            instruction_hex,
+            "--examples",
+            "10",
+            "--output",
+            str(output),
+        )
+    )
+    raw = cast(object, json.loads(output.read_text(encoding="utf-8")))
+    if not isinstance(raw, dict):
+        raise AssertionError("fuzz result is not an object")
+    return cast(dict[str, object], raw)
+
+
 def main_test() -> None:
     with TemporaryDirectory() as temporary:
         directory = Path(temporary)
         scalar_model, scalar = _acquire("4801d8", directory)
         assert scalar["status"] == "pass"
         _ = InstructionModel.from_json(scalar_model.read_text(encoding="utf-8"))
-        scalar_fuzz = directory / "scalar-fuzz.json"
-        fuzz_main(
-            (
-                "--acquisition",
-                str(directory / "result.json"),
-                "--model",
-                str(scalar_model),
-                "--instruction-hex",
-                "4801d8",
-                "--examples",
-                "10",
-                "--output",
-                str(scalar_fuzz),
-            )
-        )
-        scalar_fuzz_result = cast(
-            object, json.loads(scalar_fuzz.read_text(encoding="utf-8"))
-        )
-        assert isinstance(scalar_fuzz_result, dict)
-        assert scalar_fuzz_result["status"] == "pass"
+        assert _fuzz("4801d8", scalar_model, directory)["status"] == "pass"
 
         vector_model, vector = _acquire("660f6ec0", directory)
-        assert vector["status"] == "unsupported"
-        unavailable = cast(object, json.loads(vector_model.read_text(encoding="utf-8")))
+        assert vector["status"] == "pass"
+        _ = InstructionModel.from_json(vector_model.read_text(encoding="utf-8"))
+        assert _fuzz("660f6ec0", vector_model, directory)["status"] == "pass"
+
+        fp_model, fp = _acquire("f20f58c1", directory)
+        assert fp["status"] == "unsupported"
+        unavailable = cast(object, json.loads(fp_model.read_text(encoding="utf-8")))
         if not isinstance(unavailable, dict):
             raise AssertionError("unavailable model is not an object")
         assert unavailable["schema"] == "ixyk.unavailable_instruction_model.v1"
-        vector_fuzz = directory / "vector-fuzz.json"
-        fuzz_main(
-            (
-                "--acquisition",
-                str(directory / "result.json"),
-                "--model",
-                str(vector_model),
-                "--instruction-hex",
-                "660f6ec0",
-                "--examples",
-                "10",
-                "--output",
-                str(vector_fuzz),
-            )
-        )
-        vector_fuzz_result = cast(
-            object, json.loads(vector_fuzz.read_text(encoding="utf-8"))
-        )
-        assert isinstance(vector_fuzz_result, dict)
-        assert vector_fuzz_result["status"] == "unsupported"
+        assert _fuzz("f20f58c1", fp_model, directory)["status"] == "unsupported"
 
 
 if __name__ == "__main__":
