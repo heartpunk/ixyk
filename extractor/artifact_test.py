@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import pytest
 
+from extractor import z3_runtime as _z3_runtime
 from extractor import z3_boundary as _z3
 from extractor.artifact import (
     BOOL,
@@ -18,6 +19,10 @@ from extractor.artifact import (
 )
 from extractor.typed_z3 import expr_from_z3, step_summary_from_z3
 import z3
+
+
+def test_z3_native_runtime_is_declared() -> None:
+    assert _z3_runtime.LIBSTDCXX.is_file()
 
 
 def _model() -> InstructionModel:

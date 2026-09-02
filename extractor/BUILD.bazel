@@ -58,6 +58,13 @@ py_library(
 )
 
 py_library(
+    name = "z3_runtime",
+    srcs = ["z3_runtime.py"],
+    target_compatible_with = _LINUX_X86_64,
+    deps = [":native_runtime"],
+)
+
+py_library(
     name = "runtime",
     srcs = ["runtime.py"],
     data = ["amd64_smoke.hex"],
@@ -213,6 +220,7 @@ py_test(
         ":artifact",
         ":typed_z3",
         ":z3_boundary",
+        ":z3_runtime",
         requirement("pytest"),
         requirement("z3-solver"),
     ],
