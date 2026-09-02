@@ -10,6 +10,7 @@ from tempfile import TemporaryDirectory
 
 CATALOG = Path(__file__).with_name("x86_64_top_100.json")
 OUTPUT = Path(__file__).with_name("x86_64_probes.json")
+STARLARK_OUTPUT = Path(__file__).with_name("x86_64_probes.bzl")
 PROBES = {
     "MOV": "mov rax, rbx",
     "ADD": "add rax, rbx",
@@ -173,6 +174,18 @@ def main() -> None:
         "probes": probes,
     }
     _ = OUTPUT.write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
+    lines = ["X86_64_PROBES = ["]
+    lines.extend(
+        "    ({rank}, {name}, {assembly}, {bytes}),".format(
+            rank=probe["rank"],
+            name=json.dumps(probe["name"]),
+            assembly=json.dumps(probe["assembly"]),
+            bytes=json.dumps(probe["bytes"]),
+        )
+        for probe in probes
+    )
+    lines.append("]")
+    _ = STARLARK_OUTPUT.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
 if __name__ == "__main__":
