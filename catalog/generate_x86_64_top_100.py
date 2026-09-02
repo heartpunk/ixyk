@@ -53,10 +53,7 @@ def main() -> None:
             {
                 "name": name,
                 "occurrences": sum(row["count"] for row in variants),
-                "observed_variant_rows": len(variants),
-                "observed_opcode_count": len({row["opcode"] for row in variants}),
-                "observed_prefix_count": len({row["prefix"] for row in variants}),
-                "observed_sizes": sorted({row["size"] for row in variants}),
+                "opcode_encodings": sorted_strings(row["opcode"] for row in variants),
                 "categories": sorted_strings(row["tag"] for row in variants),
                 "source_mnemonics": sorted_strings(row["mnem"] for row in variants),
             }
@@ -75,6 +72,10 @@ def main() -> None:
         "aggregation": {
             "identity": "canonical instruction family",
             "score": "sum of occurrence count across every observed variant row",
+            "opcode_encodings": (
+                "distinct values of the source dataset's opcode field; source rows "
+                "are not treated as variants"
+            ),
             "normalization": [
                 "MOVABS -> MOV",
                 "strip REP, REPZ, or REPNZ from source mnemonic into its family",

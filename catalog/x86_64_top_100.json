@@ -9,6 +9,7 @@
   "aggregation": {
     "identity": "canonical instruction family",
     "score": "sum of occurrence count across every observed variant row",
+    "opcode_encodings": "distinct values of the source dataset's opcode field; source rows are not treated as variants",
     "normalization": [
       "MOVABS -> MOV",
       "strip REP, REPZ, or REPNZ from source mnemonic into its family"
@@ -20,22 +21,37 @@
       "rank": 1,
       "name": "MOV",
       "occurrences": 10627770656,
-      "observed_variant_rows": 4123,
-      "observed_opcode_count": 30,
-      "observed_prefix_count": 66,
-      "observed_sizes": [
-        2,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10,
-        11,
-        12,
-        13
+      "opcode_encodings": [
+        "88",
+        "89",
+        "8a",
+        "8b",
+        "8c",
+        "8e",
+        "a0",
+        "a1",
+        "a2",
+        "a3",
+        "b0",
+        "b1",
+        "b2",
+        "b3",
+        "b4",
+        "b5",
+        "b6",
+        "b7",
+        "b8",
+        "b9",
+        "ba",
+        "bb",
+        "bc",
+        "bd",
+        "be",
+        "bf",
+        "c6",
+        "c7",
+        "f20",
+        "f23"
       ],
       "categories": [
         "DATA"
@@ -51,22 +67,16 @@
       "rank": 2,
       "name": "ADD",
       "occurrences": 3529131973,
-      "observed_variant_rows": 2193,
-      "observed_opcode_count": 9,
-      "observed_prefix_count": 72,
-      "observed_sizes": [
-        2,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10,
-        11,
-        12,
-        13
+      "opcode_encodings": [
+        "0",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "80",
+        "81",
+        "83"
       ],
       "categories": [
         "BINARY ARITHMETIC"
@@ -81,17 +91,9 @@
       "rank": 3,
       "name": "CALL",
       "occurrences": 2235935654,
-      "observed_variant_rows": 96,
-      "observed_opcode_count": 2,
-      "observed_prefix_count": 8,
-      "observed_sizes": [
-        2,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8
+      "opcode_encodings": [
+        "e8",
+        "ff"
       ],
       "categories": [
         "CONTROL FLOW"
@@ -104,18 +106,8 @@
       "rank": 4,
       "name": "LEA",
       "occurrences": 1351390642,
-      "observed_variant_rows": 685,
-      "observed_opcode_count": 1,
-      "observed_prefix_count": 26,
-      "observed_sizes": [
-        2,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9
+      "opcode_encodings": [
+        "8d"
       ],
       "categories": [
         "MISC"
@@ -128,13 +120,9 @@
       "rank": 5,
       "name": "JE",
       "occurrences": 1253038862,
-      "observed_variant_rows": 23,
-      "observed_opcode_count": 2,
-      "observed_prefix_count": 2,
-      "observed_sizes": [
-        2,
-        3,
-        6
+      "opcode_encodings": [
+        "74",
+        "f84"
       ],
       "categories": [
         "CONTROL FLOW"
@@ -147,21 +135,13 @@
       "rank": 6,
       "name": "TEST",
       "occurrences": 1125117859,
-      "observed_variant_rows": 1144,
-      "observed_opcode_count": 6,
-      "observed_prefix_count": 30,
-      "observed_sizes": [
-        2,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10,
-        11,
-        12
+      "opcode_encodings": [
+        "84",
+        "85",
+        "a8",
+        "a9",
+        "f6",
+        "f7"
       ],
       "categories": [
         "BITWISE"
@@ -175,17 +155,10 @@
       "rank": 7,
       "name": "JMP",
       "occurrences": 1048626646,
-      "observed_variant_rows": 54,
-      "observed_opcode_count": 3,
-      "observed_prefix_count": 6,
-      "observed_sizes": [
-        2,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8
+      "opcode_encodings": [
+        "e9",
+        "eb",
+        "ff"
       ],
       "categories": [
         "CONTROL FLOW"
@@ -199,20 +172,11 @@
       "rank": 8,
       "name": "NOP",
       "occurrences": 1042810062,
-      "observed_variant_rows": 108,
-      "observed_opcode_count": 4,
-      "observed_prefix_count": 8,
-      "observed_sizes": [
-        1,
-        2,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10
+      "opcode_encodings": [
+        "90",
+        "f19",
+        "f1c",
+        "f1f"
       ],
       "categories": [
         "MISC"
@@ -225,21 +189,16 @@
       "rank": 9,
       "name": "CMP",
       "occurrences": 934686880,
-      "observed_variant_rows": 2917,
-      "observed_opcode_count": 9,
-      "observed_prefix_count": 42,
-      "observed_sizes": [
-        2,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10,
-        11,
-        12
+      "opcode_encodings": [
+        "38",
+        "39",
+        "3a",
+        "3b",
+        "3c",
+        "3d",
+        "80",
+        "81",
+        "83"
       ],
       "categories": [
         "BINARY ARITHMETIC"
@@ -253,14 +212,9 @@
       "rank": 10,
       "name": "JNE",
       "occurrences": 843978385,
-      "observed_variant_rows": 27,
-      "observed_opcode_count": 2,
-      "observed_prefix_count": 5,
-      "observed_sizes": [
-        2,
-        3,
-        6,
-        7
+      "opcode_encodings": [
+        "75",
+        "f85"
       ],
       "categories": [
         "CONTROL FLOW"
@@ -274,18 +228,14 @@
       "rank": 11,
       "name": "XOR",
       "occurrences": 657996290,
-      "observed_variant_rows": 1167,
-      "observed_opcode_count": 7,
-      "observed_prefix_count": 34,
-      "observed_sizes": [
-        2,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9
+      "opcode_encodings": [
+        "30",
+        "31",
+        "32",
+        "33",
+        "34",
+        "35",
+        "81"
       ],
       "categories": [
         "LOGICAL"
@@ -300,14 +250,9 @@
       "rank": 12,
       "name": "RET",
       "occurrences": 296410098,
-      "observed_variant_rows": 35,
-      "observed_opcode_count": 2,
-      "observed_prefix_count": 6,
-      "observed_sizes": [
-        1,
-        2,
-        3,
-        4
+      "opcode_encodings": [
+        "c2",
+        "c3"
       ],
       "categories": [
         "CONTROL FLOW"
@@ -321,21 +266,16 @@
       "rank": 13,
       "name": "AND",
       "occurrences": 283871821,
-      "observed_variant_rows": 1318,
-      "observed_opcode_count": 9,
-      "observed_prefix_count": 41,
-      "observed_sizes": [
-        2,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10,
-        11,
-        12
+      "opcode_encodings": [
+        "20",
+        "21",
+        "22",
+        "23",
+        "24",
+        "25",
+        "80",
+        "81",
+        "83"
       ],
       "categories": [
         "LOGICAL"
@@ -350,18 +290,9 @@
       "rank": 14,
       "name": "MOVZX",
       "occurrences": 279163464,
-      "observed_variant_rows": 813,
-      "observed_opcode_count": 2,
-      "observed_prefix_count": 33,
-      "observed_sizes": [
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10
+      "opcode_encodings": [
+        "fb6",
+        "fb7"
       ],
       "categories": [
         "DATA"
@@ -374,18 +305,9 @@
       "rank": 15,
       "name": "MOVSD",
       "occurrences": 204657284,
-      "observed_variant_rows": 468,
-      "observed_opcode_count": 2,
-      "observed_prefix_count": 10,
-      "observed_sizes": [
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10,
-        11
+      "opcode_encodings": [
+        "f10",
+        "f11"
       ],
       "categories": [
         "STRING"
@@ -398,19 +320,13 @@
       "rank": 16,
       "name": "ROL",
       "occurrences": 196742072,
-      "observed_variant_rows": 73,
-      "observed_opcode_count": 6,
-      "observed_prefix_count": 14,
-      "observed_sizes": [
-        2,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10
+      "opcode_encodings": [
+        "c0",
+        "c1",
+        "d0",
+        "d1",
+        "d2",
+        "d3"
       ],
       "categories": [
         "SHIFT AND ROTATE"
@@ -423,19 +339,16 @@
       "rank": 17,
       "name": "SUB",
       "occurrences": 183967954,
-      "observed_variant_rows": 1388,
-      "observed_opcode_count": 9,
-      "observed_prefix_count": 45,
-      "observed_sizes": [
-        2,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10
+      "opcode_encodings": [
+        "28",
+        "29",
+        "2a",
+        "2b",
+        "2c",
+        "2d",
+        "80",
+        "81",
+        "83"
       ],
       "categories": [
         "BINARY ARITHMETIC"
@@ -450,17 +363,13 @@
       "rank": 18,
       "name": "SAR",
       "occurrences": 140511363,
-      "observed_variant_rows": 115,
-      "observed_opcode_count": 6,
-      "observed_prefix_count": 15,
-      "observed_sizes": [
-        2,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8
+      "opcode_encodings": [
+        "c0",
+        "c1",
+        "d0",
+        "d1",
+        "d2",
+        "d3"
       ],
       "categories": [
         "SHIFT AND ROTATE"
@@ -474,22 +383,16 @@
       "rank": 19,
       "name": "OR",
       "occurrences": 112605733,
-      "observed_variant_rows": 1489,
-      "observed_opcode_count": 9,
-      "observed_prefix_count": 44,
-      "observed_sizes": [
-        2,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10,
-        11,
-        12,
-        13
+      "opcode_encodings": [
+        "8",
+        "80",
+        "81",
+        "83",
+        "9",
+        "a",
+        "b",
+        "c",
+        "d"
       ],
       "categories": [
         "LOGICAL"
@@ -504,18 +407,8 @@
       "rank": 20,
       "name": "MOVSXD",
       "occurrences": 107204963,
-      "observed_variant_rows": 329,
-      "observed_opcode_count": 1,
-      "observed_prefix_count": 16,
-      "observed_sizes": [
-        2,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9
+      "opcode_encodings": [
+        "63"
       ],
       "categories": [
         "DATA"
@@ -529,14 +422,9 @@
       "rank": 21,
       "name": "JBE",
       "occurrences": 100743554,
-      "observed_variant_rows": 25,
-      "observed_opcode_count": 2,
-      "observed_prefix_count": 3,
-      "observed_sizes": [
-        2,
-        3,
-        6,
-        7
+      "opcode_encodings": [
+        "76",
+        "f86"
       ],
       "categories": [
         "CONTROL FLOW"
@@ -549,13 +437,9 @@
       "rank": 22,
       "name": "JA",
       "occurrences": 100701018,
-      "observed_variant_rows": 23,
-      "observed_opcode_count": 2,
-      "observed_prefix_count": 2,
-      "observed_sizes": [
-        2,
-        3,
-        6
+      "opcode_encodings": [
+        "77",
+        "f87"
       ],
       "categories": [
         "CONTROL FLOW"
@@ -568,17 +452,8 @@
       "rank": 23,
       "name": "SETNE",
       "occurrences": 87126490,
-      "observed_variant_rows": 119,
-      "observed_opcode_count": 1,
-      "observed_prefix_count": 5,
-      "observed_sizes": [
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9
+      "opcode_encodings": [
+        "f95"
       ],
       "categories": [
         "BITWISE"
@@ -591,18 +466,9 @@
       "rank": 24,
       "name": "DEC",
       "occurrences": 83671772,
-      "observed_variant_rows": 163,
-      "observed_opcode_count": 2,
-      "observed_prefix_count": 18,
-      "observed_sizes": [
-        2,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9
+      "opcode_encodings": [
+        "fe",
+        "ff"
       ],
       "categories": [
         "BINARY ARITHMETIC"
@@ -616,18 +482,17 @@
       "rank": 25,
       "name": "XCHG",
       "occurrences": 64462611,
-      "observed_variant_rows": 227,
-      "observed_opcode_count": 10,
-      "observed_prefix_count": 27,
-      "observed_sizes": [
-        1,
-        2,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8
+      "opcode_encodings": [
+        "86",
+        "87",
+        "90",
+        "91",
+        "92",
+        "93",
+        "94",
+        "95",
+        "96",
+        "97"
       ],
       "categories": [
         "DATA"
@@ -641,13 +506,9 @@
       "rank": 26,
       "name": "JLE",
       "occurrences": 59856464,
-      "observed_variant_rows": 23,
-      "observed_opcode_count": 2,
-      "observed_prefix_count": 2,
-      "observed_sizes": [
-        2,
-        3,
-        6
+      "opcode_encodings": [
+        "7e",
+        "f8e"
       ],
       "categories": [
         "CONTROL FLOW"
@@ -660,13 +521,9 @@
       "rank": 27,
       "name": "JB",
       "occurrences": 58498822,
-      "observed_variant_rows": 29,
-      "observed_opcode_count": 2,
-      "observed_prefix_count": 8,
-      "observed_sizes": [
-        2,
-        3,
-        6
+      "opcode_encodings": [
+        "72",
+        "f82"
       ],
       "categories": [
         "CONTROL FLOW"
@@ -679,17 +536,8 @@
       "rank": 28,
       "name": "MULSD",
       "occurrences": 58224854,
-      "observed_variant_rows": 193,
-      "observed_opcode_count": 1,
-      "observed_prefix_count": 9,
-      "observed_sizes": [
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10
+      "opcode_encodings": [
+        "f59"
       ],
       "categories": [
         "SSE"
@@ -702,13 +550,9 @@
       "rank": 29,
       "name": "JAE",
       "occurrences": 54770464,
-      "observed_variant_rows": 23,
-      "observed_opcode_count": 2,
-      "observed_prefix_count": 2,
-      "observed_sizes": [
-        2,
-        3,
-        6
+      "opcode_encodings": [
+        "73",
+        "f83"
       ],
       "categories": [
         "CONTROL FLOW"
@@ -721,17 +565,8 @@
       "rank": 30,
       "name": "ADDSD",
       "occurrences": 44543198,
-      "observed_variant_rows": 183,
-      "observed_opcode_count": 1,
-      "observed_prefix_count": 9,
-      "observed_sizes": [
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10
+      "opcode_encodings": [
+        "f58"
       ],
       "categories": [
         "SSE"
@@ -744,17 +579,9 @@
       "rank": 31,
       "name": "MOVAPD",
       "occurrences": 43244542,
-      "observed_variant_rows": 149,
-      "observed_opcode_count": 2,
-      "observed_prefix_count": 8,
-      "observed_sizes": [
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10
+      "opcode_encodings": [
+        "f28",
+        "f29"
       ],
       "categories": [
         "SSE"
@@ -767,21 +594,11 @@
       "rank": 32,
       "name": "IMUL",
       "occurrences": 38845870,
-      "observed_variant_rows": 1046,
-      "observed_opcode_count": 4,
-      "observed_prefix_count": 30,
-      "observed_sizes": [
-        2,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10,
-        11,
-        12
+      "opcode_encodings": [
+        "69",
+        "6b",
+        "f7",
+        "faf"
       ],
       "categories": [
         "BINARY ARITHMETIC"
@@ -794,13 +611,9 @@
       "rank": 33,
       "name": "JG",
       "occurrences": 37072506,
-      "observed_variant_rows": 24,
-      "observed_opcode_count": 2,
-      "observed_prefix_count": 3,
-      "observed_sizes": [
-        2,
-        3,
-        6
+      "opcode_encodings": [
+        "7f",
+        "f8f"
       ],
       "categories": [
         "CONTROL FLOW"
@@ -813,17 +626,8 @@
       "rank": 34,
       "name": "UCOMISD",
       "occurrences": 33845132,
-      "observed_variant_rows": 161,
-      "observed_opcode_count": 1,
-      "observed_prefix_count": 9,
-      "observed_sizes": [
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10
+      "opcode_encodings": [
+        "f2e"
       ],
       "categories": [
         "SSE"
@@ -836,13 +640,9 @@
       "rank": 35,
       "name": "JS",
       "occurrences": 31225626,
-      "observed_variant_rows": 27,
-      "observed_opcode_count": 2,
-      "observed_prefix_count": 6,
-      "observed_sizes": [
-        2,
-        3,
-        6
+      "opcode_encodings": [
+        "78",
+        "f88"
       ],
       "categories": [
         "CONTROL FLOW"
@@ -855,18 +655,8 @@
       "rank": 36,
       "name": "PXOR",
       "occurrences": 31085484,
-      "observed_variant_rows": 73,
-      "observed_opcode_count": 1,
-      "observed_prefix_count": 10,
-      "observed_sizes": [
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10
+      "opcode_encodings": [
+        "fef"
       ],
       "categories": [
         "MMX"
@@ -879,17 +669,14 @@
       "rank": 37,
       "name": "ADC",
       "occurrences": 29953466,
-      "observed_variant_rows": 188,
-      "observed_opcode_count": 7,
-      "observed_prefix_count": 23,
-      "observed_sizes": [
-        2,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8
+      "opcode_encodings": [
+        "10",
+        "11",
+        "12",
+        "13",
+        "14",
+        "15",
+        "83"
       ],
       "categories": [
         "BINARY ARITHMETIC"
@@ -904,18 +691,13 @@
       "rank": 38,
       "name": "SHL",
       "occurrences": 28804734,
-      "observed_variant_rows": 217,
-      "observed_opcode_count": 6,
-      "observed_prefix_count": 11,
-      "observed_sizes": [
-        2,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9
+      "opcode_encodings": [
+        "c0",
+        "c1",
+        "d0",
+        "d1",
+        "d2",
+        "d3"
       ],
       "categories": [
         "SHIFT AND ROTATE"
@@ -928,18 +710,9 @@
       "rank": 39,
       "name": "MOVSX",
       "occurrences": 28331958,
-      "observed_variant_rows": 1124,
-      "observed_opcode_count": 2,
-      "observed_prefix_count": 29,
-      "observed_sizes": [
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10
+      "opcode_encodings": [
+        "fbe",
+        "fbf"
       ],
       "categories": [
         "DATA"
@@ -952,17 +725,8 @@
       "rank": 40,
       "name": "SETE",
       "occurrences": 28250824,
-      "observed_variant_rows": 123,
-      "observed_opcode_count": 1,
-      "observed_prefix_count": 7,
-      "observed_sizes": [
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9
+      "opcode_encodings": [
+        "f94"
       ],
       "categories": [
         "BITWISE"
@@ -975,17 +739,8 @@
       "rank": 41,
       "name": "SUBSD",
       "occurrences": 26304452,
-      "observed_variant_rows": 177,
-      "observed_opcode_count": 1,
-      "observed_prefix_count": 8,
-      "observed_sizes": [
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10
+      "opcode_encodings": [
+        "f5c"
       ],
       "categories": [
         "SSE"
@@ -998,18 +753,8 @@
       "rank": 42,
       "name": "CMOVE",
       "occurrences": 25266068,
-      "observed_variant_rows": 315,
-      "observed_opcode_count": 1,
-      "observed_prefix_count": 11,
-      "observed_sizes": [
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10
+      "opcode_encodings": [
+        "f44"
       ],
       "categories": [
         "DATA"
@@ -1022,17 +767,9 @@
       "rank": 43,
       "name": "MOVAPS",
       "occurrences": 22894136,
-      "observed_variant_rows": 230,
-      "observed_opcode_count": 2,
-      "observed_prefix_count": 8,
-      "observed_sizes": [
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9
+      "opcode_encodings": [
+        "f28",
+        "f29"
       ],
       "categories": [
         "SSE"
@@ -1045,13 +782,9 @@
       "rank": 44,
       "name": "JL",
       "occurrences": 20870366,
-      "observed_variant_rows": 23,
-      "observed_opcode_count": 2,
-      "observed_prefix_count": 2,
-      "observed_sizes": [
-        2,
-        3,
-        6
+      "opcode_encodings": [
+        "7c",
+        "f8c"
       ],
       "categories": [
         "CONTROL FLOW"
@@ -1064,18 +797,8 @@
       "rank": 45,
       "name": "CMOVNE",
       "occurrences": 20175206,
-      "observed_variant_rows": 303,
-      "observed_opcode_count": 1,
-      "observed_prefix_count": 14,
-      "observed_sizes": [
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10
+      "opcode_encodings": [
+        "f45"
       ],
       "categories": [
         "DATA"
@@ -1088,17 +811,9 @@
       "rank": 46,
       "name": "MOVSS",
       "occurrences": 19360518,
-      "observed_variant_rows": 436,
-      "observed_opcode_count": 2,
-      "observed_prefix_count": 9,
-      "observed_sizes": [
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10
+      "opcode_encodings": [
+        "f10",
+        "f11"
       ],
       "categories": [
         "SSE"
@@ -1111,13 +826,9 @@
       "rank": 47,
       "name": "JGE",
       "occurrences": 18102372,
-      "observed_variant_rows": 26,
-      "observed_opcode_count": 2,
-      "observed_prefix_count": 5,
-      "observed_sizes": [
-        2,
-        3,
-        6
+      "opcode_encodings": [
+        "7d",
+        "f8d"
       ],
       "categories": [
         "CONTROL FLOW"
@@ -1130,18 +841,8 @@
       "rank": 48,
       "name": "CVTSI2SD",
       "occurrences": 17232180,
-      "observed_variant_rows": 319,
-      "observed_opcode_count": 1,
-      "observed_prefix_count": 18,
-      "observed_sizes": [
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10,
-        11
+      "opcode_encodings": [
+        "f2a"
       ],
       "categories": [
         "SSE"
@@ -1154,11 +855,8 @@
       "rank": 49,
       "name": "UD2",
       "occurrences": 16754816,
-      "observed_variant_rows": 11,
-      "observed_opcode_count": 1,
-      "observed_prefix_count": 1,
-      "observed_sizes": [
-        2
+      "opcode_encodings": [
+        "f0b"
       ],
       "categories": [
         "MISC"
@@ -1171,18 +869,9 @@
       "rank": 50,
       "name": "DIV",
       "occurrences": 15849876,
-      "observed_variant_rows": 106,
-      "observed_opcode_count": 2,
-      "observed_prefix_count": 14,
-      "observed_sizes": [
-        2,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9
+      "opcode_encodings": [
+        "f6",
+        "f7"
       ],
       "categories": [
         "BINARY ARITHMETIC"
@@ -1195,17 +884,8 @@
       "rank": 51,
       "name": "CVTTSD2SI",
       "occurrences": 15667186,
-      "observed_variant_rows": 280,
-      "observed_opcode_count": 1,
-      "observed_prefix_count": 16,
-      "observed_sizes": [
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10
+      "opcode_encodings": [
+        "f2c"
       ],
       "categories": [
         "SSE"
@@ -1218,11 +898,8 @@
       "rank": 52,
       "name": "CDQE",
       "occurrences": 15149112,
-      "observed_variant_rows": 12,
-      "observed_opcode_count": 1,
-      "observed_prefix_count": 2,
-      "observed_sizes": [
-        2
+      "opcode_encodings": [
+        "98"
       ],
       "categories": [
         "DATA"
@@ -1235,14 +912,9 @@
       "rank": 53,
       "name": "MUL",
       "occurrences": 11857626,
-      "observed_variant_rows": 18,
-      "observed_opcode_count": 2,
-      "observed_prefix_count": 7,
-      "observed_sizes": [
-        2,
-        3,
-        4,
-        5
+      "opcode_encodings": [
+        "f6",
+        "f7"
       ],
       "categories": [
         "BINARY ARITHMETIC"
@@ -1255,17 +927,13 @@
       "rank": 54,
       "name": "SBB",
       "occurrences": 11226558,
-      "observed_variant_rows": 170,
-      "observed_opcode_count": 6,
-      "observed_prefix_count": 19,
-      "observed_sizes": [
-        2,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8
+      "opcode_encodings": [
+        "18",
+        "19",
+        "1a",
+        "1b",
+        "1c",
+        "1d"
       ],
       "categories": [
         "BINARY ARITHMETIC"
@@ -1278,13 +946,9 @@
       "rank": 55,
       "name": "JNS",
       "occurrences": 11101268,
-      "observed_variant_rows": 23,
-      "observed_opcode_count": 2,
-      "observed_prefix_count": 2,
-      "observed_sizes": [
-        2,
-        3,
-        6
+      "opcode_encodings": [
+        "79",
+        "f89"
       ],
       "categories": [
         "CONTROL FLOW"
@@ -1297,18 +961,9 @@
       "rank": 56,
       "name": "BT",
       "occurrences": 9558202,
-      "observed_variant_rows": 136,
-      "observed_opcode_count": 2,
-      "observed_prefix_count": 13,
-      "observed_sizes": [
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10
+      "opcode_encodings": [
+        "fa3",
+        "fba"
       ],
       "categories": [
         "BITWISE"
@@ -1321,17 +976,8 @@
       "rank": 57,
       "name": "XORPD",
       "occurrences": 8198568,
-      "observed_variant_rows": 70,
-      "observed_opcode_count": 1,
-      "observed_prefix_count": 4,
-      "observed_sizes": [
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10
+      "opcode_encodings": [
+        "f57"
       ],
       "categories": [
         "SSE"
@@ -1344,17 +990,9 @@
       "rank": 58,
       "name": "INC",
       "occurrences": 7931076,
-      "observed_variant_rows": 106,
-      "observed_opcode_count": 2,
-      "observed_prefix_count": 16,
-      "observed_sizes": [
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9
+      "opcode_encodings": [
+        "fe",
+        "ff"
       ],
       "categories": [
         "BINARY ARITHMETIC"
@@ -1369,16 +1007,9 @@
       "rank": 59,
       "name": "NEG",
       "occurrences": 7716834,
-      "observed_variant_rows": 47,
-      "observed_opcode_count": 2,
-      "observed_prefix_count": 9,
-      "observed_sizes": [
-        2,
-        3,
-        4,
-        5,
-        6,
-        8
+      "opcode_encodings": [
+        "f6",
+        "f7"
       ],
       "categories": [
         "BINARY ARITHMETIC"
@@ -1391,17 +1022,8 @@
       "rank": 60,
       "name": "DIVSD",
       "occurrences": 7317398,
-      "observed_variant_rows": 148,
-      "observed_opcode_count": 1,
-      "observed_prefix_count": 9,
-      "observed_sizes": [
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10
+      "opcode_encodings": [
+        "f5e"
       ],
       "categories": [
         "SSE"
@@ -1414,13 +1036,9 @@
       "rank": 61,
       "name": "JP",
       "occurrences": 6303824,
-      "observed_variant_rows": 24,
-      "observed_opcode_count": 2,
-      "observed_prefix_count": 3,
-      "observed_sizes": [
-        2,
-        3,
-        6
+      "opcode_encodings": [
+        "7a",
+        "f8a"
       ],
       "categories": [
         "CONTROL FLOW"
@@ -1433,18 +1051,13 @@
       "rank": 62,
       "name": "SHR",
       "occurrences": 6066748,
-      "observed_variant_rows": 181,
-      "observed_opcode_count": 6,
-      "observed_prefix_count": 11,
-      "observed_sizes": [
-        2,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9
+      "opcode_encodings": [
+        "c0",
+        "c1",
+        "d0",
+        "d1",
+        "d2",
+        "d3"
       ],
       "categories": [
         "SHIFT AND ROTATE"
@@ -1457,18 +1070,8 @@
       "rank": 63,
       "name": "MULSS",
       "occurrences": 5409870,
-      "observed_variant_rows": 180,
-      "observed_opcode_count": 1,
-      "observed_prefix_count": 10,
-      "observed_sizes": [
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10,
-        11
+      "opcode_encodings": [
+        "f59"
       ],
       "categories": [
         "SSE"
@@ -1481,19 +1084,9 @@
       "rank": 64,
       "name": "CMPXCHG",
       "occurrences": 4942530,
-      "observed_variant_rows": 312,
-      "observed_opcode_count": 2,
-      "observed_prefix_count": 26,
-      "observed_sizes": [
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10,
-        11
+      "opcode_encodings": [
+        "fb0",
+        "fb1"
       ],
       "categories": [
         "DATA"
@@ -1506,12 +1099,8 @@
       "rank": 65,
       "name": "INT3",
       "occurrences": 4818402,
-      "observed_variant_rows": 14,
-      "observed_opcode_count": 1,
-      "observed_prefix_count": 4,
-      "observed_sizes": [
-        1,
-        2
+      "opcode_encodings": [
+        "cc"
       ],
       "categories": [
         "CONTROL FLOW"
@@ -1524,18 +1113,8 @@
       "rank": 66,
       "name": "CMOVLE",
       "occurrences": 4790260,
-      "observed_variant_rows": 307,
-      "observed_opcode_count": 1,
-      "observed_prefix_count": 20,
-      "observed_sizes": [
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10
+      "opcode_encodings": [
+        "f4e"
       ],
       "categories": [
         "DATA"
@@ -1548,17 +1127,8 @@
       "rank": 67,
       "name": "CMOVB",
       "occurrences": 4681904,
-      "observed_variant_rows": 135,
-      "observed_opcode_count": 1,
-      "observed_prefix_count": 10,
-      "observed_sizes": [
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9
+      "opcode_encodings": [
+        "f42"
       ],
       "categories": [
         "DATA"
@@ -1571,18 +1141,8 @@
       "rank": 68,
       "name": "CMOVGE",
       "occurrences": 3997948,
-      "observed_variant_rows": 295,
-      "observed_opcode_count": 1,
-      "observed_prefix_count": 26,
-      "observed_sizes": [
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10
+      "opcode_encodings": [
+        "f4d"
       ],
       "categories": [
         "DATA"
@@ -1595,18 +1155,8 @@
       "rank": 69,
       "name": "CMOVBE",
       "occurrences": 3592482,
-      "observed_variant_rows": 300,
-      "observed_opcode_count": 1,
-      "observed_prefix_count": 18,
-      "observed_sizes": [
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10
+      "opcode_encodings": [
+        "f46"
       ],
       "categories": [
         "DATA"
@@ -1619,17 +1169,8 @@
       "rank": 70,
       "name": "SETBE",
       "occurrences": 3578910,
-      "observed_variant_rows": 72,
-      "observed_opcode_count": 1,
-      "observed_prefix_count": 5,
-      "observed_sizes": [
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9
+      "opcode_encodings": [
+        "f96"
       ],
       "categories": [
         "BITWISE"
@@ -1642,18 +1183,8 @@
       "rank": 71,
       "name": "CMOVAE",
       "occurrences": 3493862,
-      "observed_variant_rows": 255,
-      "observed_opcode_count": 1,
-      "observed_prefix_count": 18,
-      "observed_sizes": [
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10
+      "opcode_encodings": [
+        "f43"
       ],
       "categories": [
         "DATA"
@@ -1666,12 +1197,8 @@
       "rank": 72,
       "name": "CLC",
       "occurrences": 3434550,
-      "observed_variant_rows": 12,
-      "observed_opcode_count": 1,
-      "observed_prefix_count": 8,
-      "observed_sizes": [
-        1,
-        2
+      "opcode_encodings": [
+        "f8"
       ],
       "categories": [
         "FLAG REGISTER INSN"
@@ -1684,17 +1211,8 @@
       "rank": 73,
       "name": "CMOVG",
       "occurrences": 3433332,
-      "observed_variant_rows": 217,
-      "observed_opcode_count": 1,
-      "observed_prefix_count": 14,
-      "observed_sizes": [
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9
+      "opcode_encodings": [
+        "f4f"
       ],
       "categories": [
         "DATA"
@@ -1707,17 +1225,8 @@
       "rank": 74,
       "name": "ADDSS",
       "occurrences": 3421454,
-      "observed_variant_rows": 156,
-      "observed_opcode_count": 1,
-      "observed_prefix_count": 9,
-      "observed_sizes": [
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10
+      "opcode_encodings": [
+        "f58"
       ],
       "categories": [
         "SSE"
@@ -1730,13 +1239,9 @@
       "rank": 75,
       "name": "STOS",
       "occurrences": 3399614,
-      "observed_variant_rows": 54,
-      "observed_opcode_count": 2,
-      "observed_prefix_count": 11,
-      "observed_sizes": [
-        1,
-        2,
-        3
+      "opcode_encodings": [
+        "aa",
+        "ab"
       ],
       "categories": [
         "STRING"
@@ -1750,17 +1255,8 @@
       "rank": 76,
       "name": "CMOVS",
       "occurrences": 3292830,
-      "observed_variant_rows": 173,
-      "observed_opcode_count": 1,
-      "observed_prefix_count": 13,
-      "observed_sizes": [
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9
+      "opcode_encodings": [
+        "f48"
       ],
       "categories": [
         "DATA"
@@ -1773,18 +1269,9 @@
       "rank": 77,
       "name": "XADD",
       "occurrences": 3194446,
-      "observed_variant_rows": 147,
-      "observed_opcode_count": 2,
-      "observed_prefix_count": 18,
-      "observed_sizes": [
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10
+      "opcode_encodings": [
+        "fc0",
+        "fc1"
       ],
       "categories": [
         "DATA"
@@ -1797,17 +1284,9 @@
       "rank": 78,
       "name": "MOVDQA",
       "occurrences": 3122802,
-      "observed_variant_rows": 220,
-      "observed_opcode_count": 2,
-      "observed_prefix_count": 8,
-      "observed_sizes": [
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10
+      "opcode_encodings": [
+        "f6f",
+        "f7f"
       ],
       "categories": [
         "SSE"
@@ -1820,12 +1299,9 @@
       "rank": 79,
       "name": "CMPS",
       "occurrences": 3075318,
-      "observed_variant_rows": 19,
-      "observed_opcode_count": 2,
-      "observed_prefix_count": 6,
-      "observed_sizes": [
-        1,
-        2
+      "opcode_encodings": [
+        "a6",
+        "a7"
       ],
       "categories": [
         "STRING"
@@ -1839,17 +1315,8 @@
       "rank": 80,
       "name": "SETG",
       "occurrences": 2979036,
-      "observed_variant_rows": 76,
-      "observed_opcode_count": 1,
-      "observed_prefix_count": 5,
-      "observed_sizes": [
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9
+      "opcode_encodings": [
+        "f9f"
       ],
       "categories": [
         "BITWISE"
@@ -1862,17 +1329,8 @@
       "rank": 81,
       "name": "CMOVA",
       "occurrences": 2891936,
-      "observed_variant_rows": 153,
-      "observed_opcode_count": 1,
-      "observed_prefix_count": 12,
-      "observed_sizes": [
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9
+      "opcode_encodings": [
+        "f47"
       ],
       "categories": [
         "DATA"
@@ -1885,13 +1343,9 @@
       "rank": 82,
       "name": "VADDSD",
       "occurrences": 2771229,
-      "observed_variant_rows": 3,
-      "observed_opcode_count": 2,
-      "observed_prefix_count": 1,
-      "observed_sizes": [
-        4,
-        5,
-        8
+      "opcode_encodings": [
+        "c4",
+        "c5"
       ],
       "categories": [
         "AVX"
@@ -1904,17 +1358,9 @@
       "rank": 83,
       "name": "MOVDQU",
       "occurrences": 2768088,
-      "observed_variant_rows": 205,
-      "observed_opcode_count": 2,
-      "observed_prefix_count": 9,
-      "observed_sizes": [
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10
+      "opcode_encodings": [
+        "f6f",
+        "f7f"
       ],
       "categories": [
         "SSE"
@@ -1927,17 +1373,8 @@
       "rank": 84,
       "name": "SETAE",
       "occurrences": 2635828,
-      "observed_variant_rows": 62,
-      "observed_opcode_count": 1,
-      "observed_prefix_count": 5,
-      "observed_sizes": [
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9
+      "opcode_encodings": [
+        "f93"
       ],
       "categories": [
         "BITWISE"
@@ -1950,17 +1387,8 @@
       "rank": 85,
       "name": "SETA",
       "occurrences": 2630946,
-      "observed_variant_rows": 81,
-      "observed_opcode_count": 1,
-      "observed_prefix_count": 5,
-      "observed_sizes": [
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9
+      "opcode_encodings": [
+        "f97"
       ],
       "categories": [
         "BITWISE"
@@ -1973,17 +1401,8 @@
       "rank": 86,
       "name": "PCMPEQB",
       "occurrences": 2494026,
-      "observed_variant_rows": 46,
-      "observed_opcode_count": 1,
-      "observed_prefix_count": 8,
-      "observed_sizes": [
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9
+      "opcode_encodings": [
+        "f74"
       ],
       "categories": [
         "MMX"
@@ -1996,12 +1415,8 @@
       "rank": 87,
       "name": "PMOVMSKB",
       "occurrences": 2447296,
-      "observed_variant_rows": 25,
-      "observed_opcode_count": 1,
-      "observed_prefix_count": 4,
-      "observed_sizes": [
-        4,
-        5
+      "opcode_encodings": [
+        "fd7"
       ],
       "categories": [
         "SSE"
@@ -2014,17 +1429,8 @@
       "rank": 88,
       "name": "CMOVL",
       "occurrences": 2422020,
-      "observed_variant_rows": 141,
-      "observed_opcode_count": 1,
-      "observed_prefix_count": 10,
-      "observed_sizes": [
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9
+      "opcode_encodings": [
+        "f4c"
       ],
       "categories": [
         "DATA"
@@ -2037,17 +1443,9 @@
       "rank": 89,
       "name": "MOVUPS",
       "occurrences": 2302032,
-      "observed_variant_rows": 216,
-      "observed_opcode_count": 2,
-      "observed_prefix_count": 8,
-      "observed_sizes": [
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9
+      "opcode_encodings": [
+        "f10",
+        "f11"
       ],
       "categories": [
         "SSE"
@@ -2060,17 +1458,8 @@
       "rank": 90,
       "name": "BSR",
       "occurrences": 2258980,
-      "observed_variant_rows": 84,
-      "observed_opcode_count": 1,
-      "observed_prefix_count": 14,
-      "observed_sizes": [
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9
+      "opcode_encodings": [
+        "fbd"
       ],
       "categories": [
         "BITWISE"
@@ -2083,17 +1472,8 @@
       "rank": 91,
       "name": "MAXSD",
       "occurrences": 2247994,
-      "observed_variant_rows": 102,
-      "observed_opcode_count": 1,
-      "observed_prefix_count": 8,
-      "observed_sizes": [
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10
+      "opcode_encodings": [
+        "f5f"
       ],
       "categories": [
         "SSE"
@@ -2106,17 +1486,8 @@
       "rank": 92,
       "name": "CMOVNS",
       "occurrences": 2205830,
-      "observed_variant_rows": 250,
-      "observed_opcode_count": 1,
-      "observed_prefix_count": 21,
-      "observed_sizes": [
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9
+      "opcode_encodings": [
+        "f49"
       ],
       "categories": [
         "DATA"
@@ -2129,17 +1500,8 @@
       "rank": 93,
       "name": "MULPD",
       "occurrences": 2135924,
-      "observed_variant_rows": 52,
-      "observed_opcode_count": 1,
-      "observed_prefix_count": 8,
-      "observed_sizes": [
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10
+      "opcode_encodings": [
+        "f59"
       ],
       "categories": [
         "SSE"
@@ -2152,17 +1514,8 @@
       "rank": 94,
       "name": "SETB",
       "occurrences": 1960876,
-      "observed_variant_rows": 59,
-      "observed_opcode_count": 1,
-      "observed_prefix_count": 4,
-      "observed_sizes": [
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9
+      "opcode_encodings": [
+        "f92"
       ],
       "categories": [
         "BITWISE"
@@ -2175,17 +1528,8 @@
       "rank": 95,
       "name": "UCOMISS",
       "occurrences": 1940968,
-      "observed_variant_rows": 140,
-      "observed_opcode_count": 1,
-      "observed_prefix_count": 8,
-      "observed_sizes": [
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9
+      "opcode_encodings": [
+        "f2e"
       ],
       "categories": [
         "SSE"
@@ -2198,12 +1542,8 @@
       "rank": 96,
       "name": "CDQ",
       "occurrences": 1845960,
-      "observed_variant_rows": 12,
-      "observed_opcode_count": 1,
-      "observed_prefix_count": 2,
-      "observed_sizes": [
-        1,
-        2
+      "opcode_encodings": [
+        "99"
       ],
       "categories": [
         "DATA"
@@ -2216,17 +1556,8 @@
       "rank": 97,
       "name": "SUBSS",
       "occurrences": 1772600,
-      "observed_variant_rows": 148,
-      "observed_opcode_count": 1,
-      "observed_prefix_count": 9,
-      "observed_sizes": [
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10
+      "opcode_encodings": [
+        "f5c"
       ],
       "categories": [
         "SSE"
@@ -2239,12 +1570,15 @@
       "rank": 98,
       "name": "BSWAP",
       "occurrences": 1703036,
-      "observed_variant_rows": 256,
-      "observed_opcode_count": 8,
-      "observed_prefix_count": 4,
-      "observed_sizes": [
-        2,
-        3
+      "opcode_encodings": [
+        "fc8",
+        "fc9",
+        "fca",
+        "fcb",
+        "fcc",
+        "fcd",
+        "fce",
+        "fcf"
       ],
       "categories": [
         "DATA"
@@ -2257,12 +1591,8 @@
       "rank": 99,
       "name": "LEAVE",
       "occurrences": 1693254,
-      "observed_variant_rows": 14,
-      "observed_opcode_count": 1,
-      "observed_prefix_count": 4,
-      "observed_sizes": [
-        1,
-        2
+      "opcode_encodings": [
+        "c9"
       ],
       "categories": [
         "CONTROL FLOW"
@@ -2275,17 +1605,8 @@
       "rank": 100,
       "name": "CVTSS2SD",
       "occurrences": 1677130,
-      "observed_variant_rows": 177,
-      "observed_opcode_count": 1,
-      "observed_prefix_count": 9,
-      "observed_sizes": [
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10
+      "opcode_encodings": [
+        "f5a"
       ],
       "categories": [
         "SSE"
