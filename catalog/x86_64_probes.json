@@ -1,0 +1,607 @@
+{
+  "schema": "ixyk.x86_64.acquisition_probes.v1",
+  "catalog_schema": "ixyk.x86_64.instruction_catalog.v1",
+  "assembler": "LLVM version 21.1.8",
+  "probes": [
+    {
+      "rank": 1,
+      "name": "MOV",
+      "assembly": "mov rax, rbx",
+      "bytes": "4889d8"
+    },
+    {
+      "rank": 2,
+      "name": "ADD",
+      "assembly": "add rax, rbx",
+      "bytes": "4801d8"
+    },
+    {
+      "rank": 3,
+      "name": "CALL",
+      "assembly": "call probe_end",
+      "bytes": "e800000000"
+    },
+    {
+      "rank": 4,
+      "name": "LEA",
+      "assembly": "lea rax, [rbx + rcx*2 + 8]",
+      "bytes": "488d444b08"
+    },
+    {
+      "rank": 5,
+      "name": "JE",
+      "assembly": "je probe_end",
+      "bytes": "7400"
+    },
+    {
+      "rank": 6,
+      "name": "TEST",
+      "assembly": "test rax, rbx",
+      "bytes": "4885d8"
+    },
+    {
+      "rank": 7,
+      "name": "JMP",
+      "assembly": "jmp probe_end",
+      "bytes": "eb00"
+    },
+    {
+      "rank": 8,
+      "name": "NOP",
+      "assembly": "nop",
+      "bytes": "90"
+    },
+    {
+      "rank": 9,
+      "name": "CMP",
+      "assembly": "cmp rax, rbx",
+      "bytes": "4839d8"
+    },
+    {
+      "rank": 10,
+      "name": "JNE",
+      "assembly": "jne probe_end",
+      "bytes": "7500"
+    },
+    {
+      "rank": 11,
+      "name": "XOR",
+      "assembly": "xor rax, rbx",
+      "bytes": "4831d8"
+    },
+    {
+      "rank": 12,
+      "name": "RET",
+      "assembly": "ret",
+      "bytes": "c3"
+    },
+    {
+      "rank": 13,
+      "name": "AND",
+      "assembly": "and rax, rbx",
+      "bytes": "4821d8"
+    },
+    {
+      "rank": 14,
+      "name": "MOVZX",
+      "assembly": "movzx eax, bl",
+      "bytes": "0fb6c3"
+    },
+    {
+      "rank": 15,
+      "name": "MOVSD",
+      "assembly": "movsd xmm0, xmm1",
+      "bytes": "f20f10c1"
+    },
+    {
+      "rank": 16,
+      "name": "ROL",
+      "assembly": "rol rax, cl",
+      "bytes": "48d3c0"
+    },
+    {
+      "rank": 17,
+      "name": "SUB",
+      "assembly": "sub rax, rbx",
+      "bytes": "4829d8"
+    },
+    {
+      "rank": 18,
+      "name": "SAR",
+      "assembly": "sar rax, cl",
+      "bytes": "48d3f8"
+    },
+    {
+      "rank": 19,
+      "name": "OR",
+      "assembly": "or rax, rbx",
+      "bytes": "4809d8"
+    },
+    {
+      "rank": 20,
+      "name": "MOVSXD",
+      "assembly": "movsxd rax, ebx",
+      "bytes": "4863c3"
+    },
+    {
+      "rank": 21,
+      "name": "JBE",
+      "assembly": "jbe probe_end",
+      "bytes": "7600"
+    },
+    {
+      "rank": 22,
+      "name": "JA",
+      "assembly": "ja probe_end",
+      "bytes": "7700"
+    },
+    {
+      "rank": 23,
+      "name": "SETNE",
+      "assembly": "setne al",
+      "bytes": "0f95c0"
+    },
+    {
+      "rank": 24,
+      "name": "DEC",
+      "assembly": "dec rax",
+      "bytes": "48ffc8"
+    },
+    {
+      "rank": 25,
+      "name": "XCHG",
+      "assembly": "xchg rax, rbx",
+      "bytes": "4893"
+    },
+    {
+      "rank": 26,
+      "name": "JLE",
+      "assembly": "jle probe_end",
+      "bytes": "7e00"
+    },
+    {
+      "rank": 27,
+      "name": "JB",
+      "assembly": "jb probe_end",
+      "bytes": "7200"
+    },
+    {
+      "rank": 28,
+      "name": "MULSD",
+      "assembly": "mulsd xmm0, xmm1",
+      "bytes": "f20f59c1"
+    },
+    {
+      "rank": 29,
+      "name": "JAE",
+      "assembly": "jae probe_end",
+      "bytes": "7300"
+    },
+    {
+      "rank": 30,
+      "name": "ADDSD",
+      "assembly": "addsd xmm0, xmm1",
+      "bytes": "f20f58c1"
+    },
+    {
+      "rank": 31,
+      "name": "MOVAPD",
+      "assembly": "movapd xmm0, xmm1",
+      "bytes": "660f28c1"
+    },
+    {
+      "rank": 32,
+      "name": "IMUL",
+      "assembly": "imul rax, rbx",
+      "bytes": "480fafc3"
+    },
+    {
+      "rank": 33,
+      "name": "JG",
+      "assembly": "jg probe_end",
+      "bytes": "7f00"
+    },
+    {
+      "rank": 34,
+      "name": "UCOMISD",
+      "assembly": "ucomisd xmm0, xmm1",
+      "bytes": "660f2ec1"
+    },
+    {
+      "rank": 35,
+      "name": "JS",
+      "assembly": "js probe_end",
+      "bytes": "7800"
+    },
+    {
+      "rank": 36,
+      "name": "PXOR",
+      "assembly": "pxor xmm0, xmm1",
+      "bytes": "660fefc1"
+    },
+    {
+      "rank": 37,
+      "name": "ADC",
+      "assembly": "adc rax, rbx",
+      "bytes": "4811d8"
+    },
+    {
+      "rank": 38,
+      "name": "SHL",
+      "assembly": "shl rax, cl",
+      "bytes": "48d3e0"
+    },
+    {
+      "rank": 39,
+      "name": "MOVSX",
+      "assembly": "movsx eax, bl",
+      "bytes": "0fbec3"
+    },
+    {
+      "rank": 40,
+      "name": "SETE",
+      "assembly": "sete al",
+      "bytes": "0f94c0"
+    },
+    {
+      "rank": 41,
+      "name": "SUBSD",
+      "assembly": "subsd xmm0, xmm1",
+      "bytes": "f20f5cc1"
+    },
+    {
+      "rank": 42,
+      "name": "CMOVE",
+      "assembly": "cmove rax, rbx",
+      "bytes": "480f44c3"
+    },
+    {
+      "rank": 43,
+      "name": "MOVAPS",
+      "assembly": "movaps xmm0, xmm1",
+      "bytes": "0f28c1"
+    },
+    {
+      "rank": 44,
+      "name": "JL",
+      "assembly": "jl probe_end",
+      "bytes": "7c00"
+    },
+    {
+      "rank": 45,
+      "name": "CMOVNE",
+      "assembly": "cmovne rax, rbx",
+      "bytes": "480f45c3"
+    },
+    {
+      "rank": 46,
+      "name": "MOVSS",
+      "assembly": "movss xmm0, xmm1",
+      "bytes": "f30f10c1"
+    },
+    {
+      "rank": 47,
+      "name": "JGE",
+      "assembly": "jge probe_end",
+      "bytes": "7d00"
+    },
+    {
+      "rank": 48,
+      "name": "CVTSI2SD",
+      "assembly": "cvtsi2sd xmm0, rax",
+      "bytes": "f2480f2ac0"
+    },
+    {
+      "rank": 49,
+      "name": "UD2",
+      "assembly": "ud2",
+      "bytes": "0f0b"
+    },
+    {
+      "rank": 50,
+      "name": "DIV",
+      "assembly": "div rbx",
+      "bytes": "48f7f3"
+    },
+    {
+      "rank": 51,
+      "name": "CVTTSD2SI",
+      "assembly": "cvttsd2si rax, xmm0",
+      "bytes": "f2480f2cc0"
+    },
+    {
+      "rank": 52,
+      "name": "CDQE",
+      "assembly": "cdqe",
+      "bytes": "4898"
+    },
+    {
+      "rank": 53,
+      "name": "MUL",
+      "assembly": "mul rbx",
+      "bytes": "48f7e3"
+    },
+    {
+      "rank": 54,
+      "name": "SBB",
+      "assembly": "sbb rax, rbx",
+      "bytes": "4819d8"
+    },
+    {
+      "rank": 55,
+      "name": "JNS",
+      "assembly": "jns probe_end",
+      "bytes": "7900"
+    },
+    {
+      "rank": 56,
+      "name": "BT",
+      "assembly": "bt rax, rbx",
+      "bytes": "480fa3d8"
+    },
+    {
+      "rank": 57,
+      "name": "XORPD",
+      "assembly": "xorpd xmm0, xmm1",
+      "bytes": "660f57c1"
+    },
+    {
+      "rank": 58,
+      "name": "INC",
+      "assembly": "inc rax",
+      "bytes": "48ffc0"
+    },
+    {
+      "rank": 59,
+      "name": "NEG",
+      "assembly": "neg rax",
+      "bytes": "48f7d8"
+    },
+    {
+      "rank": 60,
+      "name": "DIVSD",
+      "assembly": "divsd xmm0, xmm1",
+      "bytes": "f20f5ec1"
+    },
+    {
+      "rank": 61,
+      "name": "JP",
+      "assembly": "jp probe_end",
+      "bytes": "7a00"
+    },
+    {
+      "rank": 62,
+      "name": "SHR",
+      "assembly": "shr rax, cl",
+      "bytes": "48d3e8"
+    },
+    {
+      "rank": 63,
+      "name": "MULSS",
+      "assembly": "mulss xmm0, xmm1",
+      "bytes": "f30f59c1"
+    },
+    {
+      "rank": 64,
+      "name": "CMPXCHG",
+      "assembly": "cmpxchg rax, rbx",
+      "bytes": "480fb1d8"
+    },
+    {
+      "rank": 65,
+      "name": "INT3",
+      "assembly": "int3",
+      "bytes": "cc"
+    },
+    {
+      "rank": 66,
+      "name": "CMOVLE",
+      "assembly": "cmovle rax, rbx",
+      "bytes": "480f4ec3"
+    },
+    {
+      "rank": 67,
+      "name": "CMOVB",
+      "assembly": "cmovb rax, rbx",
+      "bytes": "480f42c3"
+    },
+    {
+      "rank": 68,
+      "name": "CMOVGE",
+      "assembly": "cmovge rax, rbx",
+      "bytes": "480f4dc3"
+    },
+    {
+      "rank": 69,
+      "name": "CMOVBE",
+      "assembly": "cmovbe rax, rbx",
+      "bytes": "480f46c3"
+    },
+    {
+      "rank": 70,
+      "name": "SETBE",
+      "assembly": "setbe al",
+      "bytes": "0f96c0"
+    },
+    {
+      "rank": 71,
+      "name": "CMOVAE",
+      "assembly": "cmovae rax, rbx",
+      "bytes": "480f43c3"
+    },
+    {
+      "rank": 72,
+      "name": "CLC",
+      "assembly": "clc",
+      "bytes": "f8"
+    },
+    {
+      "rank": 73,
+      "name": "CMOVG",
+      "assembly": "cmovg rax, rbx",
+      "bytes": "480f4fc3"
+    },
+    {
+      "rank": 74,
+      "name": "ADDSS",
+      "assembly": "addss xmm0, xmm1",
+      "bytes": "f30f58c1"
+    },
+    {
+      "rank": 75,
+      "name": "STOS",
+      "assembly": "rep stosq",
+      "bytes": "f348ab"
+    },
+    {
+      "rank": 76,
+      "name": "CMOVS",
+      "assembly": "cmovs rax, rbx",
+      "bytes": "480f48c3"
+    },
+    {
+      "rank": 77,
+      "name": "XADD",
+      "assembly": "xadd rax, rbx",
+      "bytes": "480fc1d8"
+    },
+    {
+      "rank": 78,
+      "name": "MOVDQA",
+      "assembly": "movdqa xmm0, xmm1",
+      "bytes": "660f6fc1"
+    },
+    {
+      "rank": 79,
+      "name": "CMPS",
+      "assembly": "repe cmpsq",
+      "bytes": "f348a7"
+    },
+    {
+      "rank": 80,
+      "name": "SETG",
+      "assembly": "setg al",
+      "bytes": "0f9fc0"
+    },
+    {
+      "rank": 81,
+      "name": "CMOVA",
+      "assembly": "cmova rax, rbx",
+      "bytes": "480f47c3"
+    },
+    {
+      "rank": 82,
+      "name": "VADDSD",
+      "assembly": "vaddsd xmm0, xmm1, xmm2",
+      "bytes": "c5f358c2"
+    },
+    {
+      "rank": 83,
+      "name": "MOVDQU",
+      "assembly": "movdqu xmm0, xmm1",
+      "bytes": "f30f6fc1"
+    },
+    {
+      "rank": 84,
+      "name": "SETAE",
+      "assembly": "setae al",
+      "bytes": "0f93c0"
+    },
+    {
+      "rank": 85,
+      "name": "SETA",
+      "assembly": "seta al",
+      "bytes": "0f97c0"
+    },
+    {
+      "rank": 86,
+      "name": "PCMPEQB",
+      "assembly": "pcmpeqb xmm0, xmm1",
+      "bytes": "660f74c1"
+    },
+    {
+      "rank": 87,
+      "name": "PMOVMSKB",
+      "assembly": "pmovmskb eax, xmm0",
+      "bytes": "660fd7c0"
+    },
+    {
+      "rank": 88,
+      "name": "CMOVL",
+      "assembly": "cmovl rax, rbx",
+      "bytes": "480f4cc3"
+    },
+    {
+      "rank": 89,
+      "name": "MOVUPS",
+      "assembly": "movups xmm0, xmm1",
+      "bytes": "0f10c1"
+    },
+    {
+      "rank": 90,
+      "name": "BSR",
+      "assembly": "bsr rax, rbx",
+      "bytes": "480fbdc3"
+    },
+    {
+      "rank": 91,
+      "name": "MAXSD",
+      "assembly": "maxsd xmm0, xmm1",
+      "bytes": "f20f5fc1"
+    },
+    {
+      "rank": 92,
+      "name": "CMOVNS",
+      "assembly": "cmovns rax, rbx",
+      "bytes": "480f49c3"
+    },
+    {
+      "rank": 93,
+      "name": "MULPD",
+      "assembly": "mulpd xmm0, xmm1",
+      "bytes": "660f59c1"
+    },
+    {
+      "rank": 94,
+      "name": "SETB",
+      "assembly": "setb al",
+      "bytes": "0f92c0"
+    },
+    {
+      "rank": 95,
+      "name": "UCOMISS",
+      "assembly": "ucomiss xmm0, xmm1",
+      "bytes": "0f2ec1"
+    },
+    {
+      "rank": 96,
+      "name": "CDQ",
+      "assembly": "cdq",
+      "bytes": "99"
+    },
+    {
+      "rank": 97,
+      "name": "SUBSS",
+      "assembly": "subss xmm0, xmm1",
+      "bytes": "f30f5cc1"
+    },
+    {
+      "rank": 98,
+      "name": "BSWAP",
+      "assembly": "bswap rax",
+      "bytes": "480fc8"
+    },
+    {
+      "rank": 99,
+      "name": "LEAVE",
+      "assembly": "leave",
+      "bytes": "c9"
+    },
+    {
+      "rank": 100,
+      "name": "CVTSS2SD",
+      "assembly": "cvtss2sd xmm0, xmm1",
+      "bytes": "f30f5ac1"
+    }
+  ]
+}
