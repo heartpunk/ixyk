@@ -278,6 +278,11 @@ semantic_regression_test(
     instruction_hex = "480fa3d8",  # bt rax, rbx
 )
 
+semantic_regression_test(
+    name = "int3_regression_test",
+    instruction_hex = "cc",  # int3
+)
+
 py_test(
     name = "scalar_closure_test",
     size = "small",
