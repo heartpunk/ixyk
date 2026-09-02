@@ -4,7 +4,7 @@ def validation_lanes(name, probes, examples):
     fuzz_results = []
     all_artifacts = []
     for rank, family, _assembly, instruction_hex in probes:
-        stem = "%03d_%s" % (rank, family.lower())
+        stem = "%d_%s" % (rank, family.lower())
         model = "artifacts/%s.model.json" % stem
         acquisition = "artifacts/%s.acquisition.json" % stem
         fuzz_result = "results/%s.fuzz.json" % stem
