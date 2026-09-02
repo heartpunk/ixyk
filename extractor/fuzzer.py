@@ -106,7 +106,8 @@ def emulate(instruction: bytes, before: ConcreteState) -> ConcreteState:
 
     _ = emulator.hook_add(
         unicorn_constant("UC_HOOK_MEM_READ_UNMAPPED")
-        | unicorn_constant("UC_HOOK_MEM_WRITE_UNMAPPED"),
+        | unicorn_constant("UC_HOOK_MEM_WRITE_UNMAPPED")
+        | unicorn_constant("UC_HOOK_MEM_FETCH_UNMAPPED"),
         map_missing,
     )
     _ = emulator.hook_add(unicorn_constant("UC_HOOK_MEM_WRITE"), record_write)
