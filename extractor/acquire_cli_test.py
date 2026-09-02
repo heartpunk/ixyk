@@ -73,6 +73,10 @@ def main_test() -> None:
         assert unavailable["schema"] == "ixyk.unavailable_instruction_model.v1"
         assert _fuzz("f20f58c1", fp_model, directory)["status"] == "unsupported"
 
+        avx_model, avx = _acquire("c5f358c2", directory)
+        assert avx["status"] == "unsupported"
+        assert _fuzz("c5f358c2", avx_model, directory)["status"] == "unsupported"
+
 
 if __name__ == "__main__":
     main_test()
