@@ -54,6 +54,7 @@
           ]);
         in {
           default = pkgs.mkShell {
+            ELAN = "";
             packages = [
               python
               pkgs.basedpyright
@@ -61,6 +62,7 @@
               pkgs.buildifier
               pkgs.git
               pkgs.jujutsu
+              pkgs.lean4
               pkgs.ruff
               pkgs.zstd
             ];
