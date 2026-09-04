@@ -22,3 +22,9 @@ also, literally just so i can move on to next steps.
   - equivalence checking between hand generated or extracted STSes (prototyped)
   - lean proof of correctness of the technique (underway, quite confident should work out, but not certain yet)
   - eventually, fixed parameter tractable computation time detectors for many CWE classes. this hasn't been done yet to any extent, but we have solid designs ready to prototype as time and priority permits.
+
+## License
+
+Copyright (C) 2026 Sophie Smithburg.
+
+Except where otherwise indicated, ixyk is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version. See [LICENSE](LICENSE) for the full license text. Third-party components retain their own copyright and license terms.
