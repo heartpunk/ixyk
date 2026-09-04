@@ -1,5 +1,6 @@
 .direnv/
 .lake/
+.hypothesis/
 .bazelrc.local
 __pycache__/
 bazel-*

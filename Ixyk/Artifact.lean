@@ -424,4 +424,25 @@ def parseAndElaborate (text : String) : Except String STS := do
   | .model system => pure system
   | .unavailable error => throw s!"instruction model is unavailable: {error}"
 
+-- Executable semantic boundary used by the differential test driver. Binding
+-- values are closed expressions; they are all evaluated in the empty context.
+private def evalBindings : List Json → Except String (Σ context, Env context)
+  | [] => pure ⟨[], .nil⟩
+  | binding :: rest => do
+      let name ← nameField binding "name"
+      let .mk sort value ← elaborateExpr [] (← parseExpr (← field binding "value"))
+      let ⟨context, env⟩ ← evalBindings rest
+      if context.any (fun declaration => declaration.name == name) then
+        throw "duplicate binding"
+      pure ⟨{ name, sort } :: context, .cons (value.eval .nil) env⟩
+
+def evalRequest (json : Json) : Except String Json := do
+  let bindings ← (← field json "bindings").getArr?
+  let ⟨context, env⟩ ← evalBindings bindings.toList
+  let .mk sort expr ← elaborateExpr context (← parseExpr (← field json "expr"))
+  match sort with
+  | .bool => pure (toJson (expr.eval env))
+  | .bv _ => pure (toJson (expr.eval env).toNat)
+  | .array _ _ => throw "observe arrays through select"
+
 end Ixyk.Artifact

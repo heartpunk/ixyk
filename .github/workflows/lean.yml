@@ -49,6 +49,9 @@ jobs:
             expected=$(sed -n "s|^leanprover/lean4:v||p" lean-toolchain)
             actual=$(lean --version | sed -n "s/^Lean (version \([^,]*\),.*/\1/p")
             test -n "$expected" && test "$actual" = "$expected"
-            lake build Ixyk ixyk-golden-check
+            lake build Ixyk ixyk-golden-check ixyk-differential-eval
             python tools/ci_lean.py
           '
+      - name: Differential Python-Z3 versus Lean semantics
+        if: steps.feature.outputs.present == 'true'
+        run: nix shell --impure --file tools/lean_fuzz_env.nix --command python -m tools.lean_differential
