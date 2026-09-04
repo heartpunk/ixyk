@@ -77,10 +77,20 @@ linux/reapi toolchain.
 - intentionally linux only, bcz i didn't wanna focus on portability yet. should work on osx in principle p quickly. like. hard hard linux only. can only initiate build from linux client to linux server.
 - insists on bazel REAPI based execution, because i didn't want to get distracted on other modes or have much possibility of divergence.
 - as a result, it may not yet work on your machine without a little tweaking. working on this.
+- this technique doesn't work really well for recursive opcodes. it could perhaps be generalized, but i just haven't tried yet.
+- won't work where the symex engine doesn't model enough, tl;dr. like, i have not remotely attempted to consider instructions like `VMENTER`. the plan there is to read their defs out from emulators when they are defined in terms of instrs we already have, or to try other symex engines that do, or to cowardly admit defeat where we can't be perfectly total. still, i do expect in the end this can achieve higher coverage than most approaches. TBD!
 
 ## Future Work
 
 - for this repo
+  - the lean embedding for the symbolic transition system (STS) fragment language we use, which should in principle enable at least some, but hopefully arbitrary proof for impls using the modeled instruction set (prototyped)
+  - fill out the abstract, make easier understand for less specialized reader
+  - splain da wordses when use: satisfiability modulo theories (SMT), symbolic transition system (STS), Remote Execution API (REAPI), Common Weakness Enumeration (CWE), Angr, Unicorn, Lean, and Futamura projection
+  - cite important techniques and tools. need decide what list is bcz been a bit since thought about this, but, we do have documented what has been considered in impl process.
+  - build section describe what platforms work and don't rn and what is needed to make it do so
+  - shared bazel/reapi environment in a standalone repo: this repo should only invoke its pinned nix flake; publish an equivalent OCI image from the same nix closure for people who don't use nix
+  - development section describing processes thus far
+  - repo org section explain where what is and why
   - generalize. not just one instr variant per opcode. should be exhaustive. was oversight. have technique impled in other repo, porting presently.
   - polish/elision pass for AI prose in README (minimal as is FYI!)
   - turning the readme into a paper
@@ -88,7 +98,6 @@ linux/reapi toolchain.
   - extension to other ISA targets
   - further explanation of the proof story
 - for those to come
-  - the lean embedding for the STS fragment language we use, which should in principle enable at least some, but hopefully arbitrary proof for impls using the modeled instruction set (prototyped)
   - STS stitching for full programs (prototyped)
   - futamura projecting programs through implementations that have been assembled as a full STS (prototyped)
   - equivalence checking between hand generated or extracted STSes (prototyped)
