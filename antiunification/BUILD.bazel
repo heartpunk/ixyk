@@ -1,0 +1,20 @@
+# SPDX-FileCopyrightText: 2026 Sophie Smithburg
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+load("@rules_python//python:defs.bzl", "py_library", "py_test")
+
+package(default_visibility = ["//visibility:public"])
+
+py_library(
+    name = "algebra",
+    srcs = [
+        "__init__.py",
+        "algebra.py",
+    ],
+)
+
+py_test(
+    name = "algebra_test",
+    srcs = ["algebra_test.py"],
+    deps = [":algebra"],
+)
