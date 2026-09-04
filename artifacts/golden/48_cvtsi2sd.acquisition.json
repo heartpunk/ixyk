@@ -1,0 +1,6 @@
+{
+  "error": "read [216, 224) escapes declared state",
+  "instruction_hex": "f2480f2ac0",
+  "schema": "ixyk.instruction_acquisition.v1",
+  "status": "unsupported"
+}

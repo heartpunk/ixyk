@@ -62,6 +62,7 @@
               pkgs.git
               pkgs.jujutsu
               pkgs.ruff
+              pkgs.zstd
             ];
             IXYK_NIX_PYTHON_ROOT = "${python}";
             IXYK_NIX_LIBSTDCXX_ROOT =
