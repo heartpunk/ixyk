@@ -2,7 +2,6 @@ name: Publish Attic dependencies
 on:
   push:
     branches: [main]
-    paths: [flake.nix, flake.lock, .github/actions/attic/**, .github/workflows/attic-publish.yml]
   workflow_dispatch:
 permissions:
   contents: read
@@ -17,6 +16,8 @@ jobs:
     timeout-minutes: 45
     # Restrict this environment to main before adding its write token.
     environment: attic-publish
+    outputs:
+      python-root: ${{ steps.closure.outputs.python-root }}
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
         with:
@@ -26,11 +27,15 @@ jobs:
           github_access_token: ${{ github.token }}
       - uses: ./.github/actions/attic
         with:
-          client-id: ${{ vars.TS_CLIENT_ID }}
-          audience: ${{ vars.TS_AUDIENCE }}
+          client-id: ${{ vars.TS_PUBLISH_CLIENT_ID }}
+          audience: ${{ vars.TS_PUBLISH_AUDIENCE }}
           cache-key: ${{ vars.ATTIC_PUBLIC_KEY }}
       - name: Realize exact Linux development closure
-        run: nix develop --print-build-logs --profile "$RUNNER_TEMP/ixyk-devshell" --command true
+        id: closure
+        run: |
+          nix develop --print-build-logs --profile "$RUNNER_TEMP/ixyk-devshell" --command true
+          root=$(nix eval --raw .#devShells.x86_64-linux.default.IXYK_NIX_PYTHON_ROOT)
+          echo "python-root=$root" >> "$GITHUB_OUTPUT"
       - name: Install pinned Attic client
         run: |
           revision=$(jq -er '.nodes.nixpkgs.locked.rev' flake.lock)
@@ -44,3 +49,27 @@ jobs:
           export XDG_CONFIG_HOME="$RUNNER_TEMP/attic-config"
           "$RUNNER_TEMP/attic-client/bin/attic" login ci http://abraxas.quetzal-celsius.ts.net:8080 "$ATTIC_TOKEN"
           "$RUNNER_TEMP/attic-client/bin/attic" push ci:ixyk-ci "$RUNNER_TEMP/ixyk-devshell"
+          "$RUNNER_TEMP/attic-client/bin/attic" push ci:ixyk-ci "${{ steps.closure.outputs.python-root }}"
+  verify-restore:
+    needs: publish
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          persist-credentials: false
+      - uses: cachix/install-nix-action@b85815f71a6de0ddee80b8a80a98d43f4bcc66c7 # v31
+        with:
+          github_access_token: ${{ github.token }}
+      - uses: ./.github/actions/attic
+        with:
+          client-id: ${{ vars.TS_MAIN_CLIENT_ID }}
+          audience: ${{ vars.TS_MAIN_AUDIENCE }}
+          cache-key: ${{ vars.ATTIC_PUBLIC_KEY }}
+      - name: Restore Python from Attic without building
+        env:
+          PYTHON_ROOT: ${{ needs.publish.outputs.python-root }}
+        run: |
+          [[ "$PYTHON_ROOT" =~ ^/nix/store/[a-z0-9]{32}-python[^/]*$ ]]
+          nix copy --from http://abraxas.quetzal-celsius.ts.net:8080/ixyk-ci "$PYTHON_ROOT"
+          "$PYTHON_ROOT/bin/python" -c 'import angr, claripy, hypothesis, pytest; print("Attic Python restore verified")'
