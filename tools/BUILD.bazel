@@ -1,6 +1,55 @@
 # SPDX-FileCopyrightText: 2026 Sophie Smithburg
 # SPDX-License-Identifier: GPL-3.0-or-later
 
+load("@rules_python//python:defs.bzl", "py_binary")
+
+_LINUX_X86_64 = [
+    "@platforms//os:linux",
+    "@platforms//cpu:x86_64",
+]
+
+_GOLDEN_ARTIFACTS = [
+    ("2_add.acquisition.json", "//catalog:artifacts/2_add.acquisition.json"),
+    ("2_add.model.json", "//catalog:artifacts/2_add.model.json"),
+    ("2_add.fuzz-10000.json", "//catalog:results/10000/2_add.fuzz.json"),
+    ("12_ret.acquisition.json", "//catalog:artifacts/12_ret.acquisition.json"),
+    ("12_ret.model.json", "//catalog:artifacts/12_ret.model.json"),
+    ("12_ret.fuzz-10000.json", "//catalog:results/10000/12_ret.fuzz.json"),
+    ("28_mulsd.acquisition.json", "//catalog:artifacts/28_mulsd.acquisition.json"),
+    ("28_mulsd.model.json", "//catalog:artifacts/28_mulsd.model.json"),
+    ("28_mulsd.fuzz-10000.json", "//catalog:results/10000/28_mulsd.fuzz.json"),
+    ("36_pxor.acquisition.json", "//catalog:artifacts/36_pxor.acquisition.json"),
+    ("36_pxor.model.json", "//catalog:artifacts/36_pxor.model.json"),
+    ("36_pxor.fuzz-10000.json", "//catalog:results/10000/36_pxor.fuzz.json"),
+    ("65_int3.acquisition.json", "//catalog:artifacts/65_int3.acquisition.json"),
+    ("65_int3.model.json", "//catalog:artifacts/65_int3.model.json"),
+    ("65_int3.fuzz-10000.json", "//catalog:results/10000/65_int3.fuzz.json"),
+]
+
+py_binary(
+    name = "update_golden",
+    srcs = ["golden.py"],
+    args = ["--mode=update"] + [
+        "--artifact=%s=$(rlocationpath %s)" % (destination, source)
+        for destination, source in _GOLDEN_ARTIFACTS
+    ],
+    data = [source for _, source in _GOLDEN_ARTIFACTS],
+    main = "golden.py",
+    target_compatible_with = _LINUX_X86_64,
+)
+
+py_binary(
+    name = "check_golden",
+    srcs = ["golden.py"],
+    args = ["--mode=check"] + [
+        "--artifact=%s=$(rlocationpath %s)" % (destination, source)
+        for destination, source in _GOLDEN_ARTIFACTS
+    ],
+    data = [source for _, source in _GOLDEN_ARTIFACTS],
+    main = "golden.py",
+    target_compatible_with = _LINUX_X86_64,
+)
+
 platform(
     name = "reapi_linux_x86_64",
     constraint_values = [
