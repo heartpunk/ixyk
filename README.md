@@ -1,6 +1,6 @@
 # ixyk: symbolic state diffs are all you need
 
-[![Sponsor heartpunk on GitHub](https://img.shields.io/github/sponsors/heartpunk?label=Sponsor&logo=github)](https://github.com/sponsors/heartpunk)
+[![Sponsor heartpunk on GitHub](https://img.shields.io/github/sponsors/heartpunk?label=Sponsor&logo=github)](https://github.com/sponsors/heartpunk) · [Support heartpunk on Patreon](https://www.patreon.com/heartpunk)
 
 ## Abstract
 
