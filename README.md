@@ -1,4 +1,7 @@
 # ixyk: symbolic state diffs are all you need
+
+[![Sponsor heartpunk on GitHub](https://img.shields.io/github/sponsors/heartpunk?label=Sponsor&logo=github)](https://github.com/sponsors/heartpunk)
+
 ## Abstract
 
 a proof of concept of the core of a technique for extracting symbolic state transformers with guards and updates expressed as smt lib fragments. currently extracts ~60 or so of 100 instrs accurately (stats updating in abstract with the implementation itself). basically, it subtracts the old state from the new state, and that's the whole thing. just takes the definitions seriously.
