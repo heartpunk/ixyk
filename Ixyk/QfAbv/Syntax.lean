@@ -7,7 +7,7 @@ inductive TermSort where
   | bool
   | bv (width : Nat)
   | array (indexWidth valueWidth : Nat)
-  deriving DecidableEq, Repr
+  deriving BEq, DecidableEq, Repr
 
 inductive BvBinOp where
   | add | sub | mul | udiv | urem
