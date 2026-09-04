@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Sophie Smithburg
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """Validated typed access to the untyped parts of z3py used by ixyk."""
 
 from __future__ import annotations

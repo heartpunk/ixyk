@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Sophie Smithburg
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """Focused checks for typed instruction serialization and Z3 conversion."""
 
 from __future__ import annotations

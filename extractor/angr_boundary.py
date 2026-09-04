@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Sophie Smithburg
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """The small Angr/Claripy surface used by the AMD64 adapter."""
 
 from __future__ import annotations

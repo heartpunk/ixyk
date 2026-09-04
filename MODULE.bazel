@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Sophie Smithburg
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 module(
     name = "ixyk",
     version = "0.1.0",

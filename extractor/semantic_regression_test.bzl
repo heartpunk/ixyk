@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Sophie Smithburg
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """One independently runnable semantic-regression target per instruction."""
 
 load("@rules_python//python:defs.bzl", "py_test")

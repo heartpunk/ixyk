@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Sophie Smithburg
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """Fail-closed, artifact-producing boundary for one instruction acquisition."""
 
 # Runtime must preload declared libstdc++ before Z3 or Angr imports.

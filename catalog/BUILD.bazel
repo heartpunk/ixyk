@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Sophie Smithburg
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 load(":validation_lanes.bzl", "validation_lanes", "validation_tier")
 load(":x86_64_probes.bzl", "X86_64_PROBES")
 

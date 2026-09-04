@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Sophie Smithburg
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """Extract one AMD64 instruction into symbolic transition outcomes."""
 
 from __future__ import annotations

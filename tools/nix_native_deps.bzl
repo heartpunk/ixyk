@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Sophie Smithburg
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """Expose the Nix-selected Linux C++ runtime as a declared Bazel input."""
 
 _ROOT_ENV = "IXYK_NIX_LIBSTDCXX_ROOT"

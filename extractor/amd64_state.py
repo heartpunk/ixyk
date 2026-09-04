@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Sophie Smithburg
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """Canonical AMD64 symbolic state adapted from the mxoq extractor."""
 
 from __future__ import annotations

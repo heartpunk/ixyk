@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Sophie Smithburg
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """Lossless conversion between Z3 and typed QF_ABV artifacts.
 
 Semantics selectively ported from ghot-effectful-extractor-boundary revision

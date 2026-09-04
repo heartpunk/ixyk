@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Sophie Smithburg
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """Independent acquire-then-fuzz actions for instruction probes."""
 
 def _fuzz_lane(name, model, acquisition, instruction_hex, examples, output):

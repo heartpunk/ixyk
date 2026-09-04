@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Sophie Smithburg
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """The extractor admits declared scalar and vector architectural state."""
 
 from extractor.runtime import load_shellcode

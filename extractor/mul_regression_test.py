@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Sophie Smithburg
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """Replay the first seeded unsigned-MUL differential witness."""
 
 from extractor.amd64_state import FLAG_NAMES, REGISTER_NAMES

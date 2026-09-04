@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Sophie Smithburg
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """File-producing command line boundary for one instruction extraction."""
 
 # Native runtime must preload declared libstdc++ before Z3 or Angr imports.

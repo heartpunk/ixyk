@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Sophie Smithburg
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """Evaluate a typed instruction model against concrete machine transitions."""
 
 from __future__ import annotations

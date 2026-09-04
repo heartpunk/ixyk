@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Sophie Smithburg
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """Strict JSON-serializable QF_ABV instruction models.
 
 Semantics selectively ported from ghot-effectful-extractor-boundary revision

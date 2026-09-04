@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Sophie Smithburg
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 X86_64_PROBES = [
     (1, "MOV", "mov rax, rbx", "4889d8"),
     (2, "ADD", "add rax, rbx", "4801d8"),
