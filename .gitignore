@@ -1,4 +1,7 @@
 .direnv/
+.lake/
+.hypothesis/
 .bazelrc.local
 __pycache__/
 bazel-*
+lake-manifest.json

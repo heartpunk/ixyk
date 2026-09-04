@@ -165,11 +165,12 @@ def bit_vector_binary(
     left: z3.BitVecRef,
     right: z3.BitVecRef,
 ) -> z3.BitVecRef:
+    if operation == "bv_udiv":
+        return _expect(_function("UDiv")(left, right), z3.BitVecRef, operation)
     methods = {
         "bv_add": "__add__",
         "bv_sub": "__sub__",
         "bv_mul": "__mul__",
-        "bv_udiv": "__truediv__",
         "bv_and": "__and__",
         "bv_or": "__or__",
         "bv_xor": "__xor__",

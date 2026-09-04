@@ -1,0 +1,34 @@
+name: Golden integrity
+on:
+  pull_request:
+  push:
+    branches: [main]
+  merge_group:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: golden-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  golden:
+    name: Golden integrity
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: cachix/install-nix-action@b85815f71a6de0ddee80b8a80a98d43f4bcc66c7 # v31
+        with:
+          github_access_token: ${{ github.token }}
+      - name: Verify corpus and checker rejection cases
+        shell: bash
+        run: |
+          revision=$(jq -er '.nodes.nixpkgs.locked.rev' flake.lock)
+          [[ "$revision" =~ ^[0-9a-f]{40}$ ]]
+          nixpkgs="github:NixOS/nixpkgs/$revision"
+          nix shell "$nixpkgs#python312" "$nixpkgs#zstd" --command bash -euo pipefail -c '
+            python tools/ci_golden_test.py
+            python tools/ci_golden.py
+          '

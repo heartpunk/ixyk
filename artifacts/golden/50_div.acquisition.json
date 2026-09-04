@@ -1,0 +1,6 @@
+{
+  "error": "instruction at 0x400000 outcome identities are incomplete",
+  "instruction_hex": "48f7f3",
+  "schema": "ixyk.instruction_acquisition.v1",
+  "status": "unsupported"
+}

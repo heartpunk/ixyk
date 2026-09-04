@@ -28,6 +28,17 @@ def test_z3_native_runtime_is_declared() -> None:
     assert _z3_runtime.LIBSTDCXX.is_file()
 
 
+@pytest.mark.parametrize(
+    "left,right,expected", [(255, 2, 127), (128, 255, 0), (0, 0, 255), (128, 0, 255)]
+)
+def test_unsigned_division_matches_smtlib(left: int, right: int, expected: int) -> None:
+    # SMT-LIB 2.7 FixedSizeBitVectors: unsigned quotient; zero divisor gives ones.
+    result = _z3.bit_vector_binary(
+        "bv_udiv", z3.BitVecVal(left, 8), z3.BitVecVal(right, 8)
+    )
+    assert z3.simplify(result).as_long() == expected
+
+
 def _model() -> InstructionModel:
     declarations = (Declaration("rax", BV64), Declaration("rip", BV64))
     rax = TypedExpr.var("rax", BV64)

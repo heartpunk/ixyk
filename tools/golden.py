@@ -9,6 +9,7 @@ import argparse
 import hashlib
 import os
 from pathlib import Path, PurePosixPath
+import subprocess
 import sys
 from typing import Literal, Protocol, cast
 
@@ -88,10 +89,28 @@ def _digest(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
 
+def _artifact_contents(destination: PurePosixPath, source: Path) -> bytes:
+    data = source.read_bytes()
+    if destination.name.endswith(".model.json.zst"):
+        return subprocess.run(
+            (
+                "zstd",
+                "--compress",
+                "--stdout",
+                "--quiet",
+                "-19",
+                "--threads=1",
+            ),
+            check=True,
+            input=data,
+            stdout=subprocess.PIPE,
+        ).stdout
+    return data
+
+
 def _manifest(contents: dict[PurePosixPath, bytes]) -> bytes:
     lines = [
-        f"{_digest(contents[path])}  {path.as_posix()}\n"
-        for path in sorted(contents)
+        f"{_digest(contents[path])}  {path.as_posix()}\n" for path in sorted(contents)
     ]
     return "".join(lines).encode()
 
@@ -159,7 +178,9 @@ def main(arguments: list[str] | None = None) -> int:
     except (FileNotFoundError, ValueError) as error:
         parser.error(str(error))
     directory = workspace / "artifacts" / "golden"
-    contents = {path: source.read_bytes() for path, source in sources.items()}
+    contents = {
+        path: _artifact_contents(path, source) for path, source in sources.items()
+    }
     if options.mode == "update":
         return _update(directory, contents)
     return _check(directory, contents)

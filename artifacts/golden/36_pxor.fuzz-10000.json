@@ -1,7 +1,0 @@
-{
-  "examples_requested": 10000,
-  "executions": 10000,
-  "instruction_hex": "660fefc1",
-  "schema": "ixyk.differential_fuzz.v1",
-  "status": "pass"
-}

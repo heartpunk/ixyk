@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 load("@rules_python//python:defs.bzl", "py_binary")
+load("//catalog:x86_64_probes.bzl", "X86_64_PROBES")
 
 _LINUX_X86_64 = [
     "@platforms//os:linux",
@@ -9,21 +10,29 @@ _LINUX_X86_64 = [
 ]
 
 _GOLDEN_ARTIFACTS = [
-    ("2_add.acquisition.json", "//catalog:artifacts/2_add.acquisition.json"),
-    ("2_add.model.json", "//catalog:artifacts/2_add.model.json"),
-    ("2_add.fuzz-10000.json", "//catalog:results/10000/2_add.fuzz.json"),
-    ("12_ret.acquisition.json", "//catalog:artifacts/12_ret.acquisition.json"),
-    ("12_ret.model.json", "//catalog:artifacts/12_ret.model.json"),
-    ("12_ret.fuzz-10000.json", "//catalog:results/10000/12_ret.fuzz.json"),
-    ("28_mulsd.acquisition.json", "//catalog:artifacts/28_mulsd.acquisition.json"),
-    ("28_mulsd.model.json", "//catalog:artifacts/28_mulsd.model.json"),
-    ("28_mulsd.fuzz-10000.json", "//catalog:results/10000/28_mulsd.fuzz.json"),
-    ("36_pxor.acquisition.json", "//catalog:artifacts/36_pxor.acquisition.json"),
-    ("36_pxor.model.json", "//catalog:artifacts/36_pxor.model.json"),
-    ("36_pxor.fuzz-10000.json", "//catalog:results/10000/36_pxor.fuzz.json"),
-    ("65_int3.acquisition.json", "//catalog:artifacts/65_int3.acquisition.json"),
-    ("65_int3.model.json", "//catalog:artifacts/65_int3.model.json"),
-    ("65_int3.fuzz-10000.json", "//catalog:results/10000/65_int3.fuzz.json"),
+    (
+        "%d_%s.acquisition.json" % (
+            rank,
+            family.lower(),
+        ),
+        "//catalog:artifacts/%d_%s.acquisition.json" % (
+            rank,
+            family.lower(),
+        ),
+    )
+    for rank, family, _assembly, _instruction_hex in X86_64_PROBES
+] + [
+    (
+        "%d_%s.model.json.zst" % (
+            rank,
+            family.lower(),
+        ),
+        "//catalog:artifacts/%d_%s.model.json" % (
+            rank,
+            family.lower(),
+        ),
+    )
+    for rank, family, _assembly, _instruction_hex in X86_64_PROBES
 ]
 
 py_binary(
