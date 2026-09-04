@@ -28,9 +28,14 @@ def applyBvBin (op : BvBinOp) (left right : BitVec width) : BitVec width :=
   | .and => left &&& right
   | .or => left ||| right
   | .xor => left ^^^ right
-  | .shl => left <<< right
+  | .shl => if right.toNat >= width then 0 else left <<< right
   | .lshr => left >>> right
   | .ashr => BitVec.sshiftRight' left right
+
+-- SMT-LIB shifts do not mask the shift count; oversized left shifts are zero.
+example : applyBvBin .shl (1 : BitVec 64) 18446744073709551615 = 0 := by decide
+example : applyBvBin .shl (1 : BitVec 8) 8 = 0 := by decide
+example : applyBvBin .shl (1 : BitVec 8) 7 = 128 := by decide
 
 -- SMT-LIB 2.7 specifies all ones for unsigned division by zero.
 example : applyBvBin .udiv (0 : BitVec 8) 0 = 255 := by decide
