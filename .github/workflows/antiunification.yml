@@ -1,0 +1,74 @@
+name: Anti-unification tests
+on:
+  pull_request:
+  push:
+    branches: [main]
+  merge_group:
+  workflow_dispatch:
+permissions:
+  contents: read
+  id-token: write
+concurrency:
+  group: au-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  au:
+    name: Anti-unification tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Detect staged feature
+        id: feature
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: |
+          if test -f antiunification/BUILD.bazel; then
+            echo 'present=true' >> "$GITHUB_OUTPUT"
+          elif test -n "$BASE_SHA" && git cat-file -e "$BASE_SHA:antiunification/BUILD.bazel" 2>/dev/null; then
+            echo 'Previously present anti-unification targets were removed' >&2
+            exit 1
+          else
+            echo 'Feature not present yet; test gate is staged.'
+          fi
+      - uses: cachix/install-nix-action@b85815f71a6de0ddee80b8a80a98d43f4bcc66c7 # v31
+        if: steps.feature.outputs.present == 'true'
+        with:
+          github_access_token: ${{ github.token }}
+      - name: Read Attic cache over the tailnet
+        if: >-
+          steps.feature.outputs.present == 'true' && vars.ATTIC_ENABLED == 'true' &&
+          ((github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository) ||
+           github.ref == 'refs/heads/main')
+        uses: ./.github/actions/attic
+        with:
+          client-id: ${{ github.event_name == 'pull_request' && vars.TS_CLIENT_ID || vars.TS_MAIN_CLIENT_ID }}
+          audience: ${{ github.event_name == 'pull_request' && vars.TS_AUDIENCE || vars.TS_MAIN_AUDIENCE }}
+          cache-key: ${{ vars.ATTIC_PUBLIC_KEY }}
+      - name: Realize Python dependencies
+        if: steps.feature.outputs.present == 'true'
+        run: nix develop --print-build-logs --command true
+      - name: Fetch pinned NativeLink release
+        if: steps.feature.outputs.present == 'true'
+        run: |
+          curl --fail --location --retry 3 \
+            https://github.com/TraceMachina/nativelink/releases/download/v1.6.4/nativelink-1.6.4-x86_64-unknown-linux-musl.tar.gz \
+            --output "$RUNNER_TEMP/nativelink.tar.gz"
+          echo "81f0140f7d2f167c875e2ef1ce7825d92ac86c09b355441a9772b577a0c3f3bd  $RUNNER_TEMP/nativelink.tar.gz" | sha256sum --check
+          mkdir "$RUNNER_TEMP/nativelink"
+          tar -xzf "$RUNNER_TEMP/nativelink.tar.gz" -C "$RUNNER_TEMP/nativelink"
+      - name: Run AU unit, property, and held-out instruction tests
+        if: steps.feature.outputs.present == 'true'
+        run: |
+          binary=$(find "$RUNNER_TEMP/nativelink" -type f -name nativelink -print -quit)
+          test -n "$binary"
+          # Root inside this disposable GitHub VM permits NativeLink namespaces.
+          nix develop --command sudo --preserve-env=PATH,IXYK_NIX_PYTHON_ROOT,IXYK_NIX_LIBSTDCXX_ROOT \
+            python tools/ci_reapi.py "$binary" \
+            //antiunification:algebra_test \
+            //antiunification:algebra_property_test \
+            //extractor:model_syntax_property_test \
+            //extractor:instruction_schema_test

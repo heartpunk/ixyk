@@ -353,3 +353,76 @@ py_test(
         requirement("z3-solver"),
     ],
 )
+
+py_library(
+    name = "model_syntax",
+    srcs = ["model_syntax.py"],
+    target_compatible_with = _LINUX_X86_64,
+    deps = [
+        ":artifact",
+        "//antiunification:algebra",
+    ],
+)
+
+py_test(
+    name = "model_syntax_property_test",
+    srcs = ["model_syntax_property_test.py"],
+    target_compatible_with = _LINUX_X86_64,
+    deps = [
+        ":artifact",
+        ":model_syntax",
+        "//antiunification:algebra",
+        requirement("hypothesis"),
+        requirement("pytest"),
+    ],
+)
+
+py_library(
+    name = "operand_slots",
+    srcs = ["operand_slots.py"],
+    target_compatible_with = _LINUX_X86_64,
+    deps = [
+        ":angr_boundary",
+        ":artifact",
+        ":model_syntax",
+        requirement("capstone"),
+    ],
+)
+
+py_library(
+    name = "instruction_schema",
+    srcs = ["instruction_schema.py"],
+    target_compatible_with = _LINUX_X86_64,
+    deps = [
+        ":artifact",
+        ":model_syntax",
+        ":operand_slots",
+        "//antiunification:algebra",
+    ],
+)
+
+py_test(
+    name = "instruction_schema_test",
+    size = "medium",
+    srcs = ["instruction_schema_test.py"],
+    data = ["@nix_native_deps//:libstdcxx"],
+    env = {
+        "GHOT_LIBSTDCXX_RLOCATION": "$(rlocationpath @nix_native_deps//:libstdcxx)",
+        "PYTHONNOUSERSITE": "1",
+        "PYTHONSAFEPATH": "1",
+    },
+    target_compatible_with = _LINUX_X86_64,
+    deps = [
+        ":angr_boundary",
+        ":artifact",
+        ":extractor",
+        ":fuzzer",
+        ":instruction_schema",
+        ":model_syntax",
+        ":operand_slots",
+        ":runtime",
+        ":z3_runtime",
+        "//antiunification:algebra",
+        requirement("pytest"),
+    ],
+)
