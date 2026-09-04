@@ -46,6 +46,10 @@ structure RawModel where
   declarations : Array Decl
   steps : Array RawStep
 
+inductive Imported where
+  | model (system : STS)
+  | unavailable (error : String)
+
 private def requireFields (json : Json) (expected : List String)
     (description : String) : Except String Unit := do
   let object ← json.getObj?
@@ -159,6 +163,14 @@ private def parseModel (json : Json) : Except String RawModel := do
     declarations := ← (← (← field json "declarations").getArr?).mapM parseDeclaration
     steps := ← (← (← field json "steps").getArr?).mapM parseStep
   }
+
+private def parseUnavailable (json : Json) : Except String String := do
+  requireFields json ["schema", "status", "error"] "unavailable instruction model"
+  if (← stringField json "schema") != "ixyk.unavailable_instruction_model.v1" then
+    throw "unknown unavailable-model schema"
+  if (← stringField json "status") != "unsupported" then
+    throw "unknown unavailable-model status"
+  nameField json "error"
 
 private def lookupVar : (context : Ctx) → (name : String) → (sort : TermSort) →
     Option (Var context sort)
@@ -391,8 +403,7 @@ private def elaborateStep (context : Ctx) (source : Control) (raw : RawStep) :
     target := ← elaborateTarget context raw.target
   }
 
-def parseAndElaborate (text : String) : Except String STS := do
-  let raw ← parseModel (← Json.parse text)
+private def elaborateModel (raw : RawModel) : Except String STS := do
   if raw.source ≥ 2 ^ 64 then throw "instruction source exceeds BV64"
   if raw.declarations.isEmpty then throw "declarations must be nonempty"
   if raw.steps.isEmpty then throw "instruction model must contain an edge"
@@ -400,5 +411,17 @@ def parseAndElaborate (text : String) : Except String STS := do
   if !uniqueNames context then throw "declaration names must be unique"
   let source := Control.address (BitVec.ofNat 64 raw.source)
   pure { context, edges := ← raw.steps.toList.mapM (elaborateStep context source) }
+
+def parse (text : String) : Except String Imported := do
+  let json ← Json.parse text
+  match ← stringField json "schema" with
+  | "ixyk.qf_abv.instruction.v1" => .model <$> elaborateModel (← parseModel json)
+  | "ixyk.unavailable_instruction_model.v1" => .unavailable <$> parseUnavailable json
+  | schema => throw s!"unknown instruction-model schema {schema}"
+
+def parseAndElaborate (text : String) : Except String STS := do
+  match ← parse text with
+  | .model system => pure system
+  | .unavailable error => throw s!"instruction model is unavailable: {error}"
 
 end Ixyk.Artifact
