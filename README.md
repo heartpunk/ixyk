@@ -82,6 +82,8 @@ linux/reapi toolchain.
 ## Future Work
 
 - for this repo
+  - polish/elision pass for AI prose in README (minimal as is FYI!)
+  - turning the readme into a paper
   - floating point
   - extension to other ISA targets
   - further explanation of the proof story
