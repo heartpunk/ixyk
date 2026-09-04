@@ -364,6 +364,19 @@ py_library(
     ],
 )
 
+py_test(
+    name = "model_syntax_property_test",
+    srcs = ["model_syntax_property_test.py"],
+    target_compatible_with = _LINUX_X86_64,
+    deps = [
+        ":artifact",
+        ":model_syntax",
+        "//antiunification:algebra",
+        requirement("hypothesis"),
+        requirement("pytest"),
+    ],
+)
+
 py_library(
     name = "operand_slots",
     srcs = ["operand_slots.py"],
