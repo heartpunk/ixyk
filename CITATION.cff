@@ -1,8 +1,11 @@
 cff-version: 1.2.0
 message: "If you use this software, please cite it using these metadata."
 
-title: "ixyk"
+title: "ixyk: symbolic state diffs are all you need"
 type: software
+version: "0.0.1"
+date-released: "2026-09-04"
+doi: "10.5281/zenodo.22290192"
 
 authors:
   - given-names: "Sophie"
@@ -12,7 +15,7 @@ license: "GPL-3.0-or-later"
 repository-code: "https://github.com/heartpunk/ixyk"
 
 abstract: >
-  a proof of concept of the core of a technique for extracting symbolic state transformers with guards and updates expressed as smt lib fragments. currently extracts ~60 or so of 100 instrs accurately (stats updating in abstract with the implementation itself). basically, it subtracts the old state from the new state, and that's the whole thing. just takes the definitions seriously.
+  a proof of concept of the core of a technique for extracting symbolic state transformers with guards and updates expressed as smt lib fragments. in the current top-100 representative campaign, 81 probes yield typed models and 78 complete full 10,000-case differential validation. basically, it subtracts the old state from the new state, and that's the whole thing. just takes the definitions seriously.
 
 keywords:
 - symbolic execution

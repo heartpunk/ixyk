@@ -55,7 +55,9 @@ unchanged.
 | Python and native dependencies | `MODULE.bazel`, `MODULE.bazel.lock`, and `extractor/requirements_linux_x86_64.txt`. |
 | Instruction probes | `catalog/x86_64_probes.json` and `catalog/x86_64_probes.bzl`. |
 | Integrity | `MANIFEST.sha256`, covering every generated file in this directory. |
-| Source revision/release | The Git commit and release tag containing these files; the DOI archive preserves that repository state. |
+| Source revision/release | The Git commit and `v0.0.1` release tag containing these files. |
+| Archived release | [v0.0.1, DOI 10.5281/zenodo.22290192](https://doi.org/10.5281/zenodo.22290192). |
+| All versions | [Concept DOI 10.5281/zenodo.22290191](https://doi.org/10.5281/zenodo.22290191). |
 
 Source remains authoritative. These committed generated files are authoritative
 reference observations of that source at this release. Ordinary Bazel output

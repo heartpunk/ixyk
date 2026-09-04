@@ -1,5 +1,6 @@
 # ixyk: symbolic state diffs are all you need
 
+[![DOI](https://zenodo.org/badge/1353984899.svg)](https://doi.org/10.5281/zenodo.22290191)
 [![Sponsor heartpunk on GitHub](https://img.shields.io/github/sponsors/heartpunk?label=Sponsor&logo=github)](https://github.com/sponsors/heartpunk) · [Support heartpunk on Patreon](https://www.patreon.com/heartpunk)
 
 ## Abstract
@@ -11,6 +12,19 @@ a proof of concept of the core of a technique for extracting symbolic state tran
 this is v0.0.1. it works. it is described in literally minimal form. additional versions will be coming w/clarifications and more explanation as i ascertain what exactly needs to go where. this release is for those most interested, and/or the agents.
 
 also, literally just so i can move on to next steps.
+
+## Citation
+
+the archived v0.0.1 release has the version-specific DOI
+[`10.5281/zenodo.22290192`](https://doi.org/10.5281/zenodo.22290192). the project
+badge and concept DOI
+[`10.5281/zenodo.22290191`](https://doi.org/10.5281/zenodo.22290191) resolve to
+the latest release and collect all archived versions.
+
+> Sophie Smithburg. (2026). *ixyk: symbolic state diffs are all you need*
+> (v0.0.1). Zenodo. https://doi.org/10.5281/zenodo.22290192
+
+machine-readable citation metadata is available in [`CITATION.cff`](CITATION.cff).
 
 ## Validation
 

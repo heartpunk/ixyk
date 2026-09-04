@@ -12,6 +12,8 @@
 | Original execution window | 2026-09-02 01:40–03:45 PDT (08:40–10:45 UTC), reconstructed from the NativeLink journal |
 | Cache audit | 100 exact REAPI action digests recovered from that window; 100/100 ActionCache results were live on 2026-09-03 |
 | Report schema | `ixyk.differential_fuzz.v1` |
+| Archived software release | [ixyk v0.0.1, DOI 10.5281/zenodo.22290192](https://doi.org/10.5281/zenodo.22290192) |
+| All archived versions | [Concept DOI 10.5281/zenodo.22290191](https://doi.org/10.5281/zenodo.22290191) |
 | Notes authoring | OpenAI Codex using GPT-5.6 Sol, high reasoning, fast mode |
 | Authorship boundary | The prose, classifications, calculations, and table presentation are AI-assisted synthesis; the underlying statuses, execution counts, witnesses, artifacts, digests, and catalog data come from the preserved repository and NativeLink cache evidence described here. |
 | Requested work | 100 representative instruction-family probes × 10,000 Hypothesis examples = 1,000,000 requested examples |
