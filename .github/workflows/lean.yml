@@ -1,0 +1,54 @@
+name: Lean validation
+on:
+  pull_request:
+  push:
+    branches: [main]
+  merge_group:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: lean-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  lean:
+    name: Lean validation
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Detect staged feature
+        id: feature
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: |
+          if test -f lean-toolchain; then
+            echo 'present=true' >> "$GITHUB_OUTPUT"
+          elif test -n "$BASE_SHA" && git cat-file -e "$BASE_SHA:lean-toolchain" 2>/dev/null; then
+            echo 'Previously present Lean toolchain was removed' >&2
+            exit 1
+          else
+            echo 'Feature not present yet; test gate is staged.'
+          fi
+      - uses: cachix/install-nix-action@b85815f71a6de0ddee80b8a80a98d43f4bcc66c7 # v31
+        if: steps.feature.outputs.present == 'true'
+        with:
+          github_access_token: ${{ github.token }}
+      - name: Build Lean and check artifact acceptance and rejection
+        if: steps.feature.outputs.present == 'true'
+        run: |
+          revision=$(jq -er '.nodes.nixpkgs.locked.rev' flake.lock)
+          [[ "$revision" =~ ^[0-9a-f]{40}$ ]]
+          nixpkgs="github:NixOS/nixpkgs/$revision"
+          # Variables in the quoted script are evaluated by the inner shell.
+          # shellcheck disable=SC2016
+          nix shell "$nixpkgs#lean4" "$nixpkgs#zstd" "$nixpkgs#python312" --command bash -euo pipefail -c '
+            expected=$(sed -n "s|^leanprover/lean4:v||p" lean-toolchain)
+            actual=$(lean --version | sed -n "s/^Lean (version \([^,]*\),.*/\1/p")
+            test -n "$expected" && test "$actual" = "$expected"
+            lake build Ixyk ixyk-golden-check
+            python tools/ci_lean.py
+          '
