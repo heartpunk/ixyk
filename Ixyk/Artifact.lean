@@ -168,7 +168,7 @@ private def parseUnavailable (json : Json) : Except String String := do
   requireFields json ["schema", "status", "error"] "unavailable instruction model"
   if (← stringField json "schema") != "ixyk.unavailable_instruction_model.v1" then
     throw "unknown unavailable-model schema"
-  if (← stringField json "status") != "unsupported" then
+  if !["unsupported", "acquisition_error"].contains (← stringField json "status") then
     throw "unknown unavailable-model status"
   nameField json "error"
 
