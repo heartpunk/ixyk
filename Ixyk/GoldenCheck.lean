@@ -3,10 +3,19 @@
 
 import Ixyk.Artifact
 
+private def readArtifact (path : String) : IO String := do
+  if path.endsWith ".zst" then
+    let output ← IO.Process.output { cmd := "zstd", args := #["-dc", path] }
+    if output.exitCode != 0 then
+      throw <| IO.userError s!"zstd failed for {path}: {output.stderr}"
+    pure output.stdout
+  else
+    IO.FS.readFile path
+
 private def check : List String → IO UInt32
   | [] => pure 0
   | path :: rest => do
-      match Ixyk.Artifact.parse (← IO.FS.readFile path) with
+      match Ixyk.Artifact.parse (← readArtifact path) with
       | .ok _ => check rest
       | .error message => IO.eprintln s!"{path}: {message}" *> pure 1
 
