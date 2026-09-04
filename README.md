@@ -12,6 +12,15 @@ this is v0.0.1. it works. it is described in literally minimal form. additional 
 
 also, literally just so i can move on to next steps.
 
+## Reference Artifacts
+
+the deliberately versioned examples in [`artifacts/golden/`](artifacts/golden/)
+preserve exact acquisition, instruction-model, and 10,000-example validation
+outputs for this release. they are research reference artifacts, not ordinary
+`bazel-bin/` or `bazel-out/` contents. the directory documents what each example
+demonstrates, how to regenerate the set, and how to verify it against the pinned
+linux/reapi toolchain.
+
 ## Known Limitations
 
 - intentionally linux only, bcz i didn't wanna focus on portability yet. should work on osx in principle p quickly.
