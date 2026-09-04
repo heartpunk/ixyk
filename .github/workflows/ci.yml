@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  merge_group:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    name: CI
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: cachix/install-nix-action@b85815f71a6de0ddee80b8a80a98d43f4bcc66c7 # v31
+        with:
+          github_access_token: ${{ github.token }}
+      - name: Check Python, Bazel, and workflow sources
+        shell: bash
+        run: |
+          revision=$(jq -er '.nodes.nixpkgs.locked.rev' flake.lock)
+          [[ "$revision" =~ ^[0-9a-f]{40}$ ]]
+          nixpkgs="github:NixOS/nixpkgs/$revision"
+          nix shell "$nixpkgs#ruff" "$nixpkgs#bazel-buildtools" "$nixpkgs#actionlint" \
+            --command bash -euo pipefail -c '
+              ruff check .
+              buildifier -mode=check -r .
+              actionlint .github/workflows/*.yml
+            '
