@@ -75,7 +75,7 @@ linux/reapi toolchain.
 
 ## Known Limitations
 
-- intentionally linux only, bcz i didn't wanna focus on portability yet. should work on osx in principle p quickly.
+- intentionally linux only, bcz i didn't wanna focus on portability yet. should work on osx in principle p quickly. like. hard hard linux only. can only initiate build from linux client to linux server.
 - insists on bazel REAPI based execution, because i didn't want to get distracted on other modes or have much possibility of divergence.
 - as a result, it may not yet work on your machine without a little tweaking. working on this.
 
