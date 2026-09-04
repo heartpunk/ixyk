@@ -12,6 +12,12 @@ this is v0.0.1. it works. it is described in literally minimal form. additional 
 
 also, literally just so i can move on to next steps.
 
+## Known Limitations
+
+- intentionally linux only, bcz i didn't wanna focus on portability yet. should work on osx in principle p quickly.
+- insists on bazel REAPI based execution, because i didn't want to get distracted on other modes or have much possibility of divergence.
+- as a result, it may not yet work on your machine without a little tweaking. working on this.
+
 ## Future Work
 
 - for this repo
