@@ -21,7 +21,29 @@
         let
           pkgs = import nixpkgs {
             inherit system;
-            overlays = [ angr-nix.overlays.default ];
+            overlays = [
+              angr-nix.overlays.default
+              (final: prev: {
+                python312 = prev.python312.override (old: {
+                  packageOverrides = nixpkgs.lib.composeExtensions
+                    (old.packageOverrides or (_: _: { }))
+                    (pyFinal: pyPrev: {
+                      bitstring = pyPrev.bitstring.overridePythonAttrs (attrs: {
+                        # Keep correctness tests without the benchmark plugin's
+                        # unrelated Elasticsearch/notebook test dependencies.
+                        nativeCheckInputs = builtins.filter
+                          (dep: nixpkgs.lib.getName dep != "pytest-benchmark")
+                          attrs.nativeCheckInputs;
+                        pytestFlags = builtins.filter
+                          (flag: flag != "--benchmark-disable")
+                          (attrs.pytestFlags or [ ]);
+                        disabledTestPaths = (attrs.disabledTestPaths or [ ])
+                          ++ [ "tests/test_benchmarks.py" ];
+                      });
+                    });
+                });
+              })
+            ];
           };
           python = pkgs.python312.withPackages (ps: [
             ps.angr
