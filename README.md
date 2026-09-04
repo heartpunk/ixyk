@@ -104,6 +104,28 @@ linux/reapi toolchain.
   - lean proof of correctness of the technique (underway, quite confident should work out, but not certain yet)
   - eventually, fixed parameter tractable computation time detectors for many CWE classes. this hasn't been done yet to any extent, but we have solid designs ready to prototype as time and priority permits.
 
+## References
+
+1. J. C. King, “Symbolic execution and program testing,” *Communications of the ACM*, vol. 19, no. 7, pp. 385–394, 1976. doi: [10.1145/360248.360252](https://doi.org/10.1145/360248.360252).
+2. T. A. Henzinger, R. Majumdar, and J.-F. Raskin, “A classification of symbolic transition systems,” *ACM Transactions on Computational Logic*, vol. 6, no. 1, pp. 1–32, 2005. doi: [10.1145/1042038.1042039](https://doi.org/10.1145/1042038.1042039).
+3. C. Barrett, R. Sebastiani, S. A. Seshia, and C. Tinelli, “Satisfiability modulo theories,” in *Handbook of Satisfiability*, vol. 185, IOS Press, 2009, pp. 825–885. doi: [10.3233/978-1-58603-929-5-825](https://doi.org/10.3233/978-1-58603-929-5-825).
+4. C. Barrett, P. Fontaine, and C. Tinelli, [*The SMT-LIB Standard: Version 2.7*](https://smt-lib.org/language.shtml). SMT-LIB Initiative, 2025.
+5. Y. Shoshitaishvili et al., “SoK: (State of) the art of war: Offensive techniques in binary analysis,” in *Proceedings of the IEEE Symposium on Security and Privacy*, 2016, pp. 138–157. doi: [10.1109/SP.2016.17](https://doi.org/10.1109/SP.2016.17).
+6. L. de Moura and N. Bjørner, “Z3: An efficient SMT solver,” in *Proceedings of TACAS*, LNCS 4963, 2008, pp. 337–340. doi: [10.1007/978-3-540-78800-3_24](https://doi.org/10.1007/978-3-540-78800-3_24).
+7. A. Q. Nguyen and H. V. Dang, “[Unicorn: Next generation CPU emulator framework](https://www.unicorn-engine.org/docs/),” presented at Black Hat USA, 2015.
+8. L. Martignoni, R. Paleari, G. F. Roglia, and D. Bruschi, “Testing CPU emulators,” in *Proceedings of ISSTA*, 2009, pp. 261–272. doi: [10.1145/1572272.1572303](https://doi.org/10.1145/1572272.1572303).
+9. D. R. MacIver, Z. Hatfield-Dodds, and contributors, “Hypothesis: A new approach to property-based testing,” *Journal of Open Source Software*, vol. 4, no. 43, art. 1891, 2019. doi: [10.21105/joss.01891](https://doi.org/10.21105/joss.01891).
+10. Intel Corporation, [*Intel 64 and IA-32 Architectures Software Developer’s Manual*](https://www.intel.com/content/www/us/en/developer/articles/technical/intel-sdm.html), 2026.
+11. G. D. Plotkin, “A note on inductive generalisation,” in *Machine Intelligence 5*, B. Meltzer and D. Michie, Eds. Edinburgh University Press, 1970, pp. 153–163.
+12. D. M. Cerna and T. Kutsia, “Anti-unification and generalization: A survey,” in *Proceedings of IJCAI*, 2023, pp. 6563–6573. doi: [10.24963/ijcai.2023/736](https://doi.org/10.24963/ijcai.2023/736).
+13. S. Heule, E. Schkufza, R. Sharma, and A. Aiken, “Stratified synthesis: Automatically learning the x86-64 instruction set,” in *Proceedings of PLDI*, 2016, pp. 237–250. doi: [10.1145/2908080.2908121](https://doi.org/10.1145/2908080.2908121).
+14. S. Dasgupta, D. Park, T. Kasampalis, V. S. Adve, and G. Roşu, “A complete formal semantics of x86-64 user-level instruction set architecture,” in *Proceedings of PLDI*, 2019, pp. 1133–1148. doi: [10.1145/3314221.3314601](https://doi.org/10.1145/3314221.3314601).
+15. J. Craaijo, F. Verbeek, and B. Ravindran, “libLISA: Instruction discovery and analysis on x86-64,” *Proceedings of the ACM on Programming Languages*, vol. 8, no. OOPSLA2, art. 283, 2024. doi: [10.1145/3689723](https://doi.org/10.1145/3689723).
+16. L. de Moura and S. Ullrich, “The Lean 4 theorem prover and programming language,” in *Proceedings of CADE-28*, LNCS 12699, 2021, pp. 625–635. doi: [10.1007/978-3-030-79876-5_37](https://doi.org/10.1007/978-3-030-79876-5_37).
+17. Y. Futamura, “Partial evaluation of computation process—An approach to a compiler-compiler,” *Higher-Order and Symbolic Computation*, vol. 12, no. 4, pp. 381–391, 1999. doi: [10.1023/A:1010095604496](https://doi.org/10.1023/A:1010095604496).
+18. Bazel Project, “[Remote Execution API](https://github.com/bazelbuild/remote-apis/blob/main/build/bazel/remote/execution/v2/remote_execution.proto),” *bazelbuild/remote-apis*.
+19. MITRE, “[Common Weakness Enumeration](https://cwe.mitre.org/).”
+
 ## License
 
 Copyright (C) 2026 Sophie Smithburg.
