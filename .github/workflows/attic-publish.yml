@@ -66,10 +66,13 @@ jobs:
           client-id: ${{ vars.TS_MAIN_CLIENT_ID }}
           audience: ${{ vars.TS_MAIN_AUDIENCE }}
           cache-key: ${{ vars.ATTIC_PUBLIC_KEY }}
-      - name: Restore Python from Attic without building
+      - name: Restore Python from Attic and upstream without building
         env:
           PYTHON_ROOT: ${{ needs.publish.outputs.python-root }}
         run: |
           [[ "$PYTHON_ROOT" =~ ^/nix/store/[a-z0-9]{32}-python[^/]*$ ]]
-          nix copy --from http://abraxas.quetzal-celsius.ts.net:8080/ixyk-ci "$PYTHON_ROOT"
+          # Attic omits paths already available from the upstream Nix cache.
+          # Disable both local and remote builds: every path must substitute.
+          nix-store --realise "$PYTHON_ROOT" --max-jobs 0 --option builders '' \
+            --option substituters 'http://abraxas.quetzal-celsius.ts.net:8080/ixyk-ci https://cache.nixos.org'
           "$PYTHON_ROOT/bin/python" -c 'import angr, claripy, hypothesis, pytest; print("Attic Python restore verified")'
