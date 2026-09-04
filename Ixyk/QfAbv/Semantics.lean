@@ -23,7 +23,7 @@ def applyBvBin (op : BvBinOp) (left right : BitVec width) : BitVec width :=
   | .add => left + right
   | .sub => left - right
   | .mul => left * right
-  | .udiv => left / right
+  | .udiv => if right == 0 then ~~~(0 : BitVec width) else left / right
   | .urem => left % right
   | .and => left &&& right
   | .or => left ||| right
@@ -31,6 +31,11 @@ def applyBvBin (op : BvBinOp) (left right : BitVec width) : BitVec width :=
   | .shl => left <<< right
   | .lshr => left >>> right
   | .ashr => BitVec.sshiftRight' left right
+
+-- SMT-LIB 2.7 specifies all ones for unsigned division by zero.
+example : applyBvBin .udiv (0 : BitVec 8) 0 = 255 := by decide
+example : applyBvBin .udiv (128 : BitVec 8) 0 = 255 := by decide
+example : applyBvBin .udiv (255 : BitVec 8) 2 = 127 := by decide
 
 def applyBvCmp (op : BvCmpOp) (left right : BitVec width) : Bool :=
   match op with
