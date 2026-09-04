@@ -30,3 +30,5 @@ runs:
           echo "extra-substituters = $endpoint/ixyk-ci $endpoint/fleet"
           echo "extra-trusted-public-keys = $CACHE_KEY fleet:Vz5GVgIgYv1wSrlc3+O3KyroBNxSC1tZEP7EWjvwQbo="
         } | sudo tee -a /etc/nix/nix.conf >/dev/null
+        # The running daemon does not reload nix.conf when a client reads it.
+        sudo systemctl restart nix-daemon.service

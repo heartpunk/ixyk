@@ -2,12 +2,16 @@ name: Publish Attic dependencies
 on:
   push:
     branches: [main]
+  pull_request:
+    paths:
+      - '.github/actions/attic/**'
+      - '.github/workflows/attic-publish.yml'
   workflow_dispatch:
 permissions:
   contents: read
   id-token: write
 concurrency:
-  group: attic-publish
+  group: attic-publish-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: false
 jobs:
   publish:
@@ -52,6 +56,9 @@ jobs:
           "$RUNNER_TEMP/attic-client/bin/attic" push ci:ixyk-ci "${{ steps.closure.outputs.python-root }}"
   verify-restore:
     needs: publish
+    if: >-
+      !cancelled() && vars.ATTIC_ENABLED == 'true' &&
+      (needs.publish.result == 'success' || github.event_name == 'pull_request')
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
@@ -63,14 +70,19 @@ jobs:
           github_access_token: ${{ github.token }}
       - uses: ./.github/actions/attic
         with:
-          client-id: ${{ vars.TS_MAIN_CLIENT_ID }}
-          audience: ${{ vars.TS_MAIN_AUDIENCE }}
+          client-id: ${{ github.event_name == 'pull_request' && vars.TS_CLIENT_ID || vars.TS_MAIN_CLIENT_ID }}
+          audience: ${{ github.event_name == 'pull_request' && vars.TS_AUDIENCE || vars.TS_MAIN_AUDIENCE }}
           cache-key: ${{ vars.ATTIC_PUBLIC_KEY }}
       - name: Restore Python from Attic and upstream without building
         env:
           PYTHON_ROOT: ${{ needs.publish.outputs.python-root }}
         run: |
+          # PRs only verify already-published dependencies; they never publish.
+          if [[ -z "$PYTHON_ROOT" ]]; then
+            PYTHON_ROOT=$(nix eval --raw --max-jobs 0 --option builders '' .#devShells.x86_64-linux.default.IXYK_NIX_PYTHON_ROOT)
+          fi
           [[ "$PYTHON_ROOT" =~ ^/nix/store/[a-z0-9]{32}-python[^/]*$ ]]
+          test ! -e "$PYTHON_ROOT"
           # Attic omits paths already available from the upstream Nix cache.
           # Disable both local and remote builds: every path must substitute.
           nix-store --realise "$PYTHON_ROOT" --max-jobs 0 --option builders '' \
