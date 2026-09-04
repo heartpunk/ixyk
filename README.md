@@ -4,13 +4,51 @@
 
 ## Abstract
 
-a proof of concept of the core of a technique for extracting symbolic state transformers with guards and updates expressed as smt lib fragments. currently extracts ~60 or so of 100 instrs accurately (stats updating in abstract with the implementation itself). basically, it subtracts the old state from the new state, and that's the whole thing. just takes the definitions seriously.
+a proof of concept of the core of a technique for extracting symbolic state transformers with guards and updates expressed as smt lib fragments. in the current top-100 representative campaign, 81 probes yield typed models and 78 complete full 10,000-case differential validation. basically, it subtracts the old state from the new state, and that's the whole thing. just takes the definitions seriously.
 
 ## Status
 
 this is v0.0.1. it works. it is described in literally minimal form. additional versions will be coming w/clarifications and more explanation as i ascertain what exactly needs to go where. this release is for those most interested, and/or the agents.
 
 also, literally just so i can move on to next steps.
+
+## Validation
+
+the current linux/reapi campaign takes one representative encoding from each of
+the 100 highest-frequency normalized x86-64 instruction families in the source
+catalog and requests 10,000 deterministic hypothesis examples per probe.
+
+| Raw result | Families | Actual executions | Share of top-100 occurrence mass | Interpretation |
+|---|---:|---:|---:|---|
+| pass | 78 | 780,000 | 99.007986% | every requested model-versus-unicorn comparison agreed |
+| mismatch | 3 | 6,621 | 0.048367% | hypothesis stopped after finding and shrinking a counterexample |
+| unsupported | 18 | 0 | 0.883665% | extraction reached a declared theory, state, or outcome boundary before fuzzing |
+| acquisition error | 1 | 0 | 0.059982% | the instruction did not produce a liftable acquisition artifact |
+| **total** | **100** | **786,621** | **100.000000%** | **1,000,000 examples were requested across the campaign** |
+
+the three raw mismatches are useful harness findings, but do not presently
+demonstrate incorrect instruction semantics:
+
+| Probe | Minimized disagreement | Classification |
+|---|---|---|
+| `bt rax, rbx` | model and unicorn choose different AF values | oracle false positive: AF is architecturally undefined for BT |
+| `bsr rax, rbx` | model and unicorn choose different PF values for a zero source | oracle false positive: PF and the zero-source destination are architecturally undefined for BSR |
+| `leave` | unicorn rejects mapping the canonical high-half address derived from RBP | model/oracle memory-domain mismatch: symbolic memory admits the address but the concrete harness cannot map its terminal page |
+
+each concrete execution initializes all 16 64-bit general-purpose registers,
+all 16 256-bit YMM registers, six modeled status flags, RIP, and sparse
+zero-default byte memory. unicorn executes exactly one instruction. the checker
+then requires exactly one symbolic edge and compares the complete modeled
+scalar, vector, flag, program-counter, and memory post-state. generation uses a
+fixed seed, disables the hypothesis example database, and shrinks the first
+disagreement.
+
+the 99.007986% figure is occurrence-weighted **within these top 100 families**.
+it is not a claim that every encoding or operand form—or 99% of all dynamically
+executed instructions—has been validated. see the full
+[`validation-notes.md`](validation-notes.md) evidence ledger for the complete
+100-family results, model shapes, failure taxonomy, witnesses, and additional
+control-flow caveats.
 
 ## Reference Artifacts
 
