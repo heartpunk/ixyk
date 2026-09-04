@@ -1,0 +1,46 @@
+name: Publish Attic dependencies
+on:
+  push:
+    branches: [main]
+    paths: [flake.nix, flake.lock, .github/actions/attic/**, .github/workflows/attic-publish.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+  id-token: write
+concurrency:
+  group: attic-publish
+  cancel-in-progress: false
+jobs:
+  publish:
+    if: github.ref == 'refs/heads/main' && vars.ATTIC_ENABLED == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    # Restrict this environment to main before adding its write token.
+    environment: attic-publish
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          persist-credentials: false
+      - uses: cachix/install-nix-action@b85815f71a6de0ddee80b8a80a98d43f4bcc66c7 # v31
+        with:
+          github_access_token: ${{ github.token }}
+      - uses: ./.github/actions/attic
+        with:
+          client-id: ${{ vars.TS_CLIENT_ID }}
+          audience: ${{ vars.TS_AUDIENCE }}
+          cache-key: ${{ vars.ATTIC_PUBLIC_KEY }}
+      - name: Realize exact Linux development closure
+        run: nix develop --print-build-logs --profile "$RUNNER_TEMP/ixyk-devshell" --command true
+      - name: Install pinned Attic client
+        run: |
+          revision=$(jq -er '.nodes.nixpkgs.locked.rev' flake.lock)
+          [[ "$revision" =~ ^[0-9a-f]{40}$ ]]
+          nix build "github:NixOS/nixpkgs/$revision#attic-client" --out-link "$RUNNER_TEMP/attic-client"
+      - name: Publish closure
+        env:
+          ATTIC_TOKEN: ${{ secrets.ATTIC_WRITE_TOKEN }}
+        run: |
+          test -n "$ATTIC_TOKEN"
+          export XDG_CONFIG_HOME="$RUNNER_TEMP/attic-config"
+          "$RUNNER_TEMP/attic-client/bin/attic" login ci http://abraxas.quetzal-celsius.ts.net:8080 "$ATTIC_TOKEN"
+          "$RUNNER_TEMP/attic-client/bin/attic" push ci:ixyk-ci "$RUNNER_TEMP/ixyk-devshell"

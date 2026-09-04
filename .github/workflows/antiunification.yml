@@ -7,6 +7,7 @@ on:
   workflow_dispatch:
 permissions:
   contents: read
+  id-token: write
 concurrency:
   group: au-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
@@ -37,6 +38,18 @@ jobs:
         if: steps.feature.outputs.present == 'true'
         with:
           github_access_token: ${{ github.token }}
+      - name: Read Attic cache over the tailnet
+        if: >-
+          steps.feature.outputs.present == 'true' && vars.ATTIC_ENABLED == 'true' &&
+          (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
+        uses: ./.github/actions/attic
+        with:
+          client-id: ${{ vars.TS_CLIENT_ID }}
+          audience: ${{ vars.TS_AUDIENCE }}
+          cache-key: ${{ vars.ATTIC_PUBLIC_KEY }}
+      - name: Realize Python dependencies
+        if: steps.feature.outputs.present == 'true'
+        run: nix develop --print-build-logs --command true
       - name: Fetch pinned NativeLink release
         if: steps.feature.outputs.present == 'true'
         run: |
