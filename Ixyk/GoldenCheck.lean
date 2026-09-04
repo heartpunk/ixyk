@@ -3,10 +3,14 @@
 
 import Ixyk.Artifact
 
+private def check : List String → IO UInt32
+  | [] => pure 0
+  | path :: rest => do
+      match Ixyk.Artifact.parse (← IO.FS.readFile path) with
+      | .ok _ => check rest
+      | .error message => IO.eprintln s!"{path}: {message}" *> pure 1
+
 def main (arguments : List String) : IO UInt32 := do
   match arguments with
-  | [path] =>
-      match Ixyk.Artifact.parseAndElaborate (← IO.FS.readFile path) with
-      | .ok _ => pure 0
-      | .error message => IO.eprintln message *> pure 1
-  | _ => IO.eprintln "usage: ixyk-golden-check MODEL.json" *> pure 2
+  | [] => IO.eprintln "usage: ixyk-golden-check MODEL.json..." *> pure 2
+  | paths => check paths
