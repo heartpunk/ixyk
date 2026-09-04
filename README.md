@@ -5,7 +5,7 @@
 
 ## Abstract
 
-a proof of concept of the core of a technique for extracting symbolic state transformers with guards and updates expressed as smt lib fragments. in the current top-100 representative campaign, 81 probes yield typed models and 78 complete full 10,000-case differential validation. basically, it subtracts the old state from the new state, and that's the whole thing. just takes the definitions seriously.
+a proof of concept of the core of a technique for extracting symbolic state transformers with guards and updates expressed as smt lib fragments. 81/100 opcodes get models from angr, 78/100 pass the full 10k sample differential fuzz pass comparing extracted models to unicorn behavior. tl;dr: it subtracts the old state from the new state, and that's the whole thing. just takes the definitions seriously.
 
 ## Status
 
@@ -15,11 +15,10 @@ also, literally just so i can move on to next steps.
 
 ## Citation
 
-the archived v0.0.1 release has the version-specific DOI
-[`10.5281/zenodo.22290192`](https://doi.org/10.5281/zenodo.22290192). the project
-badge and concept DOI
-[`10.5281/zenodo.22290191`](https://doi.org/10.5281/zenodo.22290191) resolve to
-the latest release and collect all archived versions.
+v0.0.1 release has the version-specific DOI
+[`10.5281/zenodo.22290192`](https://doi.org/10.5281/zenodo.22290192). the aggregate DOI is and resolves
+[`10.5281/zenodo.22290191`](https://doi.org/10.5281/zenodo.22290191) to
+the latest release and all archived versions.
 
 > Sophie Smithburg. (2026). *ixyk: symbolic state diffs are all you need*
 > (v0.0.1). Zenodo. https://doi.org/10.5281/zenodo.22290192
@@ -82,6 +81,7 @@ linux/reapi toolchain.
 ## Future Work
 
 - for this repo
+  - generalize. not just one instr variant per opcode. should be exhaustive. was oversight. have technique impled in other repo, porting presently.
   - polish/elision pass for AI prose in README (minimal as is FYI!)
   - turning the readme into a paper
   - floating point
