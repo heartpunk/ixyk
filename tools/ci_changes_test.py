@@ -62,7 +62,7 @@ class SelectionTest(unittest.TestCase):
                 )
 
     def test_cache_selection(self):
-        for path in ("nix/dev-environment.nix", "nix/reapi.nix", "tools/xed_enc2.nix",
+        for path in ("nix/dev-environment.nix", "nix/lean.nix", "nix/reapi.nix", "tools/xed_enc2.nix",
                      ".github/workflows/cachix.yml", "tools/ci_cachix_restore.py"):
             self.assertIn("cache", affected([path]))
         for path in ("README.md", "extractor/xed.py", "compose.reapi.yaml",
@@ -71,7 +71,7 @@ class SelectionTest(unittest.TestCase):
 
     def test_newcomer_exact_inputs(self):
         inputs = {
-            "flake.nix", "flake.lock", "nix/dev-environment.nix",
+            "flake.nix", "flake.lock", "nix/dev-environment.nix", "nix/lean.nix",
             "tools/xed_enc2.nix", "tools/xed_enc2_dispatch.py",
             "tools/dev_check.py", "tools/dev_smoke.py", ".bazelversion",
             "lean-toolchain", ".github/workflows/dev-environment.yml",

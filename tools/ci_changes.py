@@ -10,6 +10,7 @@ NEWCOMER_INPUTS = {
     "flake.nix",
     "flake.lock",
     "nix/dev-environment.nix",
+    "nix/lean.nix",
     "tools/xed_enc2.nix",
     "tools/xed_enc2_dispatch.py",
     "tools/dev_check.py",

@@ -29,7 +29,7 @@ def configuration(root: Path, port: int, worker_port: int, jobs: int, entrypoint
             }
         }
 
-    contract = "ixyk-e7a3ca80-python312-lean430-procns-v1"
+    contract = "ixyk-e7a3ca80-python312-lean431-procns-v2"
     return {
         "stores": [
             {"name": "CAS", **filesystem("cas", 2_000_000_000)},

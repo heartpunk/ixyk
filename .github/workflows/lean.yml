@@ -45,12 +45,9 @@ jobs:
       - name: Build Lean validation binaries
         if: steps.feature.outputs.present == 'true'
         run: |
-          revision=$(jq -er '.nodes.nixpkgs.locked.rev' flake.lock)
-          [[ "$revision" =~ ^[0-9a-f]{40}$ ]]
-          nixpkgs="github:NixOS/nixpkgs/$revision"
           # Variables in the quoted script are evaluated by the inner shell.
           # shellcheck disable=SC2016
-          nix shell "$nixpkgs#lean4" "$nixpkgs#zstd" "$nixpkgs#python312" --command bash -euo pipefail -c '
+          nix develop .#lean --command bash -euo pipefail -c '
             expected=$(sed -n "s|^leanprover/lean4:v||p" lean-toolchain)
             actual=$(lean --version | sed -n "s/^Lean (version \([^,]*\),.*/\1/p")
             test -n "$expected" && test "$actual" = "$expected"
@@ -59,9 +56,7 @@ jobs:
       - name: Check artifact acceptance and rejection
         if: steps.feature.outputs.present == 'true' && steps.changes.outputs.lean == 'true'
         run: |
-          revision=$(jq -er '.nodes.nixpkgs.locked.rev' flake.lock)
-          nix shell "github:NixOS/nixpkgs/$revision#python312" "github:NixOS/nixpkgs/$revision#zstd" \
-            --command python tools/ci_lean.py
+          nix develop .#lean --command python tools/ci_lean.py
       - name: Differential Python-Z3 versus Lean semantics
         if: steps.feature.outputs.present == 'true' && steps.changes.outputs.differential == 'true'
-        run: nix shell --impure --file tools/lean_fuzz_env.nix --command python -m tools.lean_differential
+        run: nix develop .#lean --command python -m tools.lean_differential

@@ -40,6 +40,7 @@ let
     ps.z3-solver
   ]);
   bazelVersion = nixpkgs.lib.removeSuffix "\n" (builtins.readFile ../.bazelversion);
+  lean = import ./lean.nix { inherit pkgs; };
   leanVersion = nixpkgs.lib.removePrefix "leanprover/lean4:v"
     (nixpkgs.lib.removeSuffix "\n" (builtins.readFile ../lean-toolchain));
   # The pinned nixpkgs Bazel bootstrap fails in the Darwin linker. Materialize
@@ -59,6 +60,9 @@ let
   } else pkgs.bazel_9;
   environment = {
     ELAN = "";
+    # rules_cc detects lld on the client; bind its path for remote link actions.
+    BAZEL_LINKOPTS = if pkgs.stdenv.isLinux then
+      "-B${pkgs.llvmPackages.lld}/bin" else "";
     IXYK_NIX_PYTHON_ROOT = "${python}";
     IXYK_NIX_XED_ROOT = if pkgs.stdenv.isLinux then
       "${import ../tools/xed_enc2.nix { inherit pkgs; }}" else "";
@@ -84,7 +88,7 @@ let
     pkgs.gnugrep
     pkgs.git
     pkgs.jujutsu
-    pkgs.lean4
+    lean
     pkgs.ruff
     pkgs.stdenv.cc
     pkgs.zstd
@@ -104,7 +108,7 @@ let
   '';
 in
 assert pkgs.bazel_9.version == bazelVersion;
-assert pkgs.lean4.version == leanVersion;
+assert lean.version == leanVersion;
 {
   shell = pkgs.mkShell (environment // { inherit packages; });
   package = pkgs.buildEnv {
