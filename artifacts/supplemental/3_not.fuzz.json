@@ -12,7 +12,7 @@
       "strategy": "ixyk.amd64-registers-flags.v1"
     }
   },
-  "elapsed_seconds": 6.9824623190797865,
+  "elapsed_seconds": 4.31249494664371,
   "examples_requested": 100,
   "executions": 100,
   "instruction_hex": "48f7d0",

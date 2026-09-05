@@ -8,11 +8,11 @@
     "identity": {
       "hypothesis": "6.160.0",
       "instruction_hex": "58",
-      "model_sha256": "91b4fcbf0672462fb53d1540e56c01bdc2efe690a1d8a0d29650337faf2a6562",
+      "model_sha256": "8eb94afb094e1dea88543e1043626a8361eb883b522bf865c728ad34cf659841",
       "strategy": "ixyk.amd64-registers-flags.v1"
     }
   },
-  "elapsed_seconds": 6.908387726871297,
+  "elapsed_seconds": 5.740166889037937,
   "examples_requested": 100,
   "executions": 100,
   "instruction_hex": "58",
