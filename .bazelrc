@@ -2,6 +2,7 @@ common --enable_bzlmod
 common --experimental_isolated_extension_usages
 common --repo_env=GIT_CONFIG_GLOBAL=/dev/null
 common --repo_env=IXYK_NIX_LIBSTDCXX_ROOT
+common --repo_env=IXYK_NIX_XED_ROOT
 
 build --incompatible_strict_action_env
 build --spawn_strategy=sandboxed
