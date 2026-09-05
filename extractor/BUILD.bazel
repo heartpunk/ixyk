@@ -272,7 +272,7 @@ py_binary(
     srcs = ["fuzz_main.py"],
     data = ["@nix_native_deps//:libstdcxx"],
     env = {
-        "GHOT_LIBSTDCXX_RLOCATION": "$(rlocationpath @nix_native_deps//:libstdcxx)",
+        "IXYK_LIBSTDCXX_RLOCATION": "$(rlocationpath @nix_native_deps//:libstdcxx)",
         "PYTHONNOUSERSITE": "1",
         "PYTHONSAFEPATH": "1",
     },
@@ -296,7 +296,7 @@ py_binary(
     srcs = ["main.py"],
     data = ["@nix_native_deps//:libstdcxx"],
     env = {
-        "GHOT_LIBSTDCXX_RLOCATION": "$(rlocationpath @nix_native_deps//:libstdcxx)",
+        "IXYK_LIBSTDCXX_RLOCATION": "$(rlocationpath @nix_native_deps//:libstdcxx)",
         "PYTHONNOUSERSITE": "1",
         "PYTHONSAFEPATH": "1",
     },
@@ -325,7 +325,7 @@ py_binary(
     srcs = ["acquire_main.py"],
     data = ["@nix_native_deps//:libstdcxx"],
     env = {
-        "GHOT_LIBSTDCXX_RLOCATION": "$(rlocationpath @nix_native_deps//:libstdcxx)",
+        "IXYK_LIBSTDCXX_RLOCATION": "$(rlocationpath @nix_native_deps//:libstdcxx)",
         "PYTHONNOUSERSITE": "1",
         "PYTHONSAFEPATH": "1",
     },
@@ -340,7 +340,7 @@ py_test(
     srcs = ["fuzz_stages_test.py"],
     data = ["@nix_native_deps//:libstdcxx"],
     env = {
-        "GHOT_LIBSTDCXX_RLOCATION": "$(rlocationpath @nix_native_deps//:libstdcxx)",
+        "IXYK_LIBSTDCXX_RLOCATION": "$(rlocationpath @nix_native_deps//:libstdcxx)",
         "PYTHONNOUSERSITE": "1",
         "PYTHONSAFEPATH": "1",
     },
@@ -362,7 +362,7 @@ py_test(
     srcs = ["acquire_cli_test.py"],
     data = ["@nix_native_deps//:libstdcxx"],
     env = {
-        "GHOT_LIBSTDCXX_RLOCATION": "$(rlocationpath @nix_native_deps//:libstdcxx)",
+        "IXYK_LIBSTDCXX_RLOCATION": "$(rlocationpath @nix_native_deps//:libstdcxx)",
         "PYTHONNOUSERSITE": "1",
         "PYTHONSAFEPATH": "1",
     },
@@ -380,7 +380,7 @@ py_test(
     srcs = ["extract_cli_test.py"],
     data = ["@nix_native_deps//:libstdcxx"],
     env = {
-        "GHOT_LIBSTDCXX_RLOCATION": "$(rlocationpath @nix_native_deps//:libstdcxx)",
+        "IXYK_LIBSTDCXX_RLOCATION": "$(rlocationpath @nix_native_deps//:libstdcxx)",
         "PYTHONNOUSERSITE": "1",
         "PYTHONSAFEPATH": "1",
     },
@@ -397,7 +397,7 @@ py_test(
     srcs = ["extract_add_test.py"],
     data = ["@nix_native_deps//:libstdcxx"],
     env = {
-        "GHOT_LIBSTDCXX_RLOCATION": "$(rlocationpath @nix_native_deps//:libstdcxx)",
+        "IXYK_LIBSTDCXX_RLOCATION": "$(rlocationpath @nix_native_deps//:libstdcxx)",
         "PYTHONNOUSERSITE": "1",
         "PYTHONSAFEPATH": "1",
     },
@@ -452,7 +452,7 @@ py_test(
     srcs = ["mul_regression_test.py"],
     data = ["@nix_native_deps//:libstdcxx"],
     env = {
-        "GHOT_LIBSTDCXX_RLOCATION": "$(rlocationpath @nix_native_deps//:libstdcxx)",
+        "IXYK_LIBSTDCXX_RLOCATION": "$(rlocationpath @nix_native_deps//:libstdcxx)",
         "PYTHONNOUSERSITE": "1",
         "PYTHONSAFEPATH": "1",
     },
@@ -471,7 +471,7 @@ py_test(
     srcs = ["scalar_closure_test.py"],
     data = ["@nix_native_deps//:libstdcxx"],
     env = {
-        "GHOT_LIBSTDCXX_RLOCATION": "$(rlocationpath @nix_native_deps//:libstdcxx)",
+        "IXYK_LIBSTDCXX_RLOCATION": "$(rlocationpath @nix_native_deps//:libstdcxx)",
         "PYTHONNOUSERSITE": "1",
         "PYTHONSAFEPATH": "1",
     },
@@ -488,7 +488,7 @@ py_test(
     srcs = ["artifact_test.py"],
     data = ["@nix_native_deps//:libstdcxx"],
     env = {
-        "GHOT_LIBSTDCXX_RLOCATION": "$(rlocationpath @nix_native_deps//:libstdcxx)",
+        "IXYK_LIBSTDCXX_RLOCATION": "$(rlocationpath @nix_native_deps//:libstdcxx)",
         "PYTHONNOUSERSITE": "1",
         "PYTHONSAFEPATH": "1",
     },
@@ -558,7 +558,7 @@ py_test(
     srcs = ["instruction_schema_test.py"],
     data = ["@nix_native_deps//:libstdcxx"],
     env = {
-        "GHOT_LIBSTDCXX_RLOCATION": "$(rlocationpath @nix_native_deps//:libstdcxx)",
+        "IXYK_LIBSTDCXX_RLOCATION": "$(rlocationpath @nix_native_deps//:libstdcxx)",
         "PYTHONNOUSERSITE": "1",
         "PYTHONSAFEPATH": "1",
     },

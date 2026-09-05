@@ -13,7 +13,7 @@ def semantic_regression_test(name, instruction_hex, args = []):
         args = ["--instruction-hex", instruction_hex] + args,
         data = ["@nix_native_deps//:libstdcxx"],
         env = {
-            "GHOT_LIBSTDCXX_RLOCATION": "$(rlocationpath @nix_native_deps//:libstdcxx)",
+            "IXYK_LIBSTDCXX_RLOCATION": "$(rlocationpath @nix_native_deps//:libstdcxx)",
             "PYTHONNOUSERSITE": "1",
             "PYTHONSAFEPATH": "1",
         },

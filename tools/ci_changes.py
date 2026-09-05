@@ -80,6 +80,10 @@ def affected(paths):
             selected |= SUITES
         elif path.endswith(".lean") or path in {"lean-toolchain", "lake-manifest.json"}:
             selected |= {"lean", "differential"}
+        elif path.startswith(("third_party/lean_bazel/", "lean/")) or path in {
+            "tools/lean_project.py", "tools/lean_reproduce.py", "tools/lean_bazel_test.py", "tools/lean_runfiles.py", "tools/lean_differential_bazel.py",
+        }:
+            selected |= {"lint", "lean", "differential"}
         elif path.startswith("catalog/"):
             selected |= {"lint", "golden", "au"}
         elif path.startswith("extractor/"):
@@ -100,7 +104,7 @@ def affected(paths):
             or path.endswith(".bzl")
             or path in {".bazelrc", ".bazelversion"}
         ):
-            selected |= {"lint", "au"}
+            selected |= {"lint", "au", "lean", "differential"}
         else:
             selected |= SUITES
     return selected

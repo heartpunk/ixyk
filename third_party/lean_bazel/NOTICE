@@ -1,0 +1,11 @@
+The Starlark import-artifact traversal in tools/lean_module.bzl translates
+Lake.fetchTransImportArts from Lean 4.31.0, src/lake/Lake/Build/Module.lean.
+Copyright (c) 2021 Microsoft Corporation. All rights reserved.
+Authors: Sebastian Ullrich, Mac Malone, Siddharth Bhat.
+Upstream license: Apache License 2.0 (LICENSE.Apache-2.0).
+Upstream source revision: 68218e876d2a38b1985b8590fff244a83c321783.
+https://github.com/leanprover/lean4/blob/68218e876d2a38b1985b8590fff244a83c321783/src/lake/Lake/Build/Module.lean
+
+The port and modifications are by Sophie Smithburg and distributed as part of
+Ixyk under GPL-3.0-or-later. Public dependencies retain their upstream licenses;
+the pinned Lean SDK includes its own LICENSE and LICENSES files.

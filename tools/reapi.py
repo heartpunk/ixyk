@@ -29,15 +29,17 @@ def configuration(root: Path, port: int, worker_port: int, jobs: int, entrypoint
             }
         }
 
+    # Lean native compilation declares the full ~3 GB SDK. Keep enough CAS
+    # space for that input set plus generated artifacts without live eviction.
     contract = "ixyk-e7a3ca80-python312-lean431-procns-v2"
     return {
         "stores": [
-            {"name": "CAS", **filesystem("cas", 2_000_000_000)},
+            {"name": "CAS", **filesystem("cas", 8_000_000_000)},
             {"name": "AC", **filesystem("ac", 100_000_000)},
             {
                 "name": "WORKER",
                 "fast_slow": {
-                    "fast": filesystem("worker-cas", 2_000_000_000),
+                    "fast": filesystem("worker-cas", 8_000_000_000),
                     "slow": {"ref_store": {"name": "CAS"}},
                 },
             },

@@ -1,0 +1,12 @@
+module(
+    name = "lean_bazel",
+    version = "0.1.0",
+)
+
+bazel_dep(name = "platforms", version = "1.1.0")
+bazel_dep(name = "rules_cc", version = "0.2.22")
+
+lean_sdk = use_extension("//toolchains:lean_sdk_repository.bzl", "lean_sdk")
+use_repo(lean_sdk, "lean_sdk")
+
+register_toolchains("//toolchains:registered_lean_sdk")

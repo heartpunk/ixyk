@@ -28,6 +28,8 @@ jobs:
         id: changes
       - name: Test CI dependency filters
         run: python3 -m unittest discover -s tools -p ci_changes_test.py
+      - name: Test Lean reproduction source isolation and evidence parsing
+        run: python3 -m unittest discover -s tools -p lean_bazel_test.py
       - name: Test public cache restore verification
         run: python3 -m unittest discover -s tools -p ci_cachix_restore_test.py
       - name: Test REAPI launcher lifecycle and isolation settings

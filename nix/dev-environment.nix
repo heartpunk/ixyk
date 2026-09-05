@@ -41,6 +41,7 @@ let
   ]);
   bazelVersion = nixpkgs.lib.removeSuffix "\n" (builtins.readFile ../.bazelversion);
   lean = import ./lean.nix { inherit pkgs; };
+  leanRuntime = import ../third_party/lean_bazel/runtime.nix { inherit pkgs; };
   leanVersion = nixpkgs.lib.removePrefix "leanprover/lean4:v"
     (nixpkgs.lib.removeSuffix "\n" (builtins.readFile ../lean-toolchain));
   # The pinned nixpkgs Bazel bootstrap fails in the Darwin linker. Materialize
@@ -63,6 +64,8 @@ let
     # rules_cc detects lld on the client; bind its path for remote link actions.
     BAZEL_LINKOPTS = if pkgs.stdenv.isLinux then
       "-B${pkgs.llvmPackages.lld}/bin" else "";
+    LEAN_BAZEL_RUNTIME_ROOT = if pkgs.stdenv.isLinux then "${leanRuntime.leanRuntime}" else "";
+    LEAN_BAZEL_COMPILE_TOOLS_ROOT = if pkgs.stdenv.isLinux then "${leanRuntime.leanCompileTools}" else "";
     IXYK_NIX_PYTHON_ROOT = "${python}";
     IXYK_NIX_XED_ROOT = if pkgs.stdenv.isLinux then
       "${import ../tools/xed_enc2.nix { inherit pkgs; }}" else "";

@@ -38,7 +38,7 @@ def verify(workspace: Path) -> dict[str, int]:
     actual = {
         p.name
         for p in directory.iterdir()
-        if p.name not in {"README.md", "MANIFEST.sha256"}
+        if p.name not in {"README.md", "MANIFEST.sha256", "BUILD.bazel"}
     }
     if actual != expected:
         raise ValueError("missing or unexpected corpus files")
