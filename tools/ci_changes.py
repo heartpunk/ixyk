@@ -1,4 +1,4 @@
-"""Small, conservative dependency map for CI; unknown paths run every suite."""
+"""CI dependency map; unknown paths run project suites, newcomer has exact inputs."""
 
 import os
 from pathlib import Path
@@ -6,10 +6,27 @@ import subprocess
 
 
 SUITES = {"lint", "golden", "lean", "differential", "au"}
+NEWCOMER_INPUTS = {
+    "flake.nix",
+    "flake.lock",
+    "nix/dev-environment.nix",
+    "tools/xed_enc2.nix",
+    "tools/xed_enc2_dispatch.py",
+    "tools/dev_check.py",
+    "tools/dev_smoke.py",
+    ".bazelversion",
+    "lean-toolchain",
+    ".github/workflows/dev-environment.yml",
+    ".github/actions/changes/action.yml",
+    "tools/ci_changes.py",
+}
+ALL_SUITES = SUITES | {"newcomer"}
 
 
 def affected(paths):
-    selected = set()
+    # Unknown paths still run the project suites, but cannot implicitly
+    # select the expensive environment realization.
+    selected = {"newcomer"} if NEWCOMER_INPUTS.intersection(paths) else set()
     for path in paths:
         name = Path(path).name
         if (
@@ -93,10 +110,10 @@ def changed_paths():
 
 if __name__ == "__main__":
     paths = changed_paths()
-    selected = SUITES if paths is None else affected(paths)
+    selected = ALL_SUITES if paths is None else affected(paths)
     print(
         "Selected suites:", ", ".join(sorted(selected)) or "none (documentation only)"
     )
     with open(os.environ["GITHUB_OUTPUT"], "a") as output:
-        for suite in sorted(SUITES):
+        for suite in sorted(ALL_SUITES):
             print(f"{suite}={str(suite in selected).lower()}", file=output)

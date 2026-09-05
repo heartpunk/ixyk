@@ -10,7 +10,7 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
-from ci_changes import SUITES, affected, changed_paths
+from ci_changes import ALL_SUITES, NEWCOMER_INPUTS, SUITES, affected, changed_paths
 
 
 class SelectionTest(unittest.TestCase):
@@ -49,7 +49,38 @@ class SelectionTest(unittest.TestCase):
         }
         for path, expected in cases.items():
             with self.subTest(path=path):
-                self.assertEqual(affected([path.encode().decode()]), expected)
+                self.assertEqual(
+                    affected([path.encode().decode()]),
+                    expected | ({"newcomer"} if path in NEWCOMER_INPUTS else set()),
+                )
+
+    def test_newcomer_exact_inputs(self):
+        inputs = {
+            "flake.nix", "flake.lock", "nix/dev-environment.nix",
+            "tools/xed_enc2.nix", "tools/xed_enc2_dispatch.py",
+            "tools/dev_check.py", "tools/dev_smoke.py", ".bazelversion",
+            "lean-toolchain", ".github/workflows/dev-environment.yml",
+            ".github/actions/changes/action.yml", "tools/ci_changes.py",
+        }
+        self.assertEqual(NEWCOMER_INPUTS, inputs)
+        for path in inputs:
+            with self.subTest(path=path):
+                self.assertIn("newcomer", affected([path]))
+
+    def test_newcomer_skips_unrelated_and_unknown_paths(self):
+        for path in (
+            "extractor/artifact.py", "antiunification/algebra.py",
+            "Ixyk/QfAbv/Semantics.lean", "catalog/x86_64_probes.json",
+            "artifacts/golden/2_add.model.json", "lakefile.lean",
+            "tools/ci_lean.py", "tools/lean_fuzz_env.nix",
+            "tools/ci_changes_test.py", ".github/workflows/ci.yml",
+            ".github/workflows/attic-publish.yml", "MODULE.bazel",
+            "MODULE.bazel.lock", ".bazelrc", "tools/nix_python.bzl",
+            "README.md", ".envrc", "unknown/new-input.json",
+        ):
+            with self.subTest(path=path):
+                self.assertNotIn("newcomer", affected([path]))
+        self.assertIn("newcomer", affected(["README.md", "flake.lock"]))
 
     def test_union_and_empty(self):
         self.assertEqual(SUITES, {"lint", "golden", "lean", "differential", "au"})
@@ -144,7 +175,7 @@ class SelectionTest(unittest.TestCase):
             (
                 "workflow_dispatch",
                 b"",
-                {"lint", "golden", "lean", "differential", "au"},
+                ALL_SUITES,
             ),
             ("push", b"README.md\0", set()),
             (
@@ -176,7 +207,7 @@ class SelectionTest(unittest.TestCase):
                     )
                 expected = "existing=value\n" + "".join(
                     f"{suite}={str(suite in enabled).lower()}\n"
-                    for suite in ["au", "differential", "golden", "lean", "lint"]
+                    for suite in sorted(ALL_SUITES)
                 )
                 self.assertEqual(output.read_text(), expected)
                 self.assertEqual(
