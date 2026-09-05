@@ -10,7 +10,7 @@ import sys
 
 def main():
     # No project imports in this entrypoint: the child's first project import
-    # must be fuzz_runner, both here and when multiprocessing unpickles _worker.
+    # must be fuzz_runner, as it is in the supervised subprocess.
     script = """
 from extractor.fuzz_runner import run_bounded
 from extractor.extractor import _extract_concrete

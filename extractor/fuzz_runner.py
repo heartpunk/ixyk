@@ -13,6 +13,7 @@ from tempfile import TemporaryFile
 from time import monotonic
 import traceback
 
+from extractor import z3_runtime as _z3_runtime  # noqa: F401
 from extractor.artifact import InstructionModel
 from extractor.fuzzer import fuzz
 

@@ -102,7 +102,6 @@ py_library(
     target_compatible_with = _LINUX_X86_64,
     deps = [
         ":package",
-        ":z3_runtime",
         requirement("z3-solver"),
     ],
 )
@@ -233,6 +232,7 @@ py_library(
     deps = [
         ":artifact",
         ":fuzzer",
+        ":z3_runtime",
     ],
 )
 
@@ -240,14 +240,21 @@ py_test(
     name = "fuzz_bootstrap_test",
     srcs = ["fuzz_bootstrap_test.py"],
     data = ["@nix_native_deps//:libstdcxx"],
-    deps = [":extractor", ":fuzz_runner", ":runtime"],
+    deps = [
+        ":extractor",
+        ":fuzz_runner",
+        ":runtime",
+    ],
 )
 
 py_test(
     name = "fuzz_runner_test",
     srcs = ["fuzz_runner_test.py"],
     data = ["@nix_native_deps//:libstdcxx"],
-    deps = [":fuzz_runner", requirement("pytest")],
+    deps = [
+        ":fuzz_runner",
+        requirement("pytest"),
+    ],
 )
 
 py_library(
