@@ -40,6 +40,14 @@ def expressions(draw):
                 st.builds(lambda a, b: TypedExpr.binary("bv_xor", a, b), child, child),
                 st.builds(lambda a, b: TypedExpr.binary("bv_add", a, b), child, child),
                 st.builds(lambda a, b: TypedExpr.binary("bv_mul", a, b), child, child),
+                st.builds(lambda a, b: TypedExpr.binary("bv_sub", a, b), child, child),
+                st.builds(
+                    lambda x, k: TypedExpr.binary(
+                        "bv_shl", x, TypedExpr.bv_lit(width, k)
+                    ),
+                    child,
+                    st.integers(0, min(width + 1, (1 << width) - 1)),
+                ),
             ),
             max_leaves=15,
         )
@@ -139,6 +147,75 @@ def test_multiplication_order_uses_correspondence(width):
     expected = TypedExpr.binary("bv_mul", x, y)
     assert normalize_expression(expected, labels) == expected
     assert normalize_expression(TypedExpr.binary("bv_mul", y, x), labels) == expected
+
+
+@pytest.mark.parametrize("width", [8, 32, 64, 128])
+@pytest.mark.parametrize("amount", [0, 1, 2, 3])
+def test_scaling_forms_inside_arithmetic(width, amount):
+    sort = TermSort.bv(width)
+    x, y = (TypedExpr.var(name, sort) for name in ("x", "y"))
+    factor = TypedExpr.bv_lit(width, 1 << amount)
+    product = TypedExpr.binary("bv_mul", factor, x)
+    shift = TypedExpr.binary("bv_shl", x, TypedExpr.bv_lit(width, amount))
+    sliced = (
+        TypedExpr(
+            "concat",
+            sort,
+            (
+                TypedExpr(
+                    "extract",
+                    TermSort.bv(width - amount),
+                    (x,),
+                    hi=width - amount - 1,
+                    lo=0,
+                ),
+                TypedExpr.bv_lit(amount, 0),
+            ),
+        )
+        if amount
+        else x
+    )
+    expected = normalize_expression(TypedExpr.binary("bv_add", y, product))
+    for term in (shift, sliced, product):
+        raw = TypedExpr.binary("bv_add", y, term)
+        assert normalize_expression(raw) == expected
+        assert normalize_expression(expected) == expected
+        mask = (1 << width) - 1
+        for x_value, y_value in ((0, 0), (1, mask), (mask, 1), (mask, mask)):
+            check_concrete_normalization(raw, x_value, y_value)
+
+
+def test_shift_distributivity_example():
+    x, y = (TypedExpr.var(name, TermSort.bv(64)) for name in ("x", "y"))
+    shifted = TypedExpr.binary(
+        "bv_shl", TypedExpr.binary("bv_add", x, y), TypedExpr.bv_lit(64, 1)
+    )
+    expr = TypedExpr.unary(
+        "bv_not", TypedExpr.binary("bv_mul", TypedExpr.bv_lit(64, 3), shifted)
+    )
+    for x_value, y_value in ((0, 0), (1, 2), ((1 << 64) - 1, 1)):
+        check_concrete_normalization(expr, x_value, y_value)
+
+
+def test_unrecognized_concat_is_not_scaling():
+    x = TypedExpr.var("x", TermSort.bv(8))
+    for lo, value in ((1, 0), (0, 1)):
+        high = TypedExpr("extract", TermSort.bv(6), (x,), hi=lo + 5, lo=lo)
+        expr = TypedExpr("concat", TermSort.bv(8), (high, TypedExpr.bv_lit(2, value)))
+        assert normalize_expression(expr) == expr
+
+
+def test_equal_order_labels_do_not_merge_distinct_variables():
+    x, y = (TypedExpr.var(name, TermSort.bv(8)) for name in ("x", "y"))
+    value = normalize_expression(
+        TypedExpr.binary("bv_sub", x, y), {"x": ("same",), "y": ("same",)}
+    )
+    context = z3.Context()
+    variables = {
+        "x": z3.BitVecVal(1, 8, ctx=context),
+        "y": z3.BitVecVal(2, 8, ctx=context),
+    }
+    assert z3.simplify(expr_to_z3(value, variables, context)).as_long() == 255
 
 
 if __name__ == "__main__":
