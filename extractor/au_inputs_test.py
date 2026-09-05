@@ -167,5 +167,17 @@ def test_input_generation_rejects_encoder_returning_requested_bytes(monkeypatch)
         instruction_inputs(bytes.fromhex("4801d8"))
 
 
+def test_normalization_labels_group_variables_and_ignore_other_atoms():
+    from extractor.model_syntax import CanonicalVariable
+    from extractor.operand_slots import normalization_labels
+
+    x = CanonicalVariable("rax", TermSort.bv(64))
+    y = CanonicalVariable("rbx", TermSort.bv(64))
+    assert normalization_labels({}) == {}
+    assert normalization_labels(
+        {"z": x, "immediate": BitVectorAtom(3, TermSort.bv(8)), "a": x, "other": y}
+    ) == {"rax": ("a", "z"), "rbx": ("other",)}
+
+
 if __name__ == "__main__":
     raise SystemExit(pytest.main([__file__, "-v"]))
