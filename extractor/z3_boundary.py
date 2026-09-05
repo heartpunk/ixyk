@@ -7,6 +7,8 @@ from __future__ import annotations
 
 from collections.abc import Callable
 
+from extractor import z3_runtime as _z3_runtime  # noqa: F401
+
 import z3
 
 

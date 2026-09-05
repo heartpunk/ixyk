@@ -61,4 +61,6 @@ jobs:
             //extractor:normalization_test \
             //extractor:n_plus_one_test \
             //extractor:instruction_schema_test \
-            //extractor:fuzz_stages_test
+            //extractor:fuzz_stages_test \
+            //extractor:fuzz_bootstrap_test \
+            //extractor:fuzz_runner_test
