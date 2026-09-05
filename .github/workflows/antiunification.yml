@@ -74,5 +74,6 @@ jobs:
             //antiunification:algebra_test \
             //antiunification:algebra_property_test \
             //extractor:model_syntax_property_test \
+            //extractor:normalization_test \
             //extractor:instruction_schema_test \
             //extractor:fuzz_stages_test
