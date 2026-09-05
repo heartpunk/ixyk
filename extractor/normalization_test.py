@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 from extractor import z3_runtime as _z3_runtime
+from dataclasses import replace
 from antiunification.many import antiunify_many
 from extractor.artifact import (
     Assignment,
@@ -38,6 +39,7 @@ def expressions(draw):
                 child.map(lambda x: TypedExpr.unary("bv_not", x)),
                 st.builds(lambda a, b: TypedExpr.binary("bv_xor", a, b), child, child),
                 st.builds(lambda a, b: TypedExpr.binary("bv_add", a, b), child, child),
+                st.builds(lambda a, b: TypedExpr.binary("bv_mul", a, b), child, child),
             ),
             max_leaves=15,
         )
@@ -104,6 +106,34 @@ def test_model_fields_and_exact_au_reconstruction():
     for value in (model, normalized):
         result = antiunify_many(QFAbvSyntax(), (value,), correspondences={})
         assert result.instantiate(result.substitutions[0]) == value
+
+
+@settings(max_examples=200, deadline=None)
+@given(expressions())
+def test_normalization_commutes_with_variable_renaming(expr):
+    names = {"x": "z", "y": "a"}  # Deliberately reverse lexical ordering.
+    labels = {"x": ("left",), "y": ("right",)}
+
+    def rename(node):
+        return replace(
+            node,
+            name=names.get(node.name, node.name),
+            args=tuple(rename(arg) for arg in node.args),
+        )
+
+    renamed_labels = {names[name]: label for name, label in labels.items()}
+    assert normalize_expression(rename(expr), renamed_labels) == rename(
+        normalize_expression(expr, labels)
+    )
+
+
+@pytest.mark.parametrize("width", [1, 8, 32, 64, 128])
+def test_multiplication_order_uses_correspondence(width):
+    x, y = (TypedExpr.var(name, TermSort.bv(width)) for name in ("z", "a"))
+    labels = {"z": ("left",), "a": ("right",)}
+    expected = TypedExpr.binary("bv_mul", x, y)
+    assert normalize_expression(expected, labels) == expected
+    assert normalize_expression(TypedExpr.binary("bv_mul", y, x), labels) == expected
 
 
 if __name__ == "__main__":
