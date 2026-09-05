@@ -40,6 +40,8 @@ jobs:
         if: steps.feature.outputs.present == 'true'
         with:
           github_access_token: ${{ github.token }}
+          extra_nix_config: |
+            accept-flake-config = true
       - name: Build Lean validation binaries
         if: steps.feature.outputs.present == 'true'
         run: |

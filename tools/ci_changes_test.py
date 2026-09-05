@@ -11,7 +11,7 @@ import unittest
 from unittest.mock import patch
 
 from ci_changes import (
-    ALL_SUITES, BLANK_VM_INPUTS, DOCKER_INPUTS, NEWCOMER_INPUTS, SUITES, affected, changed_paths,
+    ALL_SUITES, BLANK_VM_INPUTS, CACHE_INPUTS, DOCKER_INPUTS, NEWCOMER_INPUTS, SUITES, affected, changed_paths,
 )
 
 
@@ -57,8 +57,17 @@ class SelectionTest(unittest.TestCase):
                     affected([path.encode().decode()]),
                     expected | ({"newcomer"} if path in NEWCOMER_INPUTS else set())
                     | ({"blank_vm"} if path in BLANK_VM_INPUTS else set())
-                    | ({"docker"} if path in DOCKER_INPUTS else set()),
+                    | ({"docker"} if path in DOCKER_INPUTS else set())
+                    | ({"cache"} if path in CACHE_INPUTS else set()),
                 )
+
+    def test_cache_selection(self):
+        for path in ("nix/dev-environment.nix", "nix/reapi.nix", "tools/xed_enc2.nix",
+                     ".github/workflows/cachix.yml", "tools/ci_cachix_restore.py"):
+            self.assertIn("cache", affected([path]))
+        for path in ("README.md", "extractor/xed.py", "compose.reapi.yaml",
+                     "nix/docker-image.nix", "tools/ci_blank_vm.sh", "unknown/file"):
+            self.assertNotIn("cache", affected([path]))
 
     def test_newcomer_exact_inputs(self):
         inputs = {

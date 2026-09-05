@@ -26,6 +26,8 @@ jobs:
         if: steps.changes.outputs.golden == 'true'
         with:
           github_access_token: ${{ github.token }}
+          extra_nix_config: |
+            accept-flake-config = true
       - name: Verify corpus and checker rejection cases
         if: steps.changes.outputs.golden == 'true'
         shell: bash

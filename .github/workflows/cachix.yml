@@ -1,0 +1,117 @@
+name: Public dependency cache
+on:
+  pull_request:
+  push:
+    branches: [main]
+  merge_group:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: cachix-${{ github.event.pull_request.number || github.ref }}
+  queue: max
+jobs:
+  changes:
+    runs-on: ubuntu-24.04
+    outputs:
+      cache: ${{ steps.changes.outputs.cache }}
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: ./.github/actions/changes
+        id: changes
+  publish:
+    needs: changes
+    # Only branches in this repository may publish; fork PRs use the public cache.
+    if: >-
+      needs.changes.outputs.cache == 'true' &&
+      github.repository == 'heartpunk/ixyk' &&
+      (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: ubuntu-24.04
+            system: x86_64-linux
+          - runner: macos-15
+            system: aarch64-darwin
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          persist-credentials: false
+      - uses: cachix/install-nix-action@b85815f71a6de0ddee80b8a80a98d43f4bcc66c7 # v31
+        with:
+          github_access_token: ${{ github.token }}
+          extra_nix_config: |
+            accept-flake-config = true
+      - uses: cachix/cachix-action@38b082610b782e7e93e209c35fd730d399dee866 # v17
+        with:
+          name: ixyk
+          skipPush: true
+      - name: Realize and test explicit publication roots
+        shell: bash
+        run: |
+          set -euo pipefail
+          nix develop --profile "$RUNNER_TEMP/dev-profile" --command python tools/dev_smoke.py
+          nix build .#dev-environment --out-link "$RUNNER_TEMP/dev-environment"
+          "$RUNNER_TEMP/dev-environment/bin/ixyk-dev" python tools/dev_smoke.py
+          roots=("$RUNNER_TEMP/dev-profile" "$RUNNER_TEMP/dev-environment")
+          if [[ '${{ matrix.system }}' == x86_64-linux ]]; then
+            nix build .#reapi --out-link "$RUNNER_TEMP/reapi"
+            roots+=("$RUNNER_TEMP/reapi")
+          fi
+          nix path-info "${roots[@]}" > "$RUNNER_TEMP/roots.txt"
+          nix path-info --recursive "${roots[@]}" | jq -R . | jq -s . > "$RUNNER_TEMP/closure.json"
+      - name: Publish tested closures
+        env:
+          CACHIX_AUTH_TOKEN: ${{ secrets.CACHIX_AUTH_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$CACHIX_AUTH_TOKEN"
+          cachix push ixyk < "$RUNNER_TEMP/roots.txt"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: cachix-closure-${{ matrix.system }}
+          path: ${{ runner.temp }}/closure.json
+          retention-days: 7
+          if-no-files-found: error
+  restore:
+    needs: publish
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: ubuntu-24.04
+            system: x86_64-linux
+          - runner: macos-15
+            system: aarch64-darwin
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          persist-credentials: false
+      - uses: cachix/install-nix-action@b85815f71a6de0ddee80b8a80a98d43f4bcc66c7 # v31
+        with:
+          github_access_token: ${{ github.token }}
+          extra_nix_config: |
+            accept-flake-config = true
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: cachix-closure-${{ matrix.system }}
+          path: ${{ runner.temp }}/published
+      - name: Restore every non-upstream object without builds or credentials
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PUBLISHED_CLOSURE
+          PUBLISHED_CLOSURE=$(cat "$RUNNER_TEMP/published/closure.json")
+          python3 tools/ci_cachix_restore.py
+          nix develop --max-jobs 0 --option builders '' --command python tools/dev_smoke.py
+          nix build .#dev-environment --max-jobs 0 --option builders '' --out-link "$RUNNER_TEMP/restored"
+          "$RUNNER_TEMP/restored/bin/ixyk-dev" python tools/dev_smoke.py

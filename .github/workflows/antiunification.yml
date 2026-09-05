@@ -7,7 +7,6 @@ on:
   workflow_dispatch:
 permissions:
   contents: read
-  id-token: write
 concurrency:
   group: au-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
@@ -41,16 +40,8 @@ jobs:
         if: steps.feature.outputs.present == 'true'
         with:
           github_access_token: ${{ github.token }}
-      - name: Read Attic cache over the tailnet
-        if: >-
-          steps.feature.outputs.present == 'true' && vars.ATTIC_ENABLED == 'true' &&
-          ((github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository) ||
-           github.ref == 'refs/heads/main')
-        uses: ./.github/actions/attic
-        with:
-          client-id: ${{ github.event_name == 'pull_request' && vars.TS_CLIENT_ID || vars.TS_MAIN_CLIENT_ID }}
-          audience: ${{ github.event_name == 'pull_request' && vars.TS_AUDIENCE || vars.TS_MAIN_AUDIENCE }}
-          cache-key: ${{ vars.ATTIC_PUBLIC_KEY }}
+          extra_nix_config: |
+            accept-flake-config = true
       - name: Realize Python dependencies
         if: steps.feature.outputs.present == 'true'
         run: nix develop --print-build-logs --command true

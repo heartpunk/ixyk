@@ -28,12 +28,16 @@ jobs:
         id: changes
       - name: Test CI dependency filters
         run: python3 -m unittest discover -s tools -p ci_changes_test.py
+      - name: Test public cache restore verification
+        run: python3 -m unittest discover -s tools -p ci_cachix_restore_test.py
       - name: Test REAPI launcher lifecycle and isolation settings
         run: python3 -m unittest discover -s tools -p reapi_test.py
       - uses: cachix/install-nix-action@b85815f71a6de0ddee80b8a80a98d43f4bcc66c7 # v31
         if: steps.changes.outputs.lint == 'true'
         with:
           github_access_token: ${{ github.token }}
+          extra_nix_config: |
+            accept-flake-config = true
       - name: Check Python, Bazel, and workflow sources
         if: steps.changes.outputs.lint == 'true'
         shell: bash

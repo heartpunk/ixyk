@@ -32,6 +32,8 @@ jobs:
         if: steps.changes.outputs.docker == 'true'
         with:
           github_access_token: ${{ github.token }}
+          extra_nix_config: |
+            accept-flake-config = true
       - name: Build and test the self-contained image
         if: steps.changes.outputs.docker == 'true'
         run: bash tools/ci_docker.sh

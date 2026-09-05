@@ -29,6 +29,8 @@ jobs:
         if: steps.changes.outputs.newcomer == 'true'
         with:
           github_access_token: ${{ github.token }}
+          extra_nix_config: |
+            accept-flake-config = true
       - name: Realize the public development environment
         if: steps.changes.outputs.newcomer == 'true'
         run: |

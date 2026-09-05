@@ -1,6 +1,8 @@
 name: Select affected suites
 description: Conservative file dependency filters with full-run fallback
 outputs:
+  cache:
+    value: ${{ steps.select.outputs.cache }}
   docker:
     value: ${{ steps.select.outputs.docker }}
   blank_vm:
