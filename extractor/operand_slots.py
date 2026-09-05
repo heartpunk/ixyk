@@ -5,7 +5,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from typing import Protocol, cast
 
@@ -61,6 +61,15 @@ def canonical_bindings(
         else:
             bindings[field] = BitVectorAtom(value % (1 << 64), TermSort.bv(64))
     return bindings
+
+
+def normalization_labels(bindings: Mapping[str, object]) -> dict[str, tuple[str, ...]]:
+    """Give canonical variables stable labels from their supplied correspondence."""
+    labels: dict[str, list[str]] = {}
+    for label, atom in bindings.items():
+        if isinstance(atom, CanonicalVariable):
+            labels.setdefault(atom.name, []).append(label)
+    return {name: tuple(sorted(roles)) for name, roles in labels.items()}
 
 
 class OperandDecodeError(ValueError):

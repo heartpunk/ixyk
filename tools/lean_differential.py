@@ -218,7 +218,7 @@ def compare(executable, expr, bindings):
     assert type(actual) is type(expected) and actual == expected, (
         f"Python/Z3={expected!r}; Lean={actual!r}; replay JSON={payload}"
     )
-    normalized = normalize_expression(expr)
+    normalized = normalize_expression(expr, {"x": ("right",), "y": ("left",)})
     normalized_result = z3.simplify(expr_to_z3(normalized, environment, context))
     normalized_expected = (
         z3.is_true(normalized_result)
