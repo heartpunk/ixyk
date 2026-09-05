@@ -5,6 +5,7 @@
 
 from __future__ import annotations
 
+import argparse
 import json
 from pathlib import Path
 import subprocess
@@ -14,6 +15,11 @@ from tempfile import TemporaryDirectory
 CATALOG = Path(__file__).with_name("x86_64_top_100.json")
 OUTPUT = Path(__file__).with_name("x86_64_probes.json")
 STARLARK_OUTPUT = Path(__file__).with_name("x86_64_probes.bzl")
+SUPPLEMENTAL_PROBES = {
+    "PUSH": "push rax",
+    "POP": "pop rax",
+    "NOT": "not rax",
+}
 PROBES = {
     "MOV": "mov rax, rbx",
     "ADD": "add rax, rbx",
@@ -152,10 +158,18 @@ def assemble(assembly: str) -> bytes:
 
 
 def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--supplemental", action="store_true")
+    options = parser.parse_args()
     catalog = json.loads(CATALOG.read_text(encoding="utf-8"))
-    instructions = catalog["instructions"]
+    selected = SUPPLEMENTAL_PROBES if options.supplemental else PROBES
+    instructions = (
+        [{"rank": index, "name": name} for index, name in enumerate(selected, 1)]
+        if options.supplemental
+        else catalog["instructions"]
+    )
     names = [instruction["name"] for instruction in instructions]
-    if set(names) != set(PROBES) or len(names) != len(PROBES):
+    if set(names) != set(selected) or len(names) != len(selected):
         raise RuntimeError("probe names do not exactly cover the instruction catalog")
     version_lines = subprocess.run(
         ("llvm-mc", "--version"), check=True, capture_output=True, text=True
@@ -165,8 +179,8 @@ def main() -> None:
         {
             "rank": instruction["rank"],
             "name": instruction["name"],
-            "assembly": PROBES[instruction["name"]],
-            "bytes": assemble(PROBES[instruction["name"]]).hex(),
+            "assembly": selected[instruction["name"]],
+            "bytes": assemble(selected[instruction["name"]]).hex(),
         }
         for instruction in instructions
     ]
@@ -176,8 +190,19 @@ def main() -> None:
         "assembler": version,
         "probes": probes,
     }
-    _ = OUTPUT.write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
-    lines = ["X86_64_PROBES = ["]
+    output, starlark_output = OUTPUT, STARLARK_OUTPUT
+    symbol = "X86_64_PROBES"
+    if options.supplemental:
+        result.pop("catalog_schema")
+        result["selection"] = (
+            "manually selected supplemental families; "
+            "rank is local ordering, not occurrence ranking"
+        )
+        output = OUTPUT.with_name("x86_64_supplemental_probes.json")
+        starlark_output = STARLARK_OUTPUT.with_name("x86_64_supplemental_probes.bzl")
+        symbol = "X86_64_SUPPLEMENTAL_PROBES"
+    _ = output.write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
+    lines = [symbol + " = ["]
     lines.extend(
         "    ({rank}, {name}, {assembly}, {bytes}),".format(
             rank=probe["rank"],
@@ -188,7 +213,7 @@ def main() -> None:
         for probe in probes
     )
     lines.append("]")
-    _ = STARLARK_OUTPUT.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    _ = starlark_output.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
 if __name__ == "__main__":

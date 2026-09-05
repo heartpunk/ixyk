@@ -1,0 +1,25 @@
+{
+  "schema": "ixyk.x86_64.acquisition_probes.v1",
+  "assembler": "LLVM version 21.1.8",
+  "probes": [
+    {
+      "rank": 1,
+      "name": "PUSH",
+      "assembly": "push rax",
+      "bytes": "50"
+    },
+    {
+      "rank": 2,
+      "name": "POP",
+      "assembly": "pop rax",
+      "bytes": "58"
+    },
+    {
+      "rank": 3,
+      "name": "NOT",
+      "assembly": "not rax",
+      "bytes": "48f7d0"
+    }
+  ],
+  "selection": "manually selected supplemental families; rank is local ordering, not occurrence ranking"
+}

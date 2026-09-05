@@ -3,11 +3,13 @@
 
 load(":validation_lanes.bzl", "validation_lanes", "validation_tier")
 load(":x86_64_probes.bzl", "X86_64_PROBES")
+load(":x86_64_supplemental_probes.bzl", "X86_64_SUPPLEMENTAL_PROBES")
 
 package(default_visibility = ["//visibility:public"])
 
 exports_files([
     "x86_64_probes.json",
+    "x86_64_supplemental_probes.json",
     "x86_64_top_100.json",
 ])
 
@@ -15,6 +17,12 @@ validation_lanes(
     name = "x86_64_top_100_fuzz",
     examples = 100,
     probes = X86_64_PROBES,
+)
+
+validation_lanes(
+    name = "x86_64_supplemental_fuzz",
+    examples = 100,
+    probes = X86_64_SUPPLEMENTAL_PROBES,
 )
 
 validation_tier(
