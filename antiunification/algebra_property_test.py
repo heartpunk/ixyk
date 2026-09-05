@@ -18,6 +18,7 @@ from antiunification import (
     antiunify_values,
 )
 from hypothesis import given, settings
+from antiunification.many import antiunify_many, separating_inputs
 from hypothesis import strategies as st
 import pytest
 
@@ -95,6 +96,44 @@ UPDATES = st.dictionaries(
 )
 
 VALUES = st.one_of(EXPRESSIONS, UPDATES)
+
+
+@settings(max_examples=100, deadline=None)
+@given(st.lists(EXPRESSIONS, min_size=2, max_size=5))
+def test_many_reconstructs_every_independent_input(values: list[Value]) -> None:
+    result = antiunify_many(GeneratedSyntax(), values, correspondences={})
+    for value, substitution in zip(values, result.substitutions, strict=True):
+        assert result.instantiate(substitution) == value
+
+
+def test_third_observation_separates_previously_identical_signatures() -> None:
+    first = (Name("a"), Name("b"), Name("c"))
+    second = (Name("a"), Name("b"), Name("d"))
+    values = tuple(Call("pair", (a, b)) for a, b in zip(first, second, strict=True))
+    result = antiunify_many(
+        GeneratedSyntax(), values, correspondences={"first": first, "second": second}
+    )
+    assert set(result.substitutions[0]) == {"first", "second"}
+    assert result.instantiate({"first": Name("x"), "second": Name("y")}) == Call(
+        "pair", (Name("x"), Name("y"))
+    )
+
+
+@settings(max_examples=100, deadline=None)
+@given(UPDATES)
+def test_many_map_reconstruction_and_held_out_renaming(value: Value) -> None:
+    prefixes = ("left_", "middle_", "right_")
+    values = tuple(rename(value, prefix) for prefix in prefixes)
+    columns = {
+        name: tuple(rename(Name(name), prefix) for prefix in prefixes)
+        for name in PARAMETERS
+    }
+    result = antiunify_many(GeneratedSyntax(), values, correspondences=columns)
+    for observation, substitution in zip(values, result.substitutions, strict=True):
+        assert result.instantiate(substitution) == observation
+    assert result.instantiate(
+        {name: rename(Name(name), "held_") for name in result.substitutions[0]}
+    ) == rename(value, "held_")
 
 
 def rename(value: Value, prefix: str) -> Value:
@@ -180,6 +219,87 @@ def test_bijective_atom_correspondence_instantiates_a_third_variant(
         )
         == held_out
     )
+
+
+@given(n=st.integers(min_value=1, max_value=12))
+@settings(max_examples=30, deadline=None)
+def test_n_plus_one_separates_and_reconstructs(n: int) -> None:
+    baseline = {f"p{i}": Name(f"base_{i}") for i in range(n)}
+    alternatives = {f"p{i}": Name(f"changed_{i}") for i in range(n)}
+    rows = separating_inputs(baseline, alternatives)
+    assert len(rows) == n + 1
+    for index, row in enumerate(rows[1:]):
+        assert {key for key in baseline if row[key] != baseline[key]} == {f"p{index}"}
+    columns = {key: tuple(row[key] for row in rows) for key in baseline}
+    assert len(set(columns.values())) == n
+    values = tuple(Call("f", tuple(row.values())) for row in rows)
+    result = antiunify_many(GeneratedSyntax(), values, correspondences=columns)
+    assert set(result.substitutions[0]) == baseline.keys()
+    for value, substitution in zip(values, result.substitutions, strict=True):
+        assert result.instantiate(substitution) == value
+    held = {key: Name(f"held_{key}") for key in baseline}
+    assert result.instantiate(held) == Call("f", tuple(held.values()))
+
+
+@pytest.mark.parametrize(
+    "baseline,alternatives",
+    [({"p": Name("a")}, {}), ({"p": Name("a")}, {"p": Name("a")})],
+)
+def test_separating_inputs_rejects_invalid_alternatives(baseline, alternatives):
+    with pytest.raises(AlgebraError):
+        separating_inputs(baseline, alternatives)
+
+
+@pytest.mark.parametrize(
+    "values,columns,message",
+    [
+        ((), {}, "at least one"),
+        ((Name("a"),), {"": (Name("a"),)}, "reserved"),
+        ((Name("a"),), {"V0": (Name("a"),)}, "reserved"),
+        ((Name("a"),), {"p": ()}, "arity"),
+        ((Name("a"), Update(())), {}, "unequal sorts"),
+        (
+            (Name("a"), Name("b")),
+            {"p": (Name("a"), Name("b")), "q": (Name("a"), Name("b"))},
+            "multiple names",
+        ),
+        (
+            (Update(((Name("a"), Name("x")), (Name("a"), Name("y")))), Update(())),
+            {},
+            "duplicate keys",
+        ),
+        (
+            (Update(((Name("a"), Name("x")),)), Update(((Name("b"), Name("y")),))),
+            {"p": (Name("a"), Name("b")), "q": (Name("a"), Name("c"))},
+            "ambiguous correspondence",
+        ),
+    ],
+)
+def test_many_rejects_invalid_observations(values, columns, message):
+    with pytest.raises(AlgebraError, match=message):
+        antiunify_many(GeneratedSyntax(), values, correspondences=columns)
+
+
+@pytest.mark.parametrize("right", [Update(()), Update(((Name("b"), Name("y")),))])
+def test_many_unalignable_maps_remain_reconstructible_whole_map_holes(right):
+    left = Update(((Name("a"), Name("x")),))
+    result = antiunify_many(GeneratedSyntax(), (left, right), correspondences={})
+    from antiunification.algebra import Hole
+
+    assert isinstance(result.pattern, Hole)
+    assert result.instantiate(result.substitutions[0]) == left
+    assert result.instantiate(result.substitutions[1]) == right
+
+
+def test_many_checks_reconstruction_even_for_ground_singletons():
+    class BrokenSyntax(GeneratedSyntax):
+        def reconstruct(self, layer):
+            return Name("wrong")
+
+    with pytest.raises(
+        AlgebraError, match="reconstruction law failed for observation 0"
+    ):
+        antiunify_many(BrokenSyntax(), (Name("a"),), correspondences={})
 
 
 if __name__ == "__main__":
