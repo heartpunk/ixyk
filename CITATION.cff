@@ -3,9 +3,9 @@ message: "If you use this software, please cite it using these metadata."
 
 title: "ixyk: symbolic state diffs are all you need"
 type: software
-version: "0.0.1"
-date-released: "2026-09-04"
-doi: "10.5281/zenodo.22290192"
+version: "0.0.2"
+date-released: "2026-09-06"
+doi: "DOI_TBD"
 
 authors:
   - given-names: "Sophie"
