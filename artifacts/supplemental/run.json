@@ -1,0 +1,21 @@
+{
+  "driver_host": "nixos",
+  "execution": "Bazel configured REAPI fleet",
+  "snapshot": "/tmp/ixyk-push-pop-not.HaC31N",
+  "snapshot_sha256": "d9fc1cda8e0194b511f5275ababcbe592513878146d03bc97432d9eddf023a26",
+  "bazel_invocation_id": "1131dbfc-6ca0-4702-83b9-8631e70a3952",
+  "target": "//catalog:x86_64_supplemental_fuzz_artifacts",
+  "exit_status": 0,
+  "elapsed_seconds": 34.587,
+  "remote_actions": 6,
+  "main_revalidation": {
+    "base_commit": "8ddb5848fd5ade1b74f68ed31e34349e6a8518bb",
+    "snapshot": "/tmp/ixyk-push-pop-not-main.iYVa2E",
+    "snapshot_sha256": "af7b14f3e5c00d7fe2866fdc565b13e4a5329f9981615eb448387afd0ec9b7e9",
+    "bazel_invocation_id": "5c56f7aa-730e-4a4b-a29c-2e8fc1719648",
+    "exit_status": 0,
+    "elapsed_seconds": 15.26,
+    "remote_cache_hits": 6,
+    "artifacts_match_initial_run": true
+  }
+}
