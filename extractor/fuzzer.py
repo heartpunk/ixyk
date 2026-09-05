@@ -5,11 +5,15 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping, Sequence
+from collections.abc import Callable, Iterable, Mapping, Sequence
 from dataclasses import dataclass
 from typing import Literal, NotRequired, TypedDict
+import hashlib
 
-from hypothesis import given, seed, settings, strategies as st
+import hypothesis
+from hypothesis.database import ExampleDatabase
+
+from hypothesis import Phase, given, seed, settings, strategies as st
 
 from extractor import z3_boundary as _z3
 from extractor.amd64_state import (
@@ -39,12 +43,17 @@ class ConcreteState:
 
 class FuzzReport(TypedDict):
     schema: str
-    status: Literal["pass", "mismatch"]
+    status: Literal["pass", "mismatch", "incomplete"]
     instruction_hex: str
     examples_requested: int
     executions: int
     differences: NotRequired[list[str]]
     witness: NotRequired[dict[str, int]]
+    stage: NotRequired[str]
+    processing: NotRequired[str]
+    reason: NotRequired[str]
+    checkpoint: NotRequired[dict]
+    explanation: NotRequired[list[str]]
 
 
 _PAGE_SIZE = 0x1000
@@ -61,6 +70,8 @@ _REGISTERS = st.tuples(
         for name in _FUZZED_REGISTERS
     )
 )
+
+
 class _Mismatch(AssertionError):
     def __init__(self, before: ConcreteState, differences: Sequence[str]) -> None:
         super().__init__("; ".join(differences))
@@ -141,22 +152,124 @@ def emulate(instruction: bytes, before: ConcreteState) -> ConcreteState:
     return ConcreteState(scalars, memory)
 
 
-def fuzz(artifact: InstructionModel, instruction: bytes, examples: int) -> FuzzReport:
-    """Shrink the first model/Unicorn disagreement into a structured result."""
+class _ExecutionBudget(BaseException):
+    """Stop Hypothesis without turning resource exhaustion into a test failure."""
 
-    if examples <= 0:
-        raise ValueError("examples must be positive")
-    compiled, executions = CompiledModel(artifact), 0
+
+class _ReplayDatabase(ExampleDatabase):
+    def __init__(self, entries: dict[str, list[str]], *, resume: bool) -> None:
+        super().__init__()
+        self.entries = {
+            bytes.fromhex(key): {bytes.fromhex(value) for value in values}
+            for key, values in entries.items()
+        }
+        self.resume = resume
+        self.changed: Callable[[], None] = lambda: None
+
+    def fetch(self, key: bytes) -> Iterable[bytes]:
+        values = set(self.entries.get(key, ()))
+        if self.resume:
+            # Hypothesis 6.160 treats primary-corpus hits as already minimized,
+            # skipping shrink AND explain. Resume through its secondary corpus.
+            # This suffix is version-sensitive; checkpoint identity pins the
+            # Hypothesis version and the stage test exercises actual reduction.
+            if key.endswith(b".secondary"):
+                values.update(self.entries.get(key.removesuffix(b".secondary"), ()))
+            elif not key.endswith(b".pareto"):
+                return ()
+        return sorted(values)
+
+    def save(self, key: bytes, value: bytes) -> None:
+        self.entries.setdefault(key, set()).add(value)
+        self.changed()
+
+    def delete(self, key: bytes, value: bytes) -> None:
+        self.entries.get(key, set()).discard(value)
+        self.changed()
+
+    def export(self) -> dict[str, list[str]]:
+        return {
+            key.hex(): [value.hex() for value in sorted(values)]
+            for key, values in sorted(self.entries.items())
+            if values
+        }
+
+
+def fuzz(
+    artifact: InstructionModel,
+    instruction: bytes,
+    examples: int,
+    *,
+    stage: Literal["discover", "shrink", "explain"] = "discover",
+    previous: dict | None = None,
+    max_executions: int | None = None,
+    progress: Callable[[dict], None] | None = None,
+) -> FuzzReport:
+    """Discover or resume a failure, exporting an action-local replay database."""
+    if examples <= 0 or (max_executions is not None and max_executions <= 0):
+        raise ValueError("example and execution budgets must be positive")
+    phases = {
+        "discover": (Phase.generate,),
+        "shrink": (Phase.reuse, Phase.shrink),
+        "explain": (Phase.reuse, Phase.shrink, Phase.explain),
+    }
+    identity = {
+        "hypothesis": hypothesis.__version__,
+        "strategy": "ixyk.amd64-registers-flags.v1",
+        "model_sha256": hashlib.sha256(artifact.to_json().encode()).hexdigest(),
+        "instruction_hex": instruction.hex(),
+    }
+    entries = {}
+    if stage != "discover":
+        if previous is None or previous.get("status") != "mismatch":
+            raise ValueError("failure processing requires a mismatch report")
+        checkpoint = previous.get("checkpoint", {})
+        if checkpoint.get("identity") != identity:
+            raise ValueError(
+                "checkpoint model, instruction, strategy or Hypothesis version differs"
+            )
+        entries = checkpoint.get("entries", {})
+        if not entries:
+            raise ValueError("checkpoint has no resumable Hypothesis examples")
+    elif previous is not None:
+        raise ValueError("discovery does not consume a previous report")
+    database = _ReplayDatabase(entries, resume=stage != "discover")
+    executions, reproduced = 0, False
+    report: FuzzReport = {
+        "schema": "ixyk.differential_fuzz.v1",
+        "status": "incomplete",
+        "instruction_hex": instruction.hex(),
+        "examples_requested": examples,
+        "executions": 0,
+        "stage": stage,
+        "processing": "incomplete",
+    }
+    if previous:
+        report["status"] = "mismatch"
+        report["witness"] = previous["witness"]
+        report["differences"] = previous["differences"]
+
+    def publish() -> None:
+        report["executions"] = executions
+        report["checkpoint"] = {"identity": identity, "entries": database.export()}
+        if progress:
+            progress(dict(report))
+
+    database.changed = publish
+    publish()
+    compiled = CompiledModel(artifact)
     code_memory = dict(enumerate(instruction, artifact.source))
 
-    @seed(0)
+    # settings must wrap seed: seed itself disables the database. Keep a fixed
+    # seed while explicitly restoring our declared, action-local replay input.
     @settings(
         max_examples=examples,
-        derandomize=True,
         deadline=None,
-        database=None,
+        database=database,
+        phases=phases[stage],
         report_multiple_bugs=False,
     )
+    @seed(0)
     @given(
         registers=_REGISTERS,
         flags=st.lists(
@@ -164,8 +277,11 @@ def fuzz(artifact: InstructionModel, instruction: bytes, examples: int) -> FuzzR
         ),
     )
     def agrees(registers: tuple[int, ...], flags: list[bool]) -> None:
-        nonlocal executions
+        nonlocal executions, reproduced
+        if max_executions is not None and executions >= max_executions:
+            raise _ExecutionBudget()
         executions += 1
+        publish()
         scalars = (
             dict(zip(_FUZZED_REGISTERS, registers, strict=True))
             | {"rip": artifact.source}
@@ -179,28 +295,45 @@ def fuzz(artifact: InstructionModel, instruction: bytes, examples: int) -> FuzzR
             after = emulate(instruction, before)
         except Exception as error:
             if not is_cpu_exception(error):
-                details = f"emulator {type(error).__name__}: {error}"
-                raise _Mismatch(before, (details,)) from error
-            differences = compiled.differences(before, "error")
+                differences = (f"emulator {type(error).__name__}: {error}",)
+            else:
+                differences = compiled.differences(before, "error")
         else:
             differences = compiled.differences(before, after)
         if differences:
+            reproduced = True
+            report["status"] = "mismatch"
+            # Preserve the simplest observed witness if processing is interrupted;
+            # explanation probes can otherwise overwrite it with large values.
+            incumbent = report.get("witness")
+            if incumbent is None or tuple(scalars.values()) < tuple(
+                incumbent[name] for name in scalars
+            ):
+                report["differences"] = list(differences)
+                report["witness"] = dict(scalars)
+            publish()
             raise _Mismatch(before, differences)
 
-    report: FuzzReport = {
-        "schema": "ixyk.differential_fuzz.v1",
-        "status": "pass",
-        "instruction_hex": instruction.hex(),
-        "examples_requested": examples,
-        "executions": 0,
-    }
     try:
         agrees()
     except _Mismatch as mismatch:
         report["status"] = "mismatch"
         report["differences"] = list(mismatch.differences)
         report["witness"] = dict(mismatch.before.scalars)
-    report["executions"] = executions
+        report["processing"] = "complete"
+        if stage == "explain":
+            report["explanation"] = list(getattr(mismatch, "__notes__", ()))
+    except _ExecutionBudget:
+        report["reason"] = "execution budget exhausted"
+    else:
+        if stage == "discover":
+            report["status"] = "pass"
+            report["processing"] = "complete"
+        elif not reproduced:
+            report["reason"] = (
+                "saved failure did not reproduce; discovery was not rerun"
+            )
+    publish()
     return report
 
 
@@ -259,8 +392,10 @@ class CompiledModel:
 
         step = enabled[0]
         if after == "error":
-            return () if step.source.target.kind == "error" else (
-                f"target: model={step.source.target.kind}, emulator=error",
+            return (
+                ()
+                if step.source.target.kind == "error"
+                else (f"target: model={step.source.target.kind}, emulator=error",)
             )
         if step.source.target.kind == "error":
             return ("target: model=error, emulator=continued",)
