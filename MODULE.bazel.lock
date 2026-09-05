@@ -191,6 +191,49 @@
   },
   "selectedYankedVersions": {},
   "moduleExtensions": {
+    "//tools:inventory_inputs.bzl%inventory_inputs": {
+      "general": {
+        "bzlTransitiveDigest": "DEeDFKLf9d39kinZauAztMj3HypqapLEOfJna9mzP3A=",
+        "usagesDigest": "OyRmX9CmVMQQIYCJ5yLnQTsWp9WmotIW3YK3iUCPVzg=",
+        "recordedInputs": [],
+        "generatedRepoSpecs": {
+          "bochs_inventory": {
+            "repoRuleId": "@@//tools:inventory_inputs.bzl%_input",
+            "attributes": {
+              "environment": "IXYK_BOCHS_INVENTORY_ROOT",
+              "path": "inventory.json"
+            }
+          },
+          "inventory_zstd": {
+            "repoRuleId": "@@//tools:inventory_inputs.bzl%_input",
+            "attributes": {
+              "environment": "IXYK_NIX_ZSTD_ROOT",
+              "path": "bin/zstd"
+            }
+          },
+          "inventory_souffle": {
+            "repoRuleId": "@@//tools:inventory_inputs.bzl%_input",
+            "attributes": {
+              "environment": "IXYK_NIX_SOUFFLE_ROOT",
+              "path": "bin/souffle"
+            }
+          }
+        }
+      }
+    },
+    "//tools:nix_native_deps.bzl%nix_native_deps": {
+      "os:linux,arch:amd64": {
+        "bzlTransitiveDigest": "sDye1zAOn7qJXr9kmR16US8pTpdJLmT2ESJnsMqQff8=",
+        "usagesDigest": "8WPmSfUDrq4e2VUl3le3Q5P7466kAvCsC9CDxRKd1zg=",
+        "recordedInputs": [],
+        "generatedRepoSpecs": {
+          "nix_native_deps": {
+            "repoRuleId": "@@//tools:nix_native_deps.bzl%_repository",
+            "attributes": {}
+          }
+        }
+      }
+    },
     "@@rules_kotlin+//src/main/starlark/core/repositories:bzlmod_setup.bzl%rules_kotlin_extensions": {
       "general": {
         "bzlTransitiveDigest": "Ga4z8lQy1YQ5rAMy+dOl0dqcCEBnYNCXku8x3YQmDZI=",

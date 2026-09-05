@@ -21,6 +21,108 @@
         "type": "github"
       }
     },
+    "bochs-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1788499984,
+        "narHash": "sha256-9LS/QIDGGorjy44zwwHxHnjRP1HUDuV8sKUJqTxMKfs=",
+        "owner": "bochs-emu",
+        "repo": "Bochs",
+        "rev": "22432bc36e1a1c502bf5b181ad832f0710d93ba6",
+        "type": "github"
+      },
+      "original": {
+        "owner": "bochs-emu",
+        "repo": "Bochs",
+        "rev": "22432bc36e1a1c502bf5b181ad832f0710d93ba6",
+        "type": "github"
+      }
+    },
+    "ddisasm-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1783441723,
+        "narHash": "sha256-All5UEMRP/z37GqP0Z0y9ciH0GMoevEEc6TN/qvMIPo=",
+        "owner": "GrammaTech",
+        "repo": "ddisasm",
+        "rev": "4bc2beef7829f6b1cb062813ba5fd3d9081eae55",
+        "type": "github"
+      },
+      "original": {
+        "owner": "GrammaTech",
+        "repo": "ddisasm",
+        "rev": "4bc2beef7829f6b1cb062813ba5fd3d9081eae55",
+        "type": "github"
+      }
+    },
+    "gtirb-pprinter-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1788473135,
+        "narHash": "sha256-jmoM1T0rLEgA4FBLAURd5amp4YsFaMnpvMbRwOZwITU=",
+        "owner": "GrammaTech",
+        "repo": "gtirb-pprinter",
+        "rev": "e479077282e2e1f0be3430e29d9bc8b7d6894579",
+        "type": "github"
+      },
+      "original": {
+        "owner": "GrammaTech",
+        "repo": "gtirb-pprinter",
+        "rev": "e479077282e2e1f0be3430e29d9bc8b7d6894579",
+        "type": "github"
+      }
+    },
+    "gtirb-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1781635904,
+        "narHash": "sha256-BxFRCgYa2BUBbmSAP/J7f2GF+t2aGrRJexaMHO4nDOk=",
+        "owner": "GrammaTech",
+        "repo": "gtirb",
+        "rev": "98fececb52ba36d86fe6798303a1904574dd5bb6",
+        "type": "github"
+      },
+      "original": {
+        "owner": "GrammaTech",
+        "repo": "gtirb",
+        "rev": "98fececb52ba36d86fe6798303a1904574dd5bb6",
+        "type": "github"
+      }
+    },
+    "libehp-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1650676898,
+        "narHash": "sha256-PZaht6gDhrKX+uoFrJjYVzOuDx5qISseT1KQCotFvw0=",
+        "owner": "GrammaTech",
+        "repo": "libehp",
+        "rev": "5e41e26b88d415f3c7d3eb47f9f0d781cc519459",
+        "type": "github"
+      },
+      "original": {
+        "owner": "GrammaTech",
+        "repo": "libehp",
+        "rev": "5e41e26b88d415f3c7d3eb47f9f0d781cc519459",
+        "type": "github"
+      }
+    },
+    "lief-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1748525291,
+        "narHash": "sha256-SvwFyhIBuG0u5rE7+1OaO7VZu4/X4jVI6oFOm5+yCd8=",
+        "owner": "lief-project",
+        "repo": "LIEF",
+        "rev": "d52c66d6da4d67c69438989df83a5415236ae08b",
+        "type": "github"
+      },
+      "original": {
+        "owner": "lief-project",
+        "ref": "0.16.6",
+        "repo": "LIEF",
+        "type": "github"
+      }
+    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1783776592,
@@ -40,7 +142,31 @@
     "root": {
       "inputs": {
         "angr-nix": "angr-nix",
-        "nixpkgs": "nixpkgs"
+        "bochs-src": "bochs-src",
+        "ddisasm-src": "ddisasm-src",
+        "gtirb-pprinter-src": "gtirb-pprinter-src",
+        "gtirb-src": "gtirb-src",
+        "libehp-src": "libehp-src",
+        "lief-src": "lief-src",
+        "nixpkgs": "nixpkgs",
+        "souffle-src": "souffle-src"
+      }
+    },
+    "souffle-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1678024105,
+        "narHash": "sha256-5g2Ikbfm5nQrsgGntZZ/VbjqSDOj0AP/mnH1nW2b4co=",
+        "owner": "souffle-lang",
+        "repo": "souffle",
+        "rev": "b60c8e9f3b9cc6b3e8b980a44fa53033328accee",
+        "type": "github"
+      },
+      "original": {
+        "owner": "souffle-lang",
+        "ref": "2.4",
+        "repo": "souffle",
+        "type": "github"
       }
     }
   },

@@ -1,0 +1,42 @@
+// SPDX-FileCopyrightText: 2026 Sophie Smithburg
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+.decl Site(b:unsigned, p:unsigned, hex:symbol, opcode:symbol)
+.input Site
+.decl Model(hex:symbol)
+.input Model
+.decl SiteCount(b:unsigned, n:number)
+SiteCount(b,n) :- Block(b), n = count : { Site(b,_,_,_) }.
+.decl Miss(b:unsigned, p:unsigned)
+Miss(b,p) :- Site(b,p,h,_), !Model(h).
+.decl MissCount(b:unsigned, n:number)
+MissCount(b,n) :- Block(b), n = count : { Miss(b,_) }.
+.decl Nontrivial(b:unsigned)
+Nontrivial(b) :- Site(b,_,_,op), op != "RET", op != "NOP", op != "ENDBR64".
+.decl Needed(g:unsigned, hex:symbol)
+Needed(g,h) :- Reach(g,b), Site(b,_,h,_).
+.decl Covered(g:unsigned, hex:symbol)
+Covered(g,h) :- Needed(g,h), Model(h).
+.output Covered
+
+.decl Summary(g:unsigned, sites:number, encodings:number, misses:number, unknowns:number, nontrivial:number)
+Summary(g,n,e,m,u,t) :- Group(g),
+    n = sum s : { Reach(g,b), SiteCount(b,s) },
+    e = count : { Needed(g,_) },
+    m = sum s : { Reach(g,b), MissCount(b,s) },
+    u = count : { Unresolved(g,_,_,_) },
+    t = count : { Reach(g,b), Nontrivial(b) }.
+.output Summary
+
+.decl HasMiss(g:unsigned, b:unsigned)
+HasMiss(g,b) :- Reach(g,b), Miss(b,_).
+.decl FirstMissBlock(g:unsigned, b:unsigned)
+FirstMissBlock(g,b) :- Group(g), b = min a : { HasMiss(g,a) }.
+.decl FirstMiss(g:unsigned, b:unsigned, p:unsigned)
+FirstMiss(g,b,p) :- FirstMissBlock(g,b), p = min pos : { Miss(b,pos) }.
+.output FirstMiss
+.decl FirstUnknownBlock(g:unsigned, b:unsigned)
+FirstUnknownBlock(g,b) :- Group(g), b = min a : { Unresolved(g,a,_,_) }.
+.decl FirstUnknown(g:unsigned, b:unsigned, reason:symbol)
+FirstUnknown(g,b,r) :- FirstUnknownBlock(g,b), Unresolved(g,b,0,r).
+.output FirstUnknown

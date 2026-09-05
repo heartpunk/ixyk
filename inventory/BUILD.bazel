@@ -1,0 +1,98 @@
+# SPDX-FileCopyrightText: 2026 Sophie Smithburg
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+load("@rules_python//python:defs.bzl", "py_binary", "py_library", "py_test")
+load("//catalog:x86_64_probes.bzl", "X86_64_PROBES")
+load(":rules.bzl", "availability_report", "cache_index")
+
+package(default_visibility = ["//visibility:public"])
+
+py_library(
+    name = "analysis",
+    srcs = [
+        "__init__.py",
+        "binary.py",
+        "golden.py",
+        "souffle.py",
+    ],
+    data = [
+        "coverage.dl",
+        "reach.dl",
+        "reachable.dl",
+    ],
+    deps = ["//extractor:artifact"],
+)
+
+py_binary(
+    name = "index_cache",
+    srcs = ["cache_main.py"],
+    main = "cache_main.py",
+    deps = [":analysis"],
+)
+
+py_binary(
+    name = "report",
+    srcs = ["report_main.py"],
+    main = "report_main.py",
+    deps = [":analysis"],
+)
+
+cache_index(
+    name = "golden_cache",
+    srcs = ["//artifacts:golden_cache"],
+    out = "golden/cache.json",
+    manifest = "//artifacts:golden/MANIFEST.sha256",
+)
+
+_LIVE_ARTIFACTS = [
+    "%d_%s.%s.json" % (
+        rank,
+        family.lower(),
+        kind,
+    )
+    for rank, family, _assembly, _hex in X86_64_PROBES
+    for kind in [
+        "acquisition",
+        "model",
+    ]
+]
+
+cache_index(
+    name = "live_cache",
+    srcs = ["//catalog:artifacts/" + name for name in _LIVE_ARTIFACTS],
+    out = "live/cache.json",
+    tags = ["manual"],
+)
+
+availability_report(
+    name = "golden_report",
+    out = "golden/report.json",
+    cache = ":golden_cache",
+    inventory = "@bochs_inventory//:inventory.json",
+)
+
+availability_report(
+    name = "live_report",
+    out = "live/report.json",
+    cache = ":live_cache",
+    inventory = "@bochs_inventory//:inventory.json",
+    tags = ["manual"],
+)
+
+py_test(
+    name = "golden_tests",
+    srcs = ["inventory_test.py"],
+    data = [
+        "//artifacts:golden/MANIFEST.sha256",
+        "//artifacts:golden_cache",
+        "@inventory_souffle//:bin/souffle",
+        "@inventory_zstd//:bin/zstd",
+    ],
+    env = {
+        "IXYK_SOUFFLE": "$(rootpath @inventory_souffle//:bin/souffle)",
+        "IXYK_GOLDEN_MANIFEST": "$(rootpath //artifacts:golden/MANIFEST.sha256)",
+        "IXYK_ZSTD": "$(rootpath @inventory_zstd//:bin/zstd)",
+    },
+    main = "inventory_test.py",
+    deps = [":analysis"],
+)
