@@ -12,9 +12,7 @@ from pathlib import Path
 from typing import Protocol, cast
 
 from extractor.z3_runtime import LIBSTDCXX
-
-from extractor.artifact import InstructionModel
-from extractor.fuzzer import fuzz
+from extractor.fuzz_runner import run_bounded
 
 
 class _Options(Protocol):
@@ -23,6 +21,10 @@ class _Options(Protocol):
     instruction_hex: str
     model: Path
     output: Path
+    stage: str
+    previous: Path | None
+    max_executions: int | None
+    seconds: int
 
 
 def _positive(value: str) -> int:
@@ -40,6 +42,12 @@ def main(arguments: Sequence[str] | None = None) -> None:
     _ = parser.add_argument("--instruction-hex", required=True)
     _ = parser.add_argument("--examples", required=True, type=_positive)
     _ = parser.add_argument("--output", required=True, type=Path)
+    _ = parser.add_argument(
+        "--stage", choices=("discover", "shrink", "explain"), default="discover"
+    )
+    _ = parser.add_argument("--previous", type=Path)
+    _ = parser.add_argument("--max-executions", type=_positive)
+    _ = parser.add_argument("--seconds", type=_positive, default=60)
     options = cast(_Options, cast(object, parser.parse_args(arguments)))
     try:
         instruction = bytes.fromhex(options.instruction_hex)
@@ -47,20 +55,53 @@ def main(arguments: Sequence[str] | None = None) -> None:
         parser.error(str(error))
     if not instruction:
         parser.error("instruction must contain at least one byte")
-    raw_acquisition = cast(
-        object, json.loads(options.acquisition.read_text(encoding="utf-8"))
-    )
-    if not isinstance(raw_acquisition, dict):
-        raise ValueError("acquisition result is not an object")
-    acquisition = cast(dict[str, object], raw_acquisition)
+    acquisition = json.loads(options.acquisition.read_text(encoding="utf-8"))
     if acquisition.get("schema") != "ixyk.instruction_acquisition.v1":
         raise ValueError("acquisition result has the wrong schema")
     if acquisition.get("instruction_hex") != instruction.hex():
         raise ValueError("acquisition result belongs to a different instruction")
+    previous = None
+    if options.previous:
+        previous = json.loads(options.previous.read_text(encoding="utf-8"))
+        if previous.get("schema") != "ixyk.differential_fuzz.v1":
+            raise ValueError("previous report has the wrong schema")
+        if previous.get("instruction_hex") != instruction.hex():
+            raise ValueError("previous report belongs to a different instruction")
+    if (options.stage == "discover") != (previous is None):
+        parser.error("shrink/explain require --previous; discover does not accept it")
     status = acquisition.get("status")
     if status == "pass":
-        model = InstructionModel.from_json(options.model.read_text(encoding="utf-8"))
-        report: object = fuzz(model, instruction, options.examples)
+        if previous is not None and previous.get("status") != "mismatch":
+            report = {
+                "schema": "ixyk.differential_fuzz.v1",
+                "instruction_hex": instruction.hex(),
+                "stage": options.stage,
+                "status": "not_applicable",
+                "processing": "not_applicable",
+                "upstream_status": previous.get("status"),
+                "executions": 0,
+            }
+        elif previous is not None and not previous.get("checkpoint", {}).get("entries"):
+            report = dict(
+                previous,
+                stage=options.stage,
+                processing="incomplete",
+                executions=0,
+                reason="upstream finding has no resumable checkpoint; witness retained",
+            )
+        else:
+            executions = options.max_executions or (
+                options.examples + 1 if options.stage == "discover" else 500
+            )
+            report = run_bounded(
+                options.model.read_text(encoding="utf-8"),
+                instruction,
+                options.seconds,
+                examples=options.examples,
+                stage=options.stage,
+                previous=previous,
+                max_executions=executions,
+            )
     elif status in {"unsupported", "acquisition_error"}:
         report = {
             "schema": "ixyk.differential_fuzz.v1",
@@ -68,6 +109,7 @@ def main(arguments: Sequence[str] | None = None) -> None:
             "instruction_hex": instruction.hex(),
             "examples_requested": options.examples,
             "executions": 0,
+            "stage": options.stage,
             "error": acquisition.get("error"),
         }
     else:

@@ -130,12 +130,21 @@ py_library(
 )
 
 py_library(
-    name = "fuzz_cli",
-    srcs = ["fuzz_cli.py"],
+    name = "fuzz_runner",
+    srcs = ["fuzz_runner.py"],
     target_compatible_with = _LINUX_X86_64,
     deps = [
         ":artifact",
         ":fuzzer",
+    ],
+)
+
+py_library(
+    name = "fuzz_cli",
+    srcs = ["fuzz_cli.py"],
+    target_compatible_with = _LINUX_X86_64,
+    deps = [
+        ":fuzz_runner",
         ":z3_runtime",
     ],
 )
@@ -205,6 +214,28 @@ py_binary(
     main = "acquire_main.py",
     target_compatible_with = _LINUX_X86_64,
     deps = [":acquire_cli"],
+)
+
+py_test(
+    name = "fuzz_stages_test",
+    size = "medium",
+    srcs = ["fuzz_stages_test.py"],
+    data = ["@nix_native_deps//:libstdcxx"],
+    env = {
+        "GHOT_LIBSTDCXX_RLOCATION": "$(rlocationpath @nix_native_deps//:libstdcxx)",
+        "PYTHONNOUSERSITE": "1",
+        "PYTHONSAFEPATH": "1",
+    },
+    target_compatible_with = _LINUX_X86_64,
+    deps = [
+        ":amd64_state",
+        requirement("hypothesis"),
+        ":extractor",
+        ":fuzz_cli",
+        ":fuzz_runner",
+        ":fuzzer",
+        ":runtime",
+    ],
 )
 
 py_test(
