@@ -19,7 +19,7 @@ def check() -> None:
         raise ValueError("run ixyk-dev-check from the ixyk repository root")
     for name in (
         "python", "bazel", "lean", "lake", "ruff", "buildifier", "actionlint",
-        "basedpyright", "git", "jj", "zstd",
+        "basedpyright", "git", "jj", "zstd", "find", "grep",
     ):
         if not shutil.which(name):
             raise ValueError(f"missing {name}; enter nix develop or use ixyk-dev")

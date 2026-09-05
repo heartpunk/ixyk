@@ -11,7 +11,7 @@ import unittest
 from unittest.mock import patch
 
 from ci_changes import (
-    ALL_SUITES, BLANK_VM_INPUTS, NEWCOMER_INPUTS, SUITES, affected, changed_paths,
+    ALL_SUITES, BLANK_VM_INPUTS, DOCKER_INPUTS, NEWCOMER_INPUTS, SUITES, affected, changed_paths,
 )
 
 
@@ -56,7 +56,8 @@ class SelectionTest(unittest.TestCase):
                 self.assertEqual(
                     affected([path.encode().decode()]),
                     expected | ({"newcomer"} if path in NEWCOMER_INPUTS else set())
-                    | ({"blank_vm"} if path in BLANK_VM_INPUTS else set()),
+                    | ({"blank_vm"} if path in BLANK_VM_INPUTS else set())
+                    | ({"docker"} if path in DOCKER_INPUTS else set()),
                 )
 
     def test_newcomer_exact_inputs(self):
@@ -100,6 +101,18 @@ class SelectionTest(unittest.TestCase):
             "catalog/x86_64_probes.json", "MODULE.bazel",
             "tools/reapi_test.py", "tools/ci_changes_test.py",
         ):
+            self.assertNotIn("blank_vm", affected([path]))
+
+    def test_docker_inputs(self):
+        for path in DOCKER_INPUTS:
+            self.assertIn("docker", affected([path]))
+        for path in ("README.md", "unknown/file", "tools/ci_blank_vm.sh",
+                     "antiunification/algebra.py", "tools/reapi_test.py"):
+            self.assertNotIn("docker", affected([path]))
+        for path in ("nix/docker-image.nix", "compose.yaml", "tools/ci_docker.sh", "tools/docker.apparmor",
+                     ".github/workflows/docker.yml"):
+            self.assertIn("docker", affected([path]))
+            self.assertNotIn("newcomer", affected([path]))
             self.assertNotIn("blank_vm", affected([path]))
 
     def test_union_and_empty(self):

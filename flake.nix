@@ -19,12 +19,16 @@
         import ./nix/dev-environment.nix { inherit nixpkgs angr-nix system; });
     in {
       devShells = nixpkgs.lib.mapAttrs (_: env: { default = env.shell; }) environments;
-      packages = nixpkgs.lib.mapAttrs (system: env: {
+      packages = nixpkgs.lib.mapAttrs (system: env: let
+        pkgs = import nixpkgs { inherit system; };
+        reapi = import ./nix/reapi.nix { inherit pkgs; development = env.package; };
+      in {
         default = env.package;
         dev-environment = env.package;
       } // nixpkgs.lib.optionalAttrs (system == "x86_64-linux") {
-        reapi = import ./nix/reapi.nix {
-          pkgs = import nixpkgs { inherit system; };
+        inherit reapi;
+        docker-image = import ./nix/docker-image.nix {
+          inherit pkgs reapi;
           development = env.package;
         };
       }) environments;

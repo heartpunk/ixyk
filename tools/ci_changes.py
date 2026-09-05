@@ -29,7 +29,14 @@ BLANK_VM_INPUTS = NEWCOMER_INPUTS | {
     "tools/ci_blank_vm.sh",
     "tools/ci_blank_guest.sh",
 }
-ALL_SUITES = SUITES | {"newcomer", "blank_vm"}
+DOCKER_INPUTS = (BLANK_VM_INPUTS - {
+    "tools/ci_blank_vm.sh", "tools/ci_blank_guest.sh",
+    ".github/workflows/dev-environment.yml",
+}) | {
+    "nix/docker-image.nix", "compose.yaml", "tools/ci_docker.sh", "tools/docker.apparmor",
+    ".github/workflows/docker.yml",
+}
+ALL_SUITES = SUITES | {"newcomer", "blank_vm", "docker"}
 
 
 def affected(paths):
@@ -38,6 +45,8 @@ def affected(paths):
     selected = {"newcomer"} if NEWCOMER_INPUTS.intersection(paths) else set()
     if BLANK_VM_INPUTS.intersection(paths):
         selected.add("blank_vm")
+    if DOCKER_INPUTS.intersection(paths):
+        selected.add("docker")
     for path in paths:
         name = Path(path).name
         if (

@@ -45,5 +45,6 @@ jobs:
             --command bash -euo pipefail -c '
               ruff check .
               buildifier -mode=check -r .
-              actionlint .github/workflows/*.yml
+              # The pinned actionlint predates GitHub concurrency.queue.
+              actionlint -ignore '\''unexpected key "queue" for "concurrency" section'\'' .github/workflows/*.yml
             '

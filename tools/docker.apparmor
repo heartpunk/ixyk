@@ -1,0 +1,7 @@
+# On Ubuntu hosts restricting unprivileged user namespaces:
+# sudo apparmor_parser -r tools/docker.apparmor
+# IXYK_APPARMOR_PROFILE=ixyk-dev docker compose run --rm dev
+abi <abi/4.0>,
+profile ixyk-dev flags=(unconfined) {
+  userns,
+}

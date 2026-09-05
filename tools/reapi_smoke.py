@@ -1,5 +1,6 @@
 """Exercise actual REAPI actions without depending on project source targets."""
 
+import argparse
 import json
 import os
 from pathlib import Path
@@ -9,6 +10,9 @@ import tempfile
 
 
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--launcher", help="Materialized REAPI executable (no Nix needed)")
+    args = parser.parse_args()
     source = Path(__file__).resolve().parent.parent
     with tempfile.TemporaryDirectory(prefix="ixyk-reapi-smoke-") as temporary:
         root = Path(temporary)
@@ -62,8 +66,9 @@ def main():
                 for index in range(2)
             )
         )
+        launcher = [args.launcher] if args.launcher else ["nix", "run", f"{source}#reapi", "--"]
         subprocess.run([
-            "nix", "run", f"{source}#reapi", "--", "--jobs", "2", "build",
+            *launcher, "--jobs", "2", "build",
             "--lockfile_mode=off", "//:all",
         ], cwd=root, check=True)
         for index in range(2):

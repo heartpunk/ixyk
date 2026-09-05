@@ -79,6 +79,9 @@ let
     bazel
     pkgs.buildifier
     pkgs.coreutils
+    # Bazel's version-selection launcher runs these before its binary wrapper.
+    pkgs.findutils
+    pkgs.gnugrep
     pkgs.git
     pkgs.jujutsu
     pkgs.lean4
