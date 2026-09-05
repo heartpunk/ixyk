@@ -3,11 +3,17 @@
 
 """Bound one fuzz action while retaining streamed findings on timeout."""
 
-from multiprocessing import get_context
+import json
+import os
+from multiprocessing import Pipe
 from multiprocessing.connection import Connection
+from subprocess import Popen, TimeoutExpired
+import sys
+from tempfile import TemporaryFile
 from time import monotonic
 import traceback
 
+from extractor import z3_runtime as _z3_runtime  # noqa: F401
 from extractor.artifact import InstructionModel
 from extractor.fuzzer import fuzz
 
@@ -32,10 +38,6 @@ def _worker(
 def run_bounded(model: str, instruction: bytes, seconds: float, **options) -> dict:
     if seconds <= 0:
         raise ValueError("time budget must be positive")
-    # A fresh interpreter avoids inheriting native solver/emulator state.
-    context = get_context("spawn")
-    receiver, sender = context.Pipe(duplex=False)
-    worker = context.Process(target=_worker, args=(sender, model, instruction, options))
     report = {
         "schema": "ixyk.differential_fuzz.v1",
         "status": "incomplete",
@@ -54,33 +56,72 @@ def run_bounded(model: str, instruction: bytes, seconds: float, **options) -> di
             }
         )
     started = monotonic()
-    worker.start()
-    sender.close()
-    try:
-        while True:
-            remaining = seconds - (monotonic() - started)
-            if remaining <= 0 or not receiver.poll(remaining):
-                report["processing"] = "incomplete"
-                report["reason"] = "time budget exhausted"
-                break
+    # Keep the potentially large request off the process-startup pipe. Popen
+    # returns before Python imports run, so the deadline covers child bootstrap
+    # as well as fuzzing. A fresh interpreter preserves native-state isolation.
+    with TemporaryFile(mode="w+") as request:
+        json.dump(
+            {"model": model, "instruction": instruction.hex(), "options": options},
+            request,
+        )
+        request.flush()
+        request.seek(0)
+        receiver, sender = Pipe(duplex=False)
+        try:
+            worker = Popen(
+                [
+                    sys.executable,
+                    "-P",
+                    "-c",
+                    "from extractor.fuzz_runner import _subprocess_worker; _subprocess_worker()",
+                    str(request.fileno()),
+                    str(sender.fileno()),
+                ],
+                pass_fds=(request.fileno(), sender.fileno()),
+                env=os.environ | {"PYTHONPATH": os.pathsep.join(sys.path)},
+            )
+        except BaseException:
+            receiver.close()
+            raise
+        finally:
+            sender.close()
+        try:
+            while True:
+                remaining = seconds - (monotonic() - started)
+                if remaining <= 0 or not receiver.poll(remaining):
+                    report["processing"] = "incomplete"
+                    report["reason"] = "time budget exhausted"
+                    break
+                try:
+                    kind, value = receiver.recv()
+                except EOFError as error:
+                    raise RuntimeError("fuzz worker exited without a result") from error
+                if kind == "error":
+                    raise RuntimeError(value)
+                report = value
+                if kind == "complete":
+                    break
+        finally:
+            # Only this call's private child is terminated and reaped.
+            if worker.poll() is None:
+                worker.terminate()
             try:
-                kind, value = receiver.recv()
-            except EOFError as error:
-                raise RuntimeError("fuzz worker exited without a result") from error
-            if kind == "error":
-                raise RuntimeError(value)
-            report = value
-            if kind == "complete":
-                break
-    finally:
-        # Only this action's private worker is terminated, never another job.
-        if worker.is_alive():
-            worker.terminate()
-        worker.join(timeout=1)
-        if worker.is_alive():
-            worker.kill()
-            worker.join()
-        receiver.close()
+                worker.wait(timeout=1)
+            except TimeoutExpired:
+                worker.kill()
+                worker.wait()
+            receiver.close()
     report["elapsed_seconds"] = monotonic() - started
     report["budget"] = {"seconds": seconds, "executions": options.get("max_executions")}
     return report
+
+
+def _subprocess_worker() -> None:
+    with os.fdopen(int(sys.argv[1])) as request:
+        payload = json.load(request)
+    _worker(
+        Connection(int(sys.argv[2]), readable=False),
+        payload["model"],
+        bytes.fromhex(payload["instruction"]),
+        payload["options"],
+    )
