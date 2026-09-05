@@ -10,6 +10,7 @@ on:
     paths:
       - '.github/actions/attic/**'
       - '.github/workflows/attic-publish.yml'
+      - 'tools/ci_attic_restore*.py'
   workflow_dispatch:
 permissions:
   contents: read
@@ -26,6 +27,7 @@ jobs:
     environment: attic-publish
     outputs:
       python-root: ${{ steps.closure.outputs.python-root }}
+      closure-paths: ${{ steps.closure.outputs.closure-paths }}
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
         with:
@@ -44,6 +46,8 @@ jobs:
           nix develop --print-build-logs --profile "$RUNNER_TEMP/ixyk-devshell" --command true
           root=$(nix eval --raw .#devShells.x86_64-linux.default.IXYK_NIX_PYTHON_ROOT)
           echo "python-root=$root" >> "$GITHUB_OUTPUT"
+          paths=$(nix-store --query --requisites "$RUNNER_TEMP/ixyk-devshell" | jq -Rsc 'split("\n") | map(select(length > 0))')
+          echo "closure-paths=$paths" >> "$GITHUB_OUTPUT"
       - name: Install pinned Attic client
         run: |
           revision=$(jq -er '.nodes.nixpkgs.locked.rev' flake.lock)
@@ -69,6 +73,8 @@ jobs:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
         with:
           persist-credentials: false
+      - name: Test closure verifier
+        run: python3 -m unittest discover -s tools -p ci_attic_restore_test.py
       - uses: cachix/install-nix-action@b85815f71a6de0ddee80b8a80a98d43f4bcc66c7 # v31
         with:
           github_access_token: ${{ github.token }}
@@ -77,18 +83,26 @@ jobs:
           client-id: ${{ github.event_name == 'pull_request' && vars.TS_CLIENT_ID || vars.TS_MAIN_CLIENT_ID }}
           audience: ${{ github.event_name == 'pull_request' && vars.TS_AUDIENCE || vars.TS_MAIN_AUDIENCE }}
           cache-key: ${{ vars.ATTIC_PUBLIC_KEY }}
-      - name: Restore Python from Attic and upstream without building
+      - name: Restore all published Attic dependencies without building
+        env:
+          PUBLISHED_CLOSURE: ${{ needs.publish.outputs.closure-paths }}
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          # PRs smoke-test declared native roots; main verifies the full manifest.
+          if [[ -z "$PUBLISHED_CLOSURE" ]]; then
+            test "$EVENT_NAME" = pull_request
+            PUBLISHED_CLOSURE=$(nix eval --json --max-jobs 0 --option builders '' \
+              .#devShells.x86_64-linux.default --apply \
+              'shell: builtins.map (name: builtins.getAttr name shell) (builtins.filter (name: builtins.match "IXYK_NIX_.*_ROOT" name != null) (builtins.attrNames shell))')
+            export PUBLISHED_CLOSURE
+          fi
+          python3 tools/ci_attic_restore.py
+      - name: Check restored Python imports
         env:
           PYTHON_ROOT: ${{ needs.publish.outputs.python-root }}
         run: |
-          # PRs only verify already-published dependencies; they never publish.
           if [[ -z "$PYTHON_ROOT" ]]; then
             PYTHON_ROOT=$(nix eval --raw --max-jobs 0 --option builders '' .#devShells.x86_64-linux.default.IXYK_NIX_PYTHON_ROOT)
           fi
           [[ "$PYTHON_ROOT" =~ ^/nix/store/[a-z0-9]{32}-python[^/]*$ ]]
-          test ! -e "$PYTHON_ROOT"
-          # Attic omits paths already available from the upstream Nix cache.
-          # Disable both local and remote builds: every path must substitute.
-          nix-store --realise "$PYTHON_ROOT" --max-jobs 0 --option builders '' \
-            --option substituters 'http://abraxas.quetzal-celsius.ts.net:8080/ixyk-ci https://cache.nixos.org'
           "$PYTHON_ROOT/bin/python" -c 'import angr, claripy, hypothesis, pytest; print("Attic Python restore verified")'
