@@ -34,7 +34,7 @@ DOCKER_INPUTS = (BLANK_VM_INPUTS - {
     ".github/workflows/dev-environment.yml",
 }) | {
     "nix/docker-image.nix", "compose.yaml", "tools/ci_docker.sh", "tools/docker.apparmor",
-    ".github/workflows/docker.yml",
+    ".github/workflows/docker.yml", "compose.reapi.yaml", "tools/ci_reapi_cluster.sh",
 }
 ALL_SUITES = SUITES | {"newcomer", "blank_vm", "docker"}
 

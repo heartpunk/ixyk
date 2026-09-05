@@ -29,5 +29,7 @@ docker compose run --rm -T dev bash -euo pipefail -c '
 test "$(stat -c %u .ixyk-container-owner-check)" = "$(id -u)"
 rm .ixyk-container-owner-check
 
+bash tools/ci_reapi_cluster.sh
+
 # Preserve the tested image for Docker-only users to download and load.
 cp -L "$RUNNER_TEMP/ixyk-image" "$RUNNER_TEMP/ixyk-dev.tar.gz"

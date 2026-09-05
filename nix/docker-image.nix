@@ -36,8 +36,8 @@ pkgs.dockerTools.buildLayeredImage {
     pkgs.dockerTools.fakeNss
   ];
   extraCommands = ''
-    mkdir -p tmp workspace run/ixyk
-    chmod 1777 tmp run/ixyk
+    mkdir -p tmp workspace run/ixyk cache
+    chmod 1777 tmp run/ixyk cache
     chmod 0777 workspace
     rm etc/passwd etc/group
     ln -s /run/ixyk/passwd etc/passwd
