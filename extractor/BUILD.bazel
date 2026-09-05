@@ -180,10 +180,33 @@ py_library(
         ":amd64_state",
         ":angr_boundary",
         ":artifact",
+        ":au_inputs",
+        ":model_syntax",
+        ":normalization",
+        ":operand_slots",
+        ":runtime",
         ":typed_z3",
+        ":xed",
         ":z3_boundary",
+        "//antiunification:algebra",
         requirement("angr"),
         requirement("z3-solver"),
+    ],
+)
+
+py_test(
+    name = "n_plus_one_test",
+    size = "medium",
+    srcs = ["n_plus_one_test.py"],
+    data = ["@nix_native_deps//:libstdcxx"],
+    deps = [
+        ":extractor",
+        ":fuzz_runner",
+        ":normalization",
+        ":operand_slots",
+        ":runtime",
+        ":xed",
+        requirement("pytest"),
     ],
 )
 
