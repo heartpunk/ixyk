@@ -241,5 +241,66 @@ def test_n_plus_one_separates_and_reconstructs(n: int) -> None:
     assert result.instantiate(held) == Call("f", tuple(held.values()))
 
 
+@pytest.mark.parametrize(
+    "baseline,alternatives",
+    [({"p": Name("a")}, {}), ({"p": Name("a")}, {"p": Name("a")})],
+)
+def test_separating_inputs_rejects_invalid_alternatives(baseline, alternatives):
+    with pytest.raises(AlgebraError):
+        separating_inputs(baseline, alternatives)
+
+
+@pytest.mark.parametrize(
+    "values,columns,message",
+    [
+        ((), {}, "at least one"),
+        ((Name("a"),), {"": (Name("a"),)}, "reserved"),
+        ((Name("a"),), {"V0": (Name("a"),)}, "reserved"),
+        ((Name("a"),), {"p": ()}, "arity"),
+        ((Name("a"), Update(())), {}, "unequal sorts"),
+        (
+            (Name("a"), Name("b")),
+            {"p": (Name("a"), Name("b")), "q": (Name("a"), Name("b"))},
+            "multiple names",
+        ),
+        (
+            (Update(((Name("a"), Name("x")), (Name("a"), Name("y")))), Update(())),
+            {},
+            "duplicate keys",
+        ),
+        (
+            (Update(((Name("a"), Name("x")),)), Update(((Name("b"), Name("y")),))),
+            {"p": (Name("a"), Name("b")), "q": (Name("a"), Name("c"))},
+            "ambiguous correspondence",
+        ),
+    ],
+)
+def test_many_rejects_invalid_observations(values, columns, message):
+    with pytest.raises(AlgebraError, match=message):
+        antiunify_many(GeneratedSyntax(), values, correspondences=columns)
+
+
+@pytest.mark.parametrize("right", [Update(()), Update(((Name("b"), Name("y")),))])
+def test_many_unalignable_maps_remain_reconstructible_whole_map_holes(right):
+    left = Update(((Name("a"), Name("x")),))
+    result = antiunify_many(GeneratedSyntax(), (left, right), correspondences={})
+    from antiunification.algebra import Hole
+
+    assert isinstance(result.pattern, Hole)
+    assert result.instantiate(result.substitutions[0]) == left
+    assert result.instantiate(result.substitutions[1]) == right
+
+
+def test_many_checks_reconstruction_even_for_ground_singletons():
+    class BrokenSyntax(GeneratedSyntax):
+        def reconstruct(self, layer):
+            return Name("wrong")
+
+    with pytest.raises(
+        AlgebraError, match="reconstruction law failed for observation 0"
+    ):
+        antiunify_many(BrokenSyntax(), (Name("a"),), correspondences={})
+
+
 if __name__ == "__main__":
     raise SystemExit(pytest.main([__file__]))
