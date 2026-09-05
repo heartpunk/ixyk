@@ -1,4 +1,4 @@
-"""Small, conservative dependency map for CI; unknown paths run every suite."""
+"""CI dependency map; unknown paths run project suites, newcomer has exact inputs."""
 
 import os
 from pathlib import Path
@@ -6,10 +6,47 @@ import subprocess
 
 
 SUITES = {"lint", "golden", "lean", "differential", "au"}
+NEWCOMER_INPUTS = {
+    "flake.nix",
+    "flake.lock",
+    "nix/dev-environment.nix",
+    "tools/xed_enc2.nix",
+    "tools/xed_enc2_dispatch.py",
+    "tools/dev_check.py",
+    "tools/dev_smoke.py",
+    ".bazelversion",
+    "lean-toolchain",
+    ".github/workflows/dev-environment.yml",
+    ".github/actions/changes/action.yml",
+    "tools/ci_changes.py",
+}
+BLANK_VM_INPUTS = NEWCOMER_INPUTS | {
+    ".bazelrc",
+    "tools/reapi_platform.bzl",
+    "nix/reapi.nix",
+    "tools/reapi.py",
+    "tools/reapi_smoke.py",
+    "tools/ci_blank_vm.sh",
+    "tools/ci_blank_guest.sh",
+}
+DOCKER_INPUTS = (BLANK_VM_INPUTS - {
+    "tools/ci_blank_vm.sh", "tools/ci_blank_guest.sh",
+    ".github/workflows/dev-environment.yml",
+}) | {
+    "nix/docker-image.nix", "compose.yaml", "tools/ci_docker.sh", "tools/docker.apparmor",
+    ".github/workflows/docker.yml", "compose.reapi.yaml", "tools/ci_reapi_cluster.sh",
+}
+ALL_SUITES = SUITES | {"newcomer", "blank_vm", "docker"}
 
 
 def affected(paths):
-    selected = set()
+    # Unknown paths still run the project suites, but cannot implicitly
+    # select the expensive environment realization.
+    selected = {"newcomer"} if NEWCOMER_INPUTS.intersection(paths) else set()
+    if BLANK_VM_INPUTS.intersection(paths):
+        selected.add("blank_vm")
+    if DOCKER_INPUTS.intersection(paths):
+        selected.add("docker")
     for path in paths:
         name = Path(path).name
         if (
@@ -43,7 +80,7 @@ def affected(paths):
             selected |= {"lint", "au", "differential"}
         elif (
             path.startswith(("antiunification/", "third_party/"))
-            or path == "tools/ci_reapi.py"
+            or path in {"tools/ci_reapi.py", "tools/reapi.py", "tools/reapi_test.py"}
         ):
             selected |= {"lint", "au"}
         elif path in {"tools/ci_golden.py", "tools/ci_golden_test.py"}:
@@ -93,10 +130,10 @@ def changed_paths():
 
 if __name__ == "__main__":
     paths = changed_paths()
-    selected = SUITES if paths is None else affected(paths)
+    selected = ALL_SUITES if paths is None else affected(paths)
     print(
         "Selected suites:", ", ".join(sorted(selected)) or "none (documentation only)"
     )
     with open(os.environ["GITHUB_OUTPUT"], "a") as output:
-        for suite in sorted(SUITES):
+        for suite in sorted(ALL_SUITES):
             print(f"{suite}={str(suite in selected).lower()}", file=output)

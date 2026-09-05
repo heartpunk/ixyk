@@ -1,0 +1,19 @@
+services:
+  dev:
+    image: ${IXYK_IMAGE:-ghcr.io/heartpunk/ixyk-dev:latest}
+    platform: linux/amd64
+    init: true
+    user: "${IXYK_UID:-1000}:${IXYK_GID:-1000}"
+    working_dir: /workspace
+    volumes:
+      - .:/workspace
+    # NativeLink isolates actions with nested user/PID/mount namespaces.
+    # Docker's default profiles and masked proc mounts prohibit these operations.
+    security_opt:
+      - seccomp=unconfined
+      - apparmor=${IXYK_APPARMOR_PROFILE:-unconfined}
+      - systempaths=unconfined
+    cap_drop:
+      - ALL
+    stdin_open: true
+    tty: true

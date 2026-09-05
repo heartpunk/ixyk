@@ -1,6 +1,12 @@
 name: Select affected suites
 description: Conservative file dependency filters with full-run fallback
 outputs:
+  docker:
+    value: ${{ steps.select.outputs.docker }}
+  blank_vm:
+    value: ${{ steps.select.outputs.blank_vm }}
+  newcomer:
+    value: ${{ steps.select.outputs.newcomer }}
   lint:
     value: ${{ steps.select.outputs.lint }}
   golden:

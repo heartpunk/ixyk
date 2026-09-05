@@ -15,65 +15,22 @@
   outputs = { nixpkgs, angr-nix, ... }:
     let
       systems = [ "aarch64-darwin" "x86_64-linux" ];
-      forAllSystems = nixpkgs.lib.genAttrs systems;
+      environments = nixpkgs.lib.genAttrs systems (system:
+        import ./nix/dev-environment.nix { inherit nixpkgs angr-nix system; });
     in {
-      devShells = forAllSystems (system:
-        let
-          pkgs = import nixpkgs {
-            inherit system;
-            overlays = [
-              angr-nix.overlays.default
-              (final: prev: {
-                python312 = prev.python312.override (old: {
-                  packageOverrides = nixpkgs.lib.composeExtensions
-                    (old.packageOverrides or (_: _: { }))
-                    (pyFinal: pyPrev: {
-                      bitstring = pyPrev.bitstring.overridePythonAttrs (attrs: {
-                        # Keep correctness tests without the benchmark plugin's
-                        # unrelated Elasticsearch/notebook test dependencies.
-                        nativeCheckInputs = builtins.filter
-                          (dep: nixpkgs.lib.getName dep != "pytest-benchmark")
-                          attrs.nativeCheckInputs;
-                        pytestFlags = builtins.filter
-                          (flag: flag != "--benchmark-disable")
-                          (attrs.pytestFlags or [ ]);
-                        disabledTestPaths = (attrs.disabledTestPaths or [ ])
-                          ++ [ "tests/test_benchmarks.py" ];
-                      });
-                    });
-                });
-              })
-            ];
-          };
-          python = pkgs.python312.withPackages (ps: [
-            ps.angr
-            ps.coverage
-            ps.hypothesis
-            ps.ipykernel
-            ps.pytest
-          ]);
-        in {
-          default = pkgs.mkShell {
-            ELAN = "";
-            packages = [
-              python
-              pkgs.basedpyright
-              (if pkgs.stdenv.isLinux then pkgs.bazel_9 else pkgs.bazelisk)
-              pkgs.buildifier
-              pkgs.git
-              pkgs.jujutsu
-              pkgs.lean4
-              pkgs.ruff
-              pkgs.zstd
-            ];
-            IXYK_NIX_PYTHON_ROOT = "${python}";
-            IXYK_NIX_XED_ROOT = if pkgs.stdenv.isLinux then
-              "${import ./tools/xed_enc2.nix { inherit pkgs; }}" else "";
-            IXYK_NIX_LIBSTDCXX_ROOT =
-              if pkgs.stdenv.isLinux then "${pkgs.stdenv.cc.cc.lib}" else "";
-            PYTHONNOUSERSITE = "1";
-            PYTHONSAFEPATH = "1";
-          };
-        });
+      devShells = nixpkgs.lib.mapAttrs (_: env: { default = env.shell; }) environments;
+      packages = nixpkgs.lib.mapAttrs (system: env: let
+        pkgs = import nixpkgs { inherit system; };
+        reapi = import ./nix/reapi.nix { inherit pkgs; development = env.package; };
+      in {
+        default = env.package;
+        dev-environment = env.package;
+      } // nixpkgs.lib.optionalAttrs (system == "x86_64-linux") {
+        inherit reapi;
+        docker-image = import ./nix/docker-image.nix {
+          inherit pkgs reapi;
+          development = env.package;
+        };
+      }) environments;
     };
 }

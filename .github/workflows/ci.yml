@@ -28,6 +28,8 @@ jobs:
         id: changes
       - name: Test CI dependency filters
         run: python3 -m unittest discover -s tools -p ci_changes_test.py
+      - name: Test REAPI launcher lifecycle and isolation settings
+        run: python3 -m unittest discover -s tools -p reapi_test.py
       - uses: cachix/install-nix-action@b85815f71a6de0ddee80b8a80a98d43f4bcc66c7 # v31
         if: steps.changes.outputs.lint == 'true'
         with:
@@ -43,5 +45,6 @@ jobs:
             --command bash -euo pipefail -c '
               ruff check .
               buildifier -mode=check -r .
-              actionlint .github/workflows/*.yml
+              # The pinned actionlint predates GitHub concurrency.queue.
+              actionlint -ignore '\''unexpected key "queue" for "concurrency" section'\'' .github/workflows/*.yml
             '

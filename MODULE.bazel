@@ -29,31 +29,8 @@ python = use_extension(
 python.defaults(python_version = "3.12")
 python.toolchain(python_version = "3.12")
 
-nix_python_runtime = use_repo_rule(
-    "@rules_python//python/local_toolchains:repos.bzl",
-    "local_runtime_repo",
-)
-
-nix_python_toolchains = use_repo_rule(
-    "@rules_python//python/local_toolchains:repos.bzl",
-    "local_runtime_toolchains_repo",
-)
-
-_REAPI_PYTHON = "/nix/store/3jm89jy56cprn52iw8vanpav58hlcj1v-python3-3.12.13/bin/python3.12"
-
-nix_python_runtime(
-    name = "nix_python_3_12",
-    interpreter_path = _REAPI_PYTHON,
-    on_failure = "fail",
-)
-
-nix_python_toolchains(
-    name = "nix_python_toolchains",
-    runtimes = ["nix_python_3_12"],
-    target_compatible_with = {
-        "nix_python_3_12": ["HOST_CONSTRAINTS"],
-    },
-)
+nix_python = use_extension("//tools:nix_python.bzl", "nix_python")
+use_repo(nix_python, "nix_python_toolchains")
 
 register_toolchains("@nix_python_toolchains//:all")
 

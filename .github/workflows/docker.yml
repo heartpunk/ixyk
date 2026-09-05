@@ -1,0 +1,69 @@
+name: Docker development environment
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  merge_group:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: docker-${{ github.event.pull_request.number || github.ref }}
+  # Keep filtered main builds queued even when a later push only changes docs.
+  queue: max
+
+jobs:
+  docker:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    outputs:
+      changed: ${{ steps.changes.outputs.docker }}
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: ./.github/actions/changes
+        id: changes
+      - uses: cachix/install-nix-action@b85815f71a6de0ddee80b8a80a98d43f4bcc66c7 # v31
+        if: steps.changes.outputs.docker == 'true'
+        with:
+          github_access_token: ${{ github.token }}
+      - name: Build and test the self-contained image
+        if: steps.changes.outputs.docker == 'true'
+        run: bash tools/ci_docker.sh
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: steps.changes.outputs.docker == 'true'
+        with:
+          name: ixyk-dev-linux-amd64
+          path: ${{ runner.temp }}/ixyk-dev.tar.gz
+          compression-level: 0
+          retention-days: 7
+          if-no-files-found: error
+
+  publish:
+    needs: docker
+    if: github.repository == 'heartpunk/ixyk' && github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.docker.outputs.changed == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: ixyk-dev-linux-amd64
+          path: ${{ runner.temp }}/image
+      - name: Publish the tested image
+        env:
+          GHCR_TOKEN: ${{ github.token }}
+        run: |
+          docker load --input "$RUNNER_TEMP/image/ixyk-dev.tar.gz"
+          printf '%s' "$GHCR_TOKEN" | docker login ghcr.io --username "$GITHUB_ACTOR" --password-stdin
+          trap 'docker logout ghcr.io' EXIT
+          docker tag ghcr.io/heartpunk/ixyk-dev:latest "ghcr.io/heartpunk/ixyk-dev:$GITHUB_SHA"
+          docker push "ghcr.io/heartpunk/ixyk-dev:$GITHUB_SHA"
+          docker push ghcr.io/heartpunk/ixyk-dev:latest

@@ -54,23 +54,15 @@ jobs:
       - name: Realize Python dependencies
         if: steps.feature.outputs.present == 'true'
         run: nix develop --print-build-logs --command true
-      - name: Fetch pinned NativeLink release
+      - name: Realize the pinned REAPI launcher
         if: steps.feature.outputs.present == 'true'
-        run: |
-          curl --fail --location --retry 3 \
-            https://github.com/TraceMachina/nativelink/releases/download/v1.6.4/nativelink-1.6.4-x86_64-unknown-linux-musl.tar.gz \
-            --output "$RUNNER_TEMP/nativelink.tar.gz"
-          echo "81f0140f7d2f167c875e2ef1ce7825d92ac86c09b355441a9772b577a0c3f3bd  $RUNNER_TEMP/nativelink.tar.gz" | sha256sum --check
-          mkdir "$RUNNER_TEMP/nativelink"
-          tar -xzf "$RUNNER_TEMP/nativelink.tar.gz" -C "$RUNNER_TEMP/nativelink"
+        run: nix build .#reapi --out-link "$RUNNER_TEMP/ixyk-reapi"
       - name: Run AU unit, property, and held-out instruction tests
         if: steps.feature.outputs.present == 'true'
         run: |
-          binary=$(find "$RUNNER_TEMP/nativelink" -type f -name nativelink -print -quit)
-          test -n "$binary"
-          # Root inside this disposable GitHub VM permits NativeLink namespaces.
-          nix develop --command sudo --preserve-env=PATH,IXYK_NIX_PYTHON_ROOT,IXYK_NIX_LIBSTDCXX_ROOT,IXYK_NIX_XED_ROOT \
-            python tools/ci_reapi.py "$binary" \
+          # This disposable Ubuntu runner restricts unprivileged namespaces.
+          sudo "$RUNNER_TEMP/ixyk-reapi/bin/ixyk-reapi" --jobs 2 test \
+            --test_output=errors \
             //antiunification:algebra_test \
             //antiunification:algebra_property_test \
             //extractor:model_syntax_property_test \

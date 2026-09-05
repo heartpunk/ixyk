@@ -10,7 +10,9 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
-from ci_changes import SUITES, affected, changed_paths
+from ci_changes import (
+    ALL_SUITES, BLANK_VM_INPUTS, DOCKER_INPUTS, NEWCOMER_INPUTS, SUITES, affected, changed_paths,
+)
 
 
 class SelectionTest(unittest.TestCase):
@@ -21,6 +23,8 @@ class SelectionTest(unittest.TestCase):
             ".github/FUNDING.yml": set(),
             "third_party/arpy/arpy.py": {"lint", "au"},
             "tools/ci_reapi.py": {"lint", "au"},
+            "tools/reapi.py": {"lint", "au"},
+            "tools/reapi_test.py": {"lint", "au"},
             ".bazelrc": {"lint", "au"},
             ".bazelversion": {"lint", "au"},
             "tools/native.bzl": {"lint", "au"},
@@ -49,7 +53,67 @@ class SelectionTest(unittest.TestCase):
         }
         for path, expected in cases.items():
             with self.subTest(path=path):
-                self.assertEqual(affected([path.encode().decode()]), expected)
+                self.assertEqual(
+                    affected([path.encode().decode()]),
+                    expected | ({"newcomer"} if path in NEWCOMER_INPUTS else set())
+                    | ({"blank_vm"} if path in BLANK_VM_INPUTS else set())
+                    | ({"docker"} if path in DOCKER_INPUTS else set()),
+                )
+
+    def test_newcomer_exact_inputs(self):
+        inputs = {
+            "flake.nix", "flake.lock", "nix/dev-environment.nix",
+            "tools/xed_enc2.nix", "tools/xed_enc2_dispatch.py",
+            "tools/dev_check.py", "tools/dev_smoke.py", ".bazelversion",
+            "lean-toolchain", ".github/workflows/dev-environment.yml",
+            ".github/actions/changes/action.yml", "tools/ci_changes.py",
+        }
+        self.assertEqual(NEWCOMER_INPUTS, inputs)
+        for path in inputs:
+            with self.subTest(path=path):
+                self.assertIn("newcomer", affected([path]))
+
+    def test_newcomer_skips_unrelated_and_unknown_paths(self):
+        for path in (
+            "extractor/artifact.py", "antiunification/algebra.py",
+            "Ixyk/QfAbv/Semantics.lean", "catalog/x86_64_probes.json",
+            "artifacts/golden/2_add.model.json", "lakefile.lean",
+            "tools/ci_lean.py", "tools/lean_fuzz_env.nix",
+            "tools/ci_changes_test.py", ".github/workflows/ci.yml",
+            ".github/workflows/attic-publish.yml", "MODULE.bazel",
+            "MODULE.bazel.lock", ".bazelrc", "tools/nix_python.bzl",
+            "README.md", ".envrc", "unknown/new-input.json",
+        ):
+            with self.subTest(path=path):
+                self.assertNotIn("newcomer", affected([path]))
+        self.assertIn("newcomer", affected(["README.md", "flake.lock"]))
+
+    def test_blank_vm_exact_inputs(self):
+        self.assertEqual(BLANK_VM_INPUTS, NEWCOMER_INPUTS | {
+            ".bazelrc", "tools/reapi_platform.bzl",
+            "nix/reapi.nix", "tools/reapi.py", "tools/reapi_smoke.py",
+            "tools/ci_blank_vm.sh", "tools/ci_blank_guest.sh",
+        })
+        for path in BLANK_VM_INPUTS:
+            self.assertIn("blank_vm", affected([path]))
+        for path in (
+            "README.md", "unknown/file", "antiunification/algebra.py",
+            "catalog/x86_64_probes.json", "MODULE.bazel",
+            "tools/reapi_test.py", "tools/ci_changes_test.py",
+        ):
+            self.assertNotIn("blank_vm", affected([path]))
+
+    def test_docker_inputs(self):
+        for path in DOCKER_INPUTS:
+            self.assertIn("docker", affected([path]))
+        for path in ("README.md", "unknown/file", "tools/ci_blank_vm.sh",
+                     "antiunification/algebra.py", "tools/reapi_test.py"):
+            self.assertNotIn("docker", affected([path]))
+        for path in ("nix/docker-image.nix", "compose.yaml", "tools/ci_docker.sh", "tools/docker.apparmor",
+                     ".github/workflows/docker.yml"):
+            self.assertIn("docker", affected([path]))
+            self.assertNotIn("newcomer", affected([path]))
+            self.assertNotIn("blank_vm", affected([path]))
 
     def test_union_and_empty(self):
         self.assertEqual(SUITES, {"lint", "golden", "lean", "differential", "au"})
@@ -144,7 +208,7 @@ class SelectionTest(unittest.TestCase):
             (
                 "workflow_dispatch",
                 b"",
-                {"lint", "golden", "lean", "differential", "au"},
+                ALL_SUITES,
             ),
             ("push", b"README.md\0", set()),
             (
@@ -176,7 +240,7 @@ class SelectionTest(unittest.TestCase):
                     )
                 expected = "existing=value\n" + "".join(
                     f"{suite}={str(suite in enabled).lower()}\n"
-                    for suite in ["au", "differential", "golden", "lean", "lint"]
+                    for suite in sorted(ALL_SUITES)
                 )
                 self.assertEqual(output.read_text(), expected)
                 self.assertEqual(

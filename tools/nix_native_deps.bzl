@@ -7,6 +7,8 @@ _ROOT_ENV = "IXYK_NIX_LIBSTDCXX_ROOT"
 _XED_ENV = "IXYK_NIX_XED_ROOT"
 
 def _repository_impl(repository_ctx):
+    if repository_ctx.os.name != "linux" or repository_ctx.os.arch not in ["amd64", "x86_64"]:
+        fail("Bazel validation requires a Linux x86-64 client and executor; the development shell supports source tooling on macOS")
     root = repository_ctx.os.environ.get(_ROOT_ENV)
     if not root or not root.startswith("/nix/store/"):
         fail("{} must identify an immutable Nix store output".format(_ROOT_ENV))

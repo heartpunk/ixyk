@@ -1,0 +1,57 @@
+x-image: &image
+  image: ${IXYK_IMAGE:-ghcr.io/heartpunk/ixyk-dev:latest}
+  platform: linux/amd64
+  init: true
+  user: "${IXYK_UID:-1000}:${IXYK_GID:-1000}"
+  cap_drop: [ALL]
+
+services:
+  coordinator:
+    <<: *image
+    command: [ixyk-reapi, --listen-address, 0.0.0.0, --port, "${IXYK_REAPI_PORT:-50051}", --worker-port, "${IXYK_WORKER_PORT:-50061}", --state-dir, /cache, coordinator]
+    ports:
+      # Bind a Tailscale/VPC/homelab address to admit off-host clients/workers.
+      - "${IXYK_BIND_ADDRESS:-127.0.0.1}:${IXYK_REAPI_PORT:-50051}:${IXYK_REAPI_PORT:-50051}"
+      - "${IXYK_BIND_ADDRESS:-127.0.0.1}:${IXYK_WORKER_PORT:-50061}:${IXYK_WORKER_PORT:-50061}"
+    volumes:
+      - coordinator-cache:/cache
+    healthcheck:
+      test: [CMD, /bin/python, -c, "import socket; socket.create_connection(('127.0.0.1', ${IXYK_REAPI_PORT:-50051}), 1).close(); socket.create_connection(('127.0.0.1', ${IXYK_WORKER_PORT:-50061}), 1).close()"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+  worker:
+    <<: *image
+    command:
+      - ixyk-reapi
+      - --endpoint
+      - grpc://${IXYK_REAPI_HOST:-coordinator}:${IXYK_REAPI_PORT:-50051}
+      - --worker-endpoint
+      - grpc://${IXYK_REAPI_HOST:-coordinator}:${IXYK_WORKER_PORT:-50061}
+      - --jobs
+      - "${IXYK_WORKER_JOBS:-2}"
+      - --state-dir
+      - /cache
+      - worker
+    # Each replica owns a separate cache; workers need no checkout or ports.
+    volumes:
+      - /cache
+    security_opt:
+      - seccomp=unconfined
+      - apparmor=${IXYK_APPARMOR_PROFILE:-unconfined}
+      - systempaths=unconfined
+
+  client:
+    <<: *image
+    profiles: [client]
+    working_dir: /workspace
+    environment:
+      IXYK_REAPI_ENDPOINT: grpc://${IXYK_REAPI_HOST:-coordinator}:${IXYK_REAPI_PORT:-50051}
+    volumes:
+      - .:/workspace
+    stdin_open: true
+    tty: true
+
+volumes:
+  coordinator-cache:
