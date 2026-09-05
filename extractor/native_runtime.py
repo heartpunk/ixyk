@@ -10,7 +10,7 @@ import os
 from pathlib import Path
 
 
-_LIBSTDCXX_RLOCATION_ENV = "GHOT_LIBSTDCXX_RLOCATION"
+_LIBSTDCXX_RLOCATION_ENV = "IXYK_LIBSTDCXX_RLOCATION"
 
 
 def runfiles_root() -> Path:

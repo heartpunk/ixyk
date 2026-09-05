@@ -1,0 +1,163 @@
+load(
+    "@lean_sdk//:toolchain_config.bzl",
+    "LEAN_BINARY_RUNNER",
+    "LEAN_CC_FLAGS",
+    "LEAN_CC_LINK_SHARED_FLAGS",
+    "LEAN_CC_LINK_STATIC_FLAGS",
+    "LEAN_CC_RUNNER",
+    "LEAN_CC_RUNNER_ARGS",
+    "LEAN_EXEC_COMPATIBLE_WITH",
+    "LEAN_INCLUDE_DIR",
+    "LEAN_LEAN_LIB_DIR",
+    "LEAN_LINKER",
+    "LEAN_PLATFORM",
+    "LEAN_RESTRICTED_COMPILE_FILES",
+    "LEAN_RESTRICTED_LEAN",
+    "LEAN_RESTRICTED_RUNNER",
+    "LEAN_RESTRICTED_RUNNER_ARGS",
+    "LEAN_RESTRICTED_RUNTIME_FILES",
+    "LEAN_RESTRICTED_RUNTIME_IDENTITY",
+    "LEAN_RUNNER",
+    "LEAN_RUNNER_ARGS",
+    "LEAN_RUNTIME_FILES",
+    "LEAN_SDK_IDENTITY",
+    "LEAN_SDK_IDE_ARTIFACTS",
+    "LEAN_SDK_SEMANTIC_ARTIFACTS",
+    "LEAN_SYSTEM_LIB_DIR",
+)
+load("@rules_cc//cc:cc_binary.bzl", "cc_binary")
+load(":lean_toolchain.bzl", "lean_toolchain")
+
+package(default_visibility = ["//visibility:public"])
+
+exports_files([
+    "lean_sdk_repository.bzl",
+    "lean_sdk_launcher.c",
+    "lean_toolchain.bzl",
+])
+
+toolchain_type(name = "lean_toolchain_type")
+
+cc_binary(
+    name = "lean_sdk_launcher",
+    srcs = ["lean_sdk_launcher.c"],
+    copts = [
+        "-ffreestanding",
+        "-fno-builtin",
+        "-fno-pie",
+        "-fno-stack-protector",
+        "-O1",
+    ],
+    features = ["-default_link_libs"],
+    linkopts = [
+        "-no-pie",
+        "-nostdlib",
+        "-static",
+        "-Wl,--build-id=none",
+        "-Wl,-e,_start",
+    ],
+    linkstatic = True,
+    target_compatible_with = [
+        "@platforms//os:linux",
+        "@platforms//cpu:x86_64",
+    ],
+)
+
+cc_binary(
+    name = "ld.lld",
+    srcs = ["lean_sdk_launcher.c"],
+    copts = [
+        "-DLEAN_SDK_LINKER_TRAMPOLINE=1",
+        "-ffreestanding",
+        "-fno-builtin",
+        "-fno-pie",
+        "-fno-stack-protector",
+        "-O1",
+    ],
+    features = ["-default_link_libs"],
+    linkopts = [
+        "-no-pie",
+        "-nostdlib",
+        "-static",
+        "-Wl,--build-id=none",
+        "-Wl,-e,_start",
+    ],
+    linkstatic = True,
+    target_compatible_with = [
+        "@platforms//os:linux",
+        "@platforms//cpu:x86_64",
+    ],
+)
+
+cc_binary(
+    name = "lean_binary_runner",
+    srcs = ["lean_sdk_launcher.c"],
+    copts = [
+        "-DLEAN_BINARY_RUNTIME_TRAMPOLINE=1",
+        "-ffreestanding",
+        "-fno-builtin",
+        "-fno-pie",
+        "-fno-stack-protector",
+        "-O1",
+    ],
+    features = ["-default_link_libs"],
+    linkopts = [
+        "-no-pie",
+        "-nostdlib",
+        "-static",
+        "-Wl,--build-id=none",
+        "-Wl,-e,_start",
+    ],
+    linkstatic = True,
+    target_compatible_with = [
+        "@platforms//os:linux",
+        "@platforms//cpu:x86_64",
+    ],
+)
+
+lean_toolchain(
+    name = "lean_sdk",
+    ar = "@lean_sdk//:bin/llvm-ar",
+    binary_runner = LEAN_BINARY_RUNNER,
+    cc = "@lean_sdk//:bin/clang",
+    cc_flags = LEAN_CC_FLAGS,
+    cc_link_shared_flags = LEAN_CC_LINK_SHARED_FLAGS,
+    cc_link_static_flags = LEAN_CC_LINK_STATIC_FLAGS,
+    cc_runner = LEAN_CC_RUNNER,
+    cc_runner_args = LEAN_CC_RUNNER_ARGS,
+    distribution = "@lean_sdk//:distribution",
+    identity = LEAN_SDK_IDENTITY,
+    identity_file = "@lean_sdk//:LEAN_SDK_IDENTITY",
+    include_dir = LEAN_INCLUDE_DIR,
+    lake = "@lean_sdk//:bin/lake",
+    lean = "@lean_sdk//:bin/lean",
+    lean_lib_dir = LEAN_LEAN_LIB_DIR,
+    leanc = "@lean_sdk//:bin/leanc",
+    linker = LEAN_LINKER,
+    platform = LEAN_PLATFORM,
+    restricted_compile_files = LEAN_RESTRICTED_COMPILE_FILES,
+    restricted_lean = LEAN_RESTRICTED_LEAN,
+    restricted_runner = LEAN_RESTRICTED_RUNNER,
+    restricted_runner_args = LEAN_RESTRICTED_RUNNER_ARGS,
+    restricted_runtime_files = LEAN_RESTRICTED_RUNTIME_FILES,
+    restricted_runtime_identity = LEAN_RESTRICTED_RUNTIME_IDENTITY,
+    runner = LEAN_RUNNER,
+    runner_args = LEAN_RUNNER_ARGS,
+    runtime_files = LEAN_RUNTIME_FILES,
+    sdk_ide_artifacts = LEAN_SDK_IDE_ARTIFACTS,
+    sdk_identity = LEAN_SDK_IDENTITY,
+    sdk_semantic_artifacts = LEAN_SDK_SEMANTIC_ARTIFACTS,
+    system_lib_dir = LEAN_SYSTEM_LIB_DIR,
+)
+
+toolchain(
+    name = "registered_lean_sdk",
+    exec_compatible_with = LEAN_EXEC_COMPATIBLE_WITH,
+    toolchain = ":lean_sdk",
+    toolchain_type = ":lean_toolchain_type",
+)
+
+exports_files([
+    "sdk-aarch64-darwin.json",
+    "sdk-x86_64-linux.json",
+])

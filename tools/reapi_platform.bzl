@@ -11,7 +11,7 @@ def local_reapi_platform():
             "OSFamily": "linux",
             "cpu_count": "2",
             "memory_mb": "4096",
-            "ixyk-nix-contract": "ixyk-e7a3ca80-python312-lean430-procns-v1",
+            "ixyk-nix-contract": "ixyk-e7a3ca80-python312-lean431-procns-v2",
         },
         visibility = ["//visibility:public"],
     )

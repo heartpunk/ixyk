@@ -7,7 +7,7 @@ module(
 )
 
 bazel_dep(name = "platforms", version = "1.1.0")
-bazel_dep(name = "rules_cc", version = "0.2.17")
+bazel_dep(name = "rules_cc", version = "0.2.22")
 bazel_dep(name = "rules_python", version = "1.7.0")
 bazel_dep(name = "ixyk_vendored_arpy", version = "1.1.1")
 bazel_dep(name = "ixyk_vendored_mulpyplexer", version = "0.9")
@@ -60,3 +60,16 @@ nix_native_deps = use_extension(
     "nix_native_deps",
 )
 use_repo(nix_native_deps, "nix_native_deps")
+
+bazel_dep(name = "lean_bazel", version = "0.1.0")
+local_path_override(
+    module_name = "lean_bazel",
+    path = "third_party/lean_bazel",
+)
+
+lean_sdk = use_extension("@lean_bazel//toolchains:lean_sdk_repository.bzl", "lean_sdk")
+use_repo(lean_sdk, "lean_sdk")
+
+register_toolchains("@lean_bazel//toolchains:registered_lean_sdk")
+
+bazel_dep(name = "zstd", version = "1.5.7.bcr.1")

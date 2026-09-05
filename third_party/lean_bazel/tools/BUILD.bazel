@@ -1,0 +1,135 @@
+load("@rules_cc//cc:cc_binary.bzl", "cc_binary")
+load("//tools:lean_binary.bzl", "lean_binary")
+load("//tools:lean_module.bzl", "lean_module")
+
+exports_files([
+    "CheckDeclaredImports.lean",
+    "ExtractSdkGraph.lean",
+    "ExportLake.lean",
+    "LakeModel.lean",
+    "RenderBazel.lean",
+    "lean_check.bzl",
+    "lean_check_runner.c",
+    "lean_module.bzl",
+    "lean_projection_freshness.bzl",
+])
+
+cc_binary(
+    name = "lean_check_runner",
+    srcs = ["lean_check_runner.c"],
+    copts = [
+        "-std=c11",
+        "-Wall",
+        "-Werror",
+        "-Wextra",
+    ],
+    linkstatic = True,
+    visibility = ["//visibility:public"],
+)
+
+cc_binary(
+    name = "projection_export_runner",
+    srcs = ["projection_export_runner.c"],
+    copts = [
+        "-std=c11",
+        "-Wall",
+        "-Werror",
+        "-Wextra",
+    ],
+    linkstatic = True,
+    visibility = ["//visibility:public"],
+)
+
+cc_binary(
+    name = "projection_verify_runner",
+    srcs = ["projection_verify_runner.c"],
+    copts = [
+        "-std=c11",
+        "-Wall",
+        "-Werror",
+        "-Wextra",
+    ],
+    linkstatic = True,
+    visibility = ["//visibility:public"],
+)
+
+# Stable native bootstrap for checking generated Lake-authority projections.
+# The ordered modules, facets, flags, and roots mirror Lake's exported plan.
+lean_module(
+    name = "projection_lake_model",
+    package_name = "lean_bazel",
+    src = "LakeModel.lean",
+    leanc_args = [
+        "-O3",
+        "-DNDEBUG",
+    ],
+    module = "tools.LakeModel",
+    sdk_imports = [
+        "Init",
+        "Lake",
+    ],
+    deps = [],
+)
+
+lean_module(
+    name = "projection_export_lake",
+    package_name = "lean_bazel",
+    src = "ExportLake.lean",
+    leanc_args = [
+        "-O3",
+        "-DNDEBUG",
+    ],
+    module = "tools.ExportLake",
+    sdk_imports = [
+        "Init",
+        "Lake.Config.InputFile",
+        "Lake.Load.Workspace",
+        "Lean.Elab.ParseImportsFast",
+    ],
+    deps = [":projection_lake_model"],
+)
+
+lean_module(
+    name = "projection_render_bazel",
+    package_name = "lean_bazel",
+    src = "RenderBazel.lean",
+    leanc_args = [
+        "-O3",
+        "-DNDEBUG",
+    ],
+    module = "RenderBazel",
+    sdk_imports = ["Init"],
+    deps = [":projection_lake_model"],
+)
+
+lean_binary(
+    name = "export_lake_bootstrap",
+    link_args = ["-rdynamic"],
+    link_facets = [
+        "module.o.export",
+        "module.o.export",
+    ],
+    link_modules = [
+        ":projection_export_lake",
+        ":projection_lake_model",
+    ],
+    output_name = "export-lake-bootstrap",
+    root_module = "tools.ExportLake",
+    support_interpreter = True,
+    visibility = ["//visibility:public"],
+)
+
+lean_binary(
+    name = "render_bazel_bootstrap",
+    link_facets = [
+        "module.o",
+        "module.o",
+    ],
+    link_modules = [
+        ":projection_render_bazel",
+        ":projection_lake_model",
+    ],
+    output_name = "render-bazel-bootstrap",
+    root_module = "RenderBazel",
+    visibility = ["//visibility:public"],
+)

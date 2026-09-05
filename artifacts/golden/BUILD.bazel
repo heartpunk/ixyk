@@ -1,0 +1,13 @@
+filegroup(
+    name = "models",
+    srcs = glob(
+        [
+            "*.model.json",
+            "*.model.json.zst",
+        ],
+        allow_empty = True,
+    ) + ["MANIFEST.sha256"],
+    visibility = ["//visibility:public"],
+)
+
+exports_files(["MANIFEST.sha256"])

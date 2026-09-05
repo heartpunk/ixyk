@@ -19,6 +19,7 @@ import z3
 from extractor.artifact import BOOL, TermSort, TypedExpr as E
 from extractor.normalization import normalize_expression
 from extractor.typed_z3 import expr_to_z3
+from tools.lean_runfiles import resolve
 
 
 BINARY = (
@@ -254,7 +255,7 @@ def main():
     args = parser.parse_args()
     if args.examples < 1:
         parser.error("--examples must be positive")
-    executable = LeanProcess(args.executable.resolve(strict=True))
+    executable = LeanProcess(resolve(args.executable))
     failures = {}
 
     def run_case(family, expr, bindings):

@@ -5,7 +5,8 @@ import Ixyk.Artifact
 
 private def readArtifact (path : String) : IO String := do
   if path.endsWith ".zst" then
-    let output ← IO.Process.output { cmd := "zstd", args := #["-dc", path] }
+    let zstd := (← IO.getEnv "IXYK_ZSTD").getD "zstd"
+    let output ← IO.Process.output { cmd := zstd, args := #["-dcf", path] }
     if output.exitCode != 0 then
       throw <| IO.userError s!"zstd failed for {path}: {output.stderr}"
     pure output.stdout

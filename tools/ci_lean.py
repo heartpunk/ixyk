@@ -1,23 +1,27 @@
 """Exercise the Lean artifact CLI on the committed corpus and malformed models."""
 
+import argparse
 import copy
 import json
+import os
 from pathlib import Path
 import subprocess
 import tempfile
 
+from lean_runfiles import resolve
+
 
 def read_model(path: Path) -> dict:
     data = (
-        subprocess.check_output(["zstd", "-dc", str(path)])
+        subprocess.check_output([os.environ.get("IXYK_ZSTD", "zstd"), "-dcf", str(path)])
         if path.suffix == ".zst"
         else path.read_bytes()
     )
     return json.loads(data)
 
 
-def check(workspace: Path) -> None:
-    directory = workspace / "artifacts/golden"
+def check(workspace: Path, binary: Path | None = None, directory: Path | None = None) -> None:
+    directory = directory or workspace / "artifacts/golden"
     paths = sorted(directory.glob("*.model.json")) + sorted(
         directory.glob("*.model.json.zst")
     )
@@ -34,7 +38,7 @@ def check(workspace: Path) -> None:
     }
     if {p.name for p in paths} != expected:
         raise ValueError("model files differ from the manifest")
-    binary = workspace / ".lake/build/bin/ixyk-golden-check"
+    binary = binary or workspace / ".lake/build/bin/ixyk-golden-check"
     subprocess.run([str(binary), *map(str, paths)], check=True)
     models = [read_model(path) for path in paths]
     executable = [
@@ -89,4 +93,15 @@ def check(workspace: Path) -> None:
 
 
 if __name__ == "__main__":
-    check(Path.cwd())
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--executable")
+    parser.add_argument("--manifest")
+    parser.add_argument("--zstd")
+    args = parser.parse_args()
+    if args.zstd:
+        os.environ["IXYK_ZSTD"] = str(resolve(args.zstd))
+    check(
+        Path.cwd(),
+        resolve(args.executable) if args.executable else None,
+        resolve(args.manifest).parent if args.manifest else None,
+    )

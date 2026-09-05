@@ -23,13 +23,26 @@
       environments = nixpkgs.lib.genAttrs systems (system:
         import ./nix/dev-environment.nix { inherit nixpkgs angr-nix system; });
     in {
-      devShells = nixpkgs.lib.mapAttrs (_: env: { default = env.shell; }) environments;
+      devShells = nixpkgs.lib.mapAttrs (system: env: let
+        pkgs = import nixpkgs { inherit system; };
+      in {
+        default = env.shell;
+        lean = pkgs.mkShell {
+          ELAN = "";
+          packages = [
+            (import ./nix/lean.nix { inherit pkgs; })
+            (pkgs.python312.withPackages (ps: [ ps.hypothesis ps.z3-solver ]))
+            pkgs.zstd
+          ];
+        };
+      }) environments;
       packages = nixpkgs.lib.mapAttrs (system: env: let
         pkgs = import nixpkgs { inherit system; };
         reapi = import ./nix/reapi.nix { inherit pkgs; development = env.package; };
       in {
         default = env.package;
         dev-environment = env.package;
+        lean = import ./nix/lean.nix { inherit pkgs; };
       } // nixpkgs.lib.optionalAttrs (system == "x86_64-linux") {
         inherit reapi;
         docker-image = import ./nix/docker-image.nix {

@@ -42,26 +42,21 @@ jobs:
           github_access_token: ${{ github.token }}
           extra_nix_config: |
             accept-flake-config = true
-      - name: Build Lean validation binaries
+      - name: Realize the pinned REAPI launcher
+        if: steps.feature.outputs.present == 'true'
+        run: nix build .#reapi --out-link "$RUNNER_TEMP/ixyk-reapi"
+      - name: Build Lean modules and validation binaries through REAPI
         if: steps.feature.outputs.present == 'true'
         run: |
-          revision=$(jq -er '.nodes.nixpkgs.locked.rev' flake.lock)
-          [[ "$revision" =~ ^[0-9a-f]{40}$ ]]
-          nixpkgs="github:NixOS/nixpkgs/$revision"
-          # Variables in the quoted script are evaluated by the inner shell.
-          # shellcheck disable=SC2016
-          nix shell "$nixpkgs#lean4" "$nixpkgs#zstd" "$nixpkgs#python312" --command bash -euo pipefail -c '
-            expected=$(sed -n "s|^leanprover/lean4:v||p" lean-toolchain)
-            actual=$(lean --version | sed -n "s/^Lean (version \([^,]*\),.*/\1/p")
-            test -n "$expected" && test "$actual" = "$expected"
-            lake build Ixyk ixyk-golden-check ixyk-differential-eval
-          '
-      - name: Check artifact acceptance and rejection
+          sudo "$RUNNER_TEMP/ixyk-reapi/bin/ixyk-reapi" --jobs 2 build \
+            //:lake_authority_modules //tools:ixyk_golden_check //tools:ixyk_differential_eval
+      - name: Check artifact acceptance and rejection through REAPI
         if: steps.feature.outputs.present == 'true' && steps.changes.outputs.lean == 'true'
         run: |
-          revision=$(jq -er '.nodes.nixpkgs.locked.rev' flake.lock)
-          nix shell "github:NixOS/nixpkgs/$revision#python312" "github:NixOS/nixpkgs/$revision#zstd" \
-            --command python tools/ci_lean.py
-      - name: Differential Python-Z3 versus Lean semantics
+          sudo "$RUNNER_TEMP/ixyk-reapi/bin/ixyk-reapi" --jobs 2 test \
+            //tools:lean_golden_test --test_output=errors
+      - name: Differential Python-Z3 versus Lean semantics through REAPI
         if: steps.feature.outputs.present == 'true' && steps.changes.outputs.differential == 'true'
-        run: nix shell --impure --file tools/lean_fuzz_env.nix --command python -m tools.lean_differential
+        run: |
+          sudo "$RUNNER_TEMP/ixyk-reapi/bin/ixyk-reapi" --jobs 2 test \
+            //tools:lean_differential_test --test_output=errors

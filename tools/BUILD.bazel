@@ -1,6 +1,7 @@
 # SPDX-FileCopyrightText: 2026 Sophie Smithburg
 # SPDX-License-Identifier: GPL-3.0-or-later
 
+load("@ixyk_pypi//:requirements.bzl", "requirement")
 load("@rules_python//python:defs.bzl", "py_binary", "py_library", "py_test")
 load("//catalog:x86_64_probes.bzl", "X86_64_PROBES")
 load(":reapi_platform.bzl", "local_reapi_platform")
@@ -80,10 +81,79 @@ platform(
     exec_properties = {
         "OSFamily": "linux",
         "cpu_count": "2",
-        "ghot-nix-contract": "ghot-e7a3ca80-lean118d8caf-procself-bazel9-v2",
+        "ixyk-nix-contract": "ixyk-e7a3ca80-python312-lean431-procns-v2",
         "memory_mb": "4096",
     },
     visibility = ["//visibility:public"],
 )
 
 local_reapi_platform()
+
+alias(
+    name = "ixyk_golden_check",
+    actual = "//:target__ixyk__ixyk_h_golden_h_check",
+    visibility = ["//visibility:public"],
+)
+
+alias(
+    name = "ixyk_differential_eval",
+    actual = "//:target__ixyk__ixyk_h_differential_h_eval",
+    visibility = ["//visibility:public"],
+)
+
+py_library(
+    name = "lean_runfiles",
+    srcs = ["lean_runfiles.py"],
+    imports = ["."],
+    deps = ["@rules_python//python/runfiles"],
+)
+
+py_test(
+    name = "lean_golden_test",
+    size = "small",
+    srcs = ["ci_lean.py"],
+    args = [
+        "--executable=$(rlocationpath :ixyk_golden_check)",
+        "--manifest=$(rlocationpath //artifacts/golden:MANIFEST.sha256)",
+        "--zstd=$(rlocationpath @zstd//:zstd_cli)",
+    ],
+    data = [
+        ":ixyk_golden_check",
+        "//artifacts/golden:MANIFEST.sha256",
+        "//artifacts/golden:models",
+        "@zstd//:zstd_cli",
+    ],
+    main = "ci_lean.py",
+    deps = [":lean_runfiles"],
+)
+
+py_library(
+    name = "lean_differential",
+    srcs = ["lean_differential.py"],
+    deps = [
+        ":lean_runfiles",
+        "//extractor:artifact",
+        "//extractor:normalization",
+        "//extractor:typed_z3",
+        requirement("hypothesis"),
+        requirement("z3-solver"),
+    ],
+)
+
+py_test(
+    name = "lean_differential_test",
+    size = "medium",
+    srcs = ["lean_differential_bazel.py"],
+    args = ["--executable=$(rlocationpath :ixyk_differential_eval)"],
+    data = [
+        ":ixyk_differential_eval",
+        "@nix_native_deps//:libstdcxx",
+    ],
+    env = {"IXYK_LIBSTDCXX_RLOCATION": "$(rlocationpath @nix_native_deps//:libstdcxx)"},
+    main = "lean_differential_bazel.py",
+    target_compatible_with = _LINUX_X86_64,
+    deps = [
+        ":lean_differential",
+        "//extractor:native_runtime",
+    ],
+)

@@ -1,0 +1,76 @@
+{
+  "author": "Sophie Smithburg",
+  "license": "GPL-3.0-or-later",
+  "origin": "Author-owned Lean/Bazel module-granularity prototype",
+  "source_revision": "9f12d06e7f98335bbe048274cfde7d8e28813976",
+  "files": [
+    {
+      "path": "tools/BUILD.bazel",
+      "source_sha256": "18a2a794af18eae8a18b4fd2ef7adfbd6c082020b608b3c280f45c6a67a05945"
+    },
+    {
+      "path": "tools/LakeModel.lean",
+      "source_sha256": "d70264846c0353c410a07762388687519688d840d029652545e0c31f1edbe339"
+    },
+    {
+      "path": "tools/ExportLake.lean",
+      "source_sha256": "07cad445a750b44f7a98228eef2403c7811b8af41117d21418225bd556068a00"
+    },
+    {
+      "path": "tools/RenderBazel.lean",
+      "source_sha256": "2cffd25329decee60a6054f4dc51c6b3314ad23c8b4d9166824dc6cb3151b759"
+    },
+    {
+      "path": "tools/ExtractSdkGraph.lean",
+      "source_sha256": "29707fd73e80cbadb885e94b73abf76288beb6d7cef6ae22fe416d6efcd60dee"
+    },
+    {
+      "path": "tools/CheckDeclaredImports.lean",
+      "source_sha256": "0ad5af797e5f842d3ecc859a826f43c996850be3e9f9b711297f6fe34c0ffe22"
+    },
+    {
+      "path": "tools/lean_module.bzl",
+      "source_sha256": "65d581bb3a598b90084dfe40e20eaa8cb494fcbb56beb3c399bf7cd31c05a260"
+    },
+    {
+      "path": "tools/lean_binary.bzl",
+      "source_sha256": "d836c74aac86ad34dad19a17835c8d455e21c32f863cde93c08bc4f7bb421f43"
+    },
+    {
+      "path": "tools/lean_check.bzl",
+      "source_sha256": "8131317c26c5de9f59560ecb9ef123e2ce1f65c84b314706186b78ae1bacda8f"
+    },
+    {
+      "path": "tools/lean_projection_freshness.bzl",
+      "source_sha256": "05f6e85eaea3a7f0c46d166e20356d4ba7b8fc8b37a23f1fef268c5585420342"
+    },
+    {
+      "path": "tools/lean_check_runner.c",
+      "source_sha256": "977794fe9be4190d98ba4adc4c88183e6392d2f25982f4760afefbc6f7201f99"
+    },
+    {
+      "path": "tools/projection_export_runner.c",
+      "source_sha256": "50181aeb583b8adb77dbe9be4033f8c02de3f8d5ac5dcd87a77a6126770b0cae"
+    },
+    {
+      "path": "tools/projection_verify_runner.c",
+      "source_sha256": "98e8b4076e05f3c13e7c15cad22dd713b82b3bbf6260f12e57e44eb9ac34653e"
+    },
+    {
+      "path": "toolchains/BUILD.bazel",
+      "source_sha256": "0c77d6efc6850029e2da1a97f08159217b905b5894bd81226db433358da52914"
+    },
+    {
+      "path": "toolchains/lean_toolchain.bzl",
+      "source_sha256": "f3b998ec5607bfa89429dc3c3548abec8e6fdaf9e66f53b176a331b9edf2b938"
+    },
+    {
+      "path": "toolchains/lean_sdk_repository.bzl",
+      "source_sha256": "9ecdf57858913e2fcb674dc862ab6ff43fe44b69afb10a1f016a7f470ccd3479"
+    },
+    {
+      "path": "toolchains/lean_sdk_launcher.c",
+      "source_sha256": "b379876c61d770f828d689926e441eef6e59af18bfb09044e39746cea0d40773"
+    }
+  ]
+}

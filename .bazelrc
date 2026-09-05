@@ -4,6 +4,9 @@ common --repo_env=GIT_CONFIG_GLOBAL=/dev/null
 common --repo_env=IXYK_NIX_LIBSTDCXX_ROOT
 common --repo_env=IXYK_NIX_XED_ROOT
 common --repo_env=IXYK_NIX_PYTHON_RUNTIME
+common --repo_env=BAZEL_LINKOPTS
+common --repo_env=LEAN_BAZEL_RUNTIME_ROOT
+common --repo_env=LEAN_BAZEL_COMPILE_TOOLS_ROOT
 
 build --incompatible_strict_action_env
 build --spawn_strategy=sandboxed

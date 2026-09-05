@@ -1,0 +1,47 @@
+{
+  "changed_module_executions": [
+    "//:module__ixyk__Ixyk",
+    "//:module__ixyk__Ixyk_d_Artifact",
+    "//:module__ixyk__Ixyk_d_DifferentialEval",
+    "//:module__ixyk__Ixyk_d_GoldenCheck",
+    "//:module__ixyk__Ixyk_d_QfAbv_d_Semantics",
+    "//:module__ixyk__Ixyk_d_QfAbv_d_Sts"
+  ],
+  "changed_seconds": 30.024,
+  "cold_module_executions": 7,
+  "cold_seconds": 96.603,
+  "endpoint": "grpc://127.0.0.1:50071",
+  "execution_log_sha256": {
+    "changed-actions.json": "33e37b3faa4fb01bd99ded92ac2239a003ee76f88177f88fa971523c195988bf",
+    "cold-actions.json": "14114bdcf6eaed1fd251cebbb24859d7dc01d2f26f220afd8e67b2da045fdbd2",
+    "restored-actions.json": "62485d6e6ae434849a720b42d653d0b763b59a8810b25089926b0f63c11fc794",
+    "tests-actions.json": "27cfa6a95c21a489eebe254996a025eec213376e19ae6f56392dc7094f27545f"
+  },
+  "jobs": 2,
+  "lean_toolchain": "leanprover/lean4:v4.31.0",
+  "platform": {
+    "machine": "x86_64",
+    "release": "6.18.18",
+    "system": "Linux"
+  },
+  "remote_module_executions": 7,
+  "remote_semantic_tests": 2,
+  "restored_artifact_sha256": {
+    "bin/ixyk-differential-eval": "10668d675995c413e3d119ab24a2f693a98d9289d48a3e475cd640090ab06a5a",
+    "bin/ixyk-golden-check": "c83a5b93d9e1002a13a9384858ce054f497a31930e637998d7373071da49ebc6",
+    "olean-root/Ixyk.olean": "f8df9e1300d0a39c15f25b2c408c43598e2a562a81aee91cebbbfd8ac2dc88d1",
+    "olean-root/Ixyk/Artifact.olean": "69434f4f47e33878099b105f0053aeaa7e1f1211c0c725f10608557c3eb424aa",
+    "olean-root/Ixyk/DifferentialEval.olean": "9ed7ad25aca231033ab7dacfbe55061ffa96e90ef29d0c37e447223291cf66e5",
+    "olean-root/Ixyk/GoldenCheck.olean": "2f2cbac172d34ae2d484e7b95fdad218afc5e334284f57e3eedd709c5d60f191",
+    "olean-root/Ixyk/QfAbv/Semantics.olean": "e3dbd06c34f171d72a4c3771c1a8db1be70a53f5e562d785a696185f93783662",
+    "olean-root/Ixyk/QfAbv/Sts.olean": "4562c60ccd1ad512509b167ba181faacea1899714dcb187a09a7ed86522dbb2e",
+    "olean-root/Ixyk/QfAbv/Syntax.olean": "af1724cc52e5dbc50df434d9551b2663391e56be80488ad77df8de712b9b7184"
+  },
+  "restored_module_cache_hits": 7,
+  "restored_seconds": 42.155,
+  "schema_version": 1,
+  "source_tree_sha256": "e819061216ae56e0739b09e611b5160b0b0e0f51d3365532b7fc2678f3f53244",
+  "stale_graph_rejected": true,
+  "status": "PASS",
+  "tested_commit": "0e6c05e290779f46a7d4328bcbd73643e59ed187"
+}

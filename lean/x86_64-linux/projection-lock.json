@@ -1,0 +1,11 @@
+{
+  "schemaVersion": "1",
+  "platform": "x86_64-linux",
+  "toolchainIdentity": "lean-4.31.0:x86_64-linux:sha256:07a633cc8d9151cbc08825ea4cdda50d4b02a2c9cb852c0131b13046f49cad7f:githash:68218e876d2a38b1985b8590fff244a83c321783",
+  "exporterSourceRevision": "sha256:1b86eac9caeb1267d0387bfb6dd8963c6b27b1995d239b601d909ad13031a5f7",
+  "exporterBinarySha256": "sha256:357cace7724612d8b7929e67ce263d871720c0bd611890d88d2760fbd2a7bad4",
+  "rendererSourceRevision": "sha256:3580f6a5f9065f32ab4d5d3932694791daa0ad592956ab0b266e290910794061",
+  "rendererBinarySha256": "sha256:7f0cadabdd26f36e3ef875b0ad1b82118b0797eb97370ed94b58251e03c2c00c",
+  "manifestSha256": "sha256:439c2aa378d01b48182f90947e65bc9abf504270dbe72aca2886bfca8ff1ecb1",
+  "projectionSha256": "sha256:4357a56a3c15c33c0618db47107efd56f0926609cea08952d7c0776a072d8a3d"
+}

@@ -25,9 +25,9 @@ class SelectionTest(unittest.TestCase):
             "tools/ci_reapi.py": {"lint", "au"},
             "tools/reapi.py": {"lint", "au"},
             "tools/reapi_test.py": {"lint", "au"},
-            ".bazelrc": {"lint", "au"},
-            ".bazelversion": {"lint", "au"},
-            "tools/native.bzl": {"lint", "au"},
+            ".bazelrc": {"lint", "au", "lean", "differential"},
+            ".bazelversion": {"lint", "au", "lean", "differential"},
+            "tools/native.bzl": {"lint", "au", "lean", "differential"},
             "lean-toolchain": {"lean", "differential"},
             "lake-manifest.json": {"lean", "differential"},
             "extractor/environment.nix": SUITES,
@@ -44,7 +44,9 @@ class SelectionTest(unittest.TestCase):
             "tools/lean_differential.py": {"lint", "differential"},
             "tools/ci_golden.py": {"lint", "golden"},
             "catalog/x86_64_probes.json": {"lint", "golden", "au"},
-            "MODULE.bazel.lock": {"lint", "au"},
+            "MODULE.bazel.lock": {"lint", "au", "lean", "differential"},
+            "third_party/lean_bazel/tools/lean_module.bzl": {"lint", "lean", "differential"},
+            "lean/x86_64-linux/projection-lock.json": {"lint", "lean", "differential"},
             "flake.lock": SUITES,
             "flake.nix": SUITES,
             ".github/actions/changes/action.yml": SUITES,
@@ -62,7 +64,7 @@ class SelectionTest(unittest.TestCase):
                 )
 
     def test_cache_selection(self):
-        for path in ("nix/dev-environment.nix", "nix/reapi.nix", "tools/xed_enc2.nix",
+        for path in ("nix/dev-environment.nix", "nix/lean.nix", "nix/reapi.nix", "tools/xed_enc2.nix",
                      ".github/workflows/cachix.yml", "tools/ci_cachix_restore.py"):
             self.assertIn("cache", affected([path]))
         for path in ("README.md", "extractor/xed.py", "compose.reapi.yaml",
@@ -71,7 +73,7 @@ class SelectionTest(unittest.TestCase):
 
     def test_newcomer_exact_inputs(self):
         inputs = {
-            "flake.nix", "flake.lock", "nix/dev-environment.nix",
+            "flake.nix", "flake.lock", "nix/dev-environment.nix", "nix/lean.nix",
             "tools/xed_enc2.nix", "tools/xed_enc2_dispatch.py",
             "tools/dev_check.py", "tools/dev_smoke.py", ".bazelversion",
             "lean-toolchain", ".github/workflows/dev-environment.yml",
