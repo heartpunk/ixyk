@@ -11,6 +11,7 @@ py_library(
     srcs = [
         "__init__.py",
         "algebra.py",
+        "many.py",
     ],
 )
 

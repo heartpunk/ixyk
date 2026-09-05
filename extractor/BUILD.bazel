@@ -8,6 +8,33 @@ load(":semantic_regression_test.bzl", "semantic_regression_test")
 
 package(default_visibility = ["//visibility:public"])
 
+py_library(
+    name = "au_inputs",
+    srcs = ["au_inputs.py"],
+    deps = [
+        ":xed",
+        "//antiunification:algebra",
+    ],
+)
+
+py_test(
+    name = "au_inputs_test",
+    srcs = ["au_inputs_test.py"],
+    data = [
+        "//catalog:x86_64_probes.json",
+        "@nix_native_deps//:libstdcxx",
+    ],
+    deps = [
+        ":artifact",
+        ":au_inputs",
+        ":model_syntax",
+        ":operand_slots",
+        ":xed",
+        "//antiunification:algebra",
+        requirement("pytest"),
+    ],
+)
+
 cc_binary(
     name = "xed_bridge",
     srcs = ["xed_bridge.c"],
@@ -438,7 +465,9 @@ py_library(
     deps = [
         ":angr_boundary",
         ":artifact",
+        ":au_inputs",
         ":model_syntax",
+        ":xed",
         requirement("capstone"),
     ],
 )
