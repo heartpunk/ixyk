@@ -9,6 +9,29 @@ load(":semantic_regression_test.bzl", "semantic_regression_test")
 package(default_visibility = ["//visibility:public"])
 
 py_library(
+    name = "normalization",
+    srcs = ["normalization.py"],
+    deps = [":artifact"],
+)
+
+py_test(
+    name = "normalization_test",
+    srcs = ["normalization_test.py"],
+    data = ["@nix_native_deps//:libstdcxx"],
+    deps = [
+        ":artifact",
+        ":model_syntax",
+        ":normalization",
+        ":typed_z3",
+        ":z3_runtime",
+        "//antiunification:algebra",
+        requirement("hypothesis"),
+        requirement("pytest"),
+        requirement("z3-solver"),
+    ],
+)
+
+py_library(
     name = "au_inputs",
     srcs = ["au_inputs.py"],
     deps = [
