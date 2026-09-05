@@ -9,19 +9,19 @@ a proof of concept of the core of a symbolic-execution technique [[1]](#ref-1) f
 
 ## Status
 
-this is v0.0.1. it works. it is described in literally minimal form. additional versions will be coming w/clarifications and more explanation as i ascertain what exactly needs to go where. this release is for those most interested, and/or the agents.
+this is v0.0.2. it works. it is described in barely more than minimal form. additional versions will be coming w/clarifications and more explanation as i ascertain what exactly needs to go where. this is the first widely announced release. but it still does presume either specialized background or substantial interest.
 
 also, literally just so i can move on to next steps.
 
 ## Citation
 
-v0.0.1 release has the version-specific DOI
-[`10.5281/zenodo.22290192`](https://doi.org/10.5281/zenodo.22290192). the aggregate DOI is and resolves
+v0.0.2 release has the version-specific DOI
+[`DOI_TBD`](DOI_TBD). the aggregate DOI is and resolves
 [`10.5281/zenodo.22290191`](https://doi.org/10.5281/zenodo.22290191) to
 the latest release and all archived versions.
 
 > Sophie Smithburg. (2026). *ixyk: symbolic state diffs are all you need*
-> (v0.0.1). Zenodo. https://doi.org/10.5281/zenodo.22290192
+> (v0.0.2). Zenodo. DOI_TBD
 
 machine-readable citation metadata is available in [`CITATION.cff`](CITATION.cff).
 
@@ -66,11 +66,10 @@ control-flow caveats.
 ## Reference Artifacts
 
 the deliberately versioned examples in [`artifacts/golden/`](artifacts/golden/)
-preserve exact acquisition, instruction-model, and 10,000-example validation
-outputs for this release. they are research reference artifacts, not ordinary
-`bazel-bin/` or `bazel-out/` contents. the directory documents what each example
-demonstrates, how to regenerate the set, and how to verify it against the pinned
-linux/reapi toolchain.
+preserve exact acquisition, instruction-model. they are research reference artifacts,
+not ordinary `bazel-bin/` or `bazel-out/` contents. the directory documents what
+each example demonstrates, how to regenerate the set, and how to verify it against
+the pinned linux/reapi toolchain.
 
 ## Repository Organization
 
@@ -96,19 +95,14 @@ linux/reapi toolchain.
 ## Known Limitations
 
 - intentionally linux only, bcz i didn't wanna focus on portability yet. should work on osx in principle p quickly. like. hard hard linux only. can only initiate build from linux client to linux server.
-- insists on bazel reapi based execution, because i didn't want to get distracted on other modes or have much possibility of divergence.
-- as a result, it may not yet work on your machine without a little tweaking. working on this.
+  - we have a docker container if u wanna work from osx! it could still be made portable in principle, but there just hasn't been a reason for it.
 - this technique doesn't work really well for recursive opcodes. it could perhaps be generalized, but i just haven't tried yet.
 
 ## Future Work
 
 - for this repo
   - fill out the abstract, make easier understand for less specialized reader
-  - build section describe what platforms work and don't rn and what is needed to make it do so
-  - shared bazel/reapi environment in a standalone repo: this repo should only invoke its pinned nix flake; publish an equivalent OCI image from the same nix closure for people who don't use nix
   - development section describing processes thus far
-  - repo org section explain where what is and why
-  - generalize instruction variants using anti-unification [[11]](#ref-11), [[12]](#ref-12). not just one instr variant per opcode. should be exhaustive. was oversight. have technique impled in other repo, porting presently.
   - doesn't yet work where the symex engine doesn't model enough. for example, `VMENTER` may be difficult to directly extract by symbolic state diffs. 
     - the plan there is to read their defs out from emulators when they are defined in terms of instrs we already have, or to try other symex engines that do, or to cowardly admit defeat where we can't be perfectly total. still, i do expect in the end this can achieve higher coverage than prior instruction-semantics approaches [[13]](#ref-13)–[[15]](#ref-15). TBD!
     - check the notes in the [Intel x86 semantic-source union census](notes/intel-x86-semantic-source-union-census-2026-09-04.md).
