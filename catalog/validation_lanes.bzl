@@ -3,6 +3,8 @@
 
 """Independent acquire-then-fuzz actions for instruction probes."""
 
+load(":run_profiles.bzl", "exclusion_reason", "skipped_instruction")
+
 def _fuzz_lane(name, model, acquisition, instruction_hex, examples, output):
     native.genrule(
         name = name,
@@ -53,14 +55,28 @@ def validation_lanes(name, probes, examples):
     native.filegroup(name = name, srcs = fuzz_results)
     native.filegroup(name = name + "_artifacts", srcs = all_artifacts)
 
-def validation_tier(name, probes, examples):
+def validation_tier(name, probes, examples, profile = "full"):
     fuzz_results = []
     all_artifacts = []
     for rank, family, _assembly, instruction_hex in probes:
         stem = "%d_%s" % (rank, family.lower())
         model = "artifacts/%s.model.json" % stem
         acquisition = "artifacts/%s.acquisition.json" % stem
-        fuzz_result = "results/%d/%s.fuzz.json" % (examples, stem)
+        directory = str(examples) if profile == "full" else "%s/%d" % (profile, examples)
+        fuzz_result = "results/%s/%s.fuzz.json" % (directory, stem)
+
+        reason = exclusion_reason(family, profile)
+        if reason:
+            skipped_instruction(
+                name = "%s_%s_fuzz" % (name, stem),
+                output = fuzz_result,
+                family = family,
+                instruction_hex = instruction_hex,
+                reason = reason,
+            )
+            fuzz_results.append(fuzz_result)
+            all_artifacts.append(fuzz_result)
+            continue
 
         _fuzz_lane(
             name = "%s_%s_fuzz" % (name, stem),

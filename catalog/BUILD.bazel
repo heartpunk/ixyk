@@ -22,3 +22,10 @@ validation_tier(
     examples = 10000,
     probes = X86_64_PROBES,
 )
+
+validation_tier(
+    name = "x86_64_top_100_fuzz_fast",
+    examples = 100,
+    probes = X86_64_PROBES,
+    profile = "fast",
+)
