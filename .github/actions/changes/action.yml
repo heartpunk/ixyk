@@ -1,0 +1,23 @@
+name: Select affected suites
+description: Conservative file dependency filters with full-run fallback
+outputs:
+  lint:
+    value: ${{ steps.select.outputs.lint }}
+  golden:
+    value: ${{ steps.select.outputs.golden }}
+  lean:
+    value: ${{ steps.select.outputs.lean }}
+  differential:
+    value: ${{ steps.select.outputs.differential }}
+  au:
+    value: ${{ steps.select.outputs.au }}
+runs:
+  using: composite
+  steps:
+    - id: select
+      shell: bash
+      env:
+        EVENT_NAME: ${{ github.event_name }}
+        BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha || github.event.before }}
+        HEAD_SHA: ${{ github.event.pull_request.head.sha || github.event.merge_group.head_sha || github.sha }}
+      run: python3 tools/ci_changes.py

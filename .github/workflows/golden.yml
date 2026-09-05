@@ -19,10 +19,15 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           persist-credentials: false
+          fetch-depth: 0
+      - uses: ./.github/actions/changes
+        id: changes
       - uses: cachix/install-nix-action@b85815f71a6de0ddee80b8a80a98d43f4bcc66c7 # v31
+        if: steps.changes.outputs.golden == 'true'
         with:
           github_access_token: ${{ github.token }}
       - name: Verify corpus and checker rejection cases
+        if: steps.changes.outputs.golden == 'true'
         shell: bash
         run: |
           revision=$(jq -er '.nodes.nixpkgs.locked.rev' flake.lock)
