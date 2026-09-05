@@ -20,7 +20,10 @@ jobs:
         with:
           persist-credentials: false
           fetch-depth: 0
+      - uses: ./.github/actions/changes
+        id: changes
       - name: Detect staged feature
+        if: steps.changes.outputs.lean == 'true' || steps.changes.outputs.differential == 'true'
         id: feature
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
@@ -37,7 +40,7 @@ jobs:
         if: steps.feature.outputs.present == 'true'
         with:
           github_access_token: ${{ github.token }}
-      - name: Build Lean and check artifact acceptance and rejection
+      - name: Build Lean validation binaries
         if: steps.feature.outputs.present == 'true'
         run: |
           revision=$(jq -er '.nodes.nixpkgs.locked.rev' flake.lock)
@@ -50,8 +53,13 @@ jobs:
             actual=$(lean --version | sed -n "s/^Lean (version \([^,]*\),.*/\1/p")
             test -n "$expected" && test "$actual" = "$expected"
             lake build Ixyk ixyk-golden-check ixyk-differential-eval
-            python tools/ci_lean.py
           '
+      - name: Check artifact acceptance and rejection
+        if: steps.feature.outputs.present == 'true' && steps.changes.outputs.lean == 'true'
+        run: |
+          revision=$(jq -er '.nodes.nixpkgs.locked.rev' flake.lock)
+          nix shell "github:NixOS/nixpkgs/$revision#python312" "github:NixOS/nixpkgs/$revision#zstd" \
+            --command python tools/ci_lean.py
       - name: Differential Python-Z3 versus Lean semantics
-        if: steps.feature.outputs.present == 'true'
+        if: steps.feature.outputs.present == 'true' && steps.changes.outputs.differential == 'true'
         run: nix shell --impure --file tools/lean_fuzz_env.nix --command python -m tools.lean_differential

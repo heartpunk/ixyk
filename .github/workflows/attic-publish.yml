@@ -2,6 +2,10 @@ name: Publish Attic dependencies
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - '**/*.md'
+      - 'LICENSE'
+      - 'CITATION.cff'
   pull_request:
     paths:
       - '.github/actions/attic/**'
