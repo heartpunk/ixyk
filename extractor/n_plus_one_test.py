@@ -52,5 +52,66 @@ def test_public_extraction(name, hexcode, monkeypatch):
     assert report["status"] == "pass", report
 
 
+@pytest.mark.parametrize(
+    "failure,message",
+    [
+        ("declarations", "input declarations disagree"),
+        ("bindings", "input operand bindings disagree"),
+        ("constant", "parameter did not vary"),
+        ("unexplained", "not explained by operands"),
+        ("type", "did not reconstruct an instruction model"),
+    ],
+)
+def test_extraction_rejects_inconsistent_au_inputs(monkeypatch, failure, message):
+    from dataclasses import replace
+    from types import SimpleNamespace
+    import antiunification.many as au
+    import extractor.au_inputs as inputs
+    import extractor.operand_slots as slots
+    from extractor.artifact import TermSort
+    from extractor.model_syntax import CanonicalVariable
+
+    code = bytes.fromhex("4801d8")
+    project = load_shellcode(code, SOURCE)
+    raw = implementation._extract_concrete(project, SOURCE)
+    alternate = replace(
+        raw,
+        declarations=raw.declarations[::-1],
+        steps=tuple(
+            replace(step, simultaneous_update=step.simultaneous_update[::-1])
+            for step in raw.steps
+        ),
+    )
+    models = iter((raw, alternate if failure == "declarations" else raw))
+    monkeypatch.setattr(inputs, "instruction_inputs", lambda code: (code, code))
+    monkeypatch.setattr(implementation, "_extract_concrete", lambda *args: next(models))
+    x = CanonicalVariable("rax", TermSort.bv(64))
+    y = CanonicalVariable("rbx", TermSort.bv(64))
+    rows = iter(
+        (
+            {"operand": x},
+            {
+                "different" if failure == "bindings" else "operand": x
+                if failure == "constant"
+                else y
+            },
+            {"operand": x},
+        )
+    )
+    monkeypatch.setattr(slots, "canonical_bindings", lambda *args: next(rows))
+    # Inject a faulty AU result only for the two result-boundary checks.
+    if failure in {"unexplained", "type"}:
+        substitutions = ({"V0": x},) if failure == "unexplained" else ({"operand": x},)
+        monkeypatch.setattr(
+            au,
+            "antiunify_many",
+            lambda *args, **kwargs: SimpleNamespace(
+                substitutions=substitutions, instantiate=lambda substitution: x
+            ),
+        )
+    with pytest.raises(slots.OperandDecodeError, match=message):
+        implementation.extract(project, SOURCE)
+
+
 if __name__ == "__main__":
     raise SystemExit(pytest.main([__file__, "-v"]))
