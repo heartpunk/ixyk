@@ -17,6 +17,7 @@ from hypothesis import given, settings, strategies as st
 import z3
 
 from extractor.artifact import BOOL, TermSort, TypedExpr as E
+from extractor.normalization import normalize_expression
 from extractor.typed_z3 import expr_to_z3
 
 
@@ -216,6 +217,23 @@ def compare(executable, expr, bindings):
     actual = executable.evaluate(payload)
     assert type(actual) is type(expected) and actual == expected, (
         f"Python/Z3={expected!r}; Lean={actual!r}; replay JSON={payload}"
+    )
+    normalized = normalize_expression(expr)
+    normalized_result = z3.simplify(expr_to_z3(normalized, environment, context))
+    normalized_expected = (
+        z3.is_true(normalized_result)
+        if normalized.sort == BOOL
+        else normalized_result.as_long()
+    )
+    assert normalized_expected == expected, "normalization changed Python semantics"
+    request["expr"] = normalized.to_data()
+    normalized_payload = json.dumps(request, separators=(",", ":"))
+    normalized_actual = executable.evaluate(normalized_payload)
+    assert (
+        type(normalized_actual) is type(expected) and normalized_actual == expected
+    ), (
+        f"Original Python/Z3={expected!r}; normalized Lean={normalized_actual!r}; "
+        f"replay JSON={normalized_payload}"
     )
 
 
