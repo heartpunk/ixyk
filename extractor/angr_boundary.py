@@ -86,6 +86,7 @@ class VexBlock(Protocol):
 
 
 class Block(Protocol):
+    bytes: bytes
     capstone: CapstoneBlock
     vex: VexBlock
 
