@@ -2,10 +2,33 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 load("@ixyk_pypi//:requirements.bzl", "requirement")
+load("@rules_cc//cc:cc_binary.bzl", "cc_binary")
 load("@rules_python//python:defs.bzl", "py_binary", "py_library", "py_test")
 load(":semantic_regression_test.bzl", "semantic_regression_test")
 
 package(default_visibility = ["//visibility:public"])
+
+cc_binary(
+    name = "xed_bridge",
+    srcs = ["xed_bridge.c"],
+    deps = ["@nix_native_deps//:xed_enc2"],
+)
+
+py_library(
+    name = "xed",
+    srcs = ["xed.py"],
+    data = [":xed_bridge"],
+    deps = [":native_runtime"],
+)
+
+py_test(
+    name = "xed_test",
+    srcs = ["xed_test.py"],
+    deps = [
+        ":xed",
+        requirement("pytest"),
+    ],
+)
 
 _LINUX_X86_64 = [
     "@platforms//os:linux",

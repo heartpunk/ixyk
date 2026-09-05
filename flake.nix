@@ -67,6 +67,8 @@
               pkgs.zstd
             ];
             IXYK_NIX_PYTHON_ROOT = "${python}";
+            IXYK_NIX_XED_ROOT = if pkgs.stdenv.isLinux then
+              "${import ./tools/xed_enc2.nix { inherit pkgs; }}" else "";
             IXYK_NIX_LIBSTDCXX_ROOT =
               if pkgs.stdenv.isLinux then "${pkgs.stdenv.cc.cc.lib}" else "";
             PYTHONNOUSERSITE = "1";

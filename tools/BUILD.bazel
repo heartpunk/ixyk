@@ -1,8 +1,19 @@
 # SPDX-FileCopyrightText: 2026 Sophie Smithburg
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-load("@rules_python//python:defs.bzl", "py_binary")
+load("@rules_python//python:defs.bzl", "py_binary", "py_library", "py_test")
 load("//catalog:x86_64_probes.bzl", "X86_64_PROBES")
+
+py_library(
+    name = "xed_enc2_dispatch",
+    srcs = ["xed_enc2_dispatch.py"],
+)
+
+py_test(
+    name = "xed_enc2_dispatch_test",
+    srcs = ["xed_enc2_dispatch_test.py"],
+    deps = [":xed_enc2_dispatch"],
+)
 
 _LINUX_X86_64 = [
     "@platforms//os:linux",
