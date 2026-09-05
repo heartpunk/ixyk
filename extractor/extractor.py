@@ -202,6 +202,57 @@ def _vex_stack_scratch_writes(raw_project: object, block: object) -> frozenset[i
 
 
 def extract(raw_project: object, source: int) -> InstructionModel:
+    """Extract separating inputs, anti-unify them, and instantiate this request."""
+    from antiunification.many import antiunify_many
+    from extractor.au_inputs import instruction_inputs
+    from extractor.model_syntax import QFAbvSyntax
+    from extractor.normalization import normalize_model
+    from extractor.operand_slots import (
+        canonical_bindings,
+        normalization_labels,
+        OperandDecodeError,
+    )
+    from extractor.runtime import load_shellcode
+    from extractor.xed import decode
+
+    project = expect_project(raw_project)
+    source = require_u64(source, "source")
+    code = bytes(project.factory.block(source, num_inst=1).bytes)
+    codes = instruction_inputs(code)
+    models = tuple(
+        _extract_concrete(load_shellcode(item, source), source) for item in codes
+    )
+    declarations = models[0].declarations
+    if any(model.declarations != declarations for model in models):
+        raise OperandDecodeError("AU input declarations disagree")
+    rows = tuple(
+        canonical_bindings(decode(item), declarations, source) for item in codes
+    )
+    if any(row.keys() != rows[0].keys() for row in rows):
+        raise OperandDecodeError("AU input operand bindings disagree")
+    models = tuple(
+        normalize_model(model, normalization_labels(row))
+        for model, row in zip(models, rows, strict=True)
+    )
+    columns = {name: tuple(row[name] for row in rows) for name in rows[0]}
+    if any(all(value == column[0] for value in column) for column in columns.values()):
+        raise OperandDecodeError("an AU parameter did not vary")
+    result = antiunify_many(QFAbvSyntax(), models, correspondences=columns)
+    unexplained = set(result.substitutions[0]) - columns.keys()
+    if unexplained:
+        raise OperandDecodeError(
+            f"AU differences are not explained by operands: {sorted(unexplained)}"
+        )
+    requested = canonical_bindings(decode(code), declarations, source)
+    value = result.instantiate(
+        {name: requested[name] for name in result.substitutions[0]}
+    )
+    if not isinstance(value, InstructionModel):
+        raise OperandDecodeError("AU did not reconstruct an instruction model")
+    return normalize_model(value, normalization_labels(requested))
+
+
+def _extract_concrete(raw_project: object, source: int) -> InstructionModel:
     """Symbolically execute one exact instruction and extract every outcome."""
 
     project, source = expect_project(raw_project), require_u64(source, "source")
@@ -296,9 +347,8 @@ def _extract_step(
         canonical_declarations(),
         guard=guard,
         updates=updates,
-        target=_terminal_target(post) or (
-            target if target_value is None else target_value
-        ),
+        target=_terminal_target(post)
+        or (target if target_value is None else target_value),
         mirrored_pc=target,
     )
 
