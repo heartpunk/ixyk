@@ -4,6 +4,11 @@
 {
   description = "ixyk AMD64 semantic-model validation spike";
 
+  nixConfig = {
+    extra-substituters = [ "https://ixyk.cachix.org" ];
+    extra-trusted-public-keys = [ "ixyk.cachix.org-1:BcMtFvSIYCFngmXH/S8028XN4katnbBRoD898nm3g3M=" ];
+  };
+
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/e7a3ca8092b61ff85b6a45bf863ea2b2d6a661b3";
     angr-nix = {

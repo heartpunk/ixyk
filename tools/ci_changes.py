@@ -36,7 +36,10 @@ DOCKER_INPUTS = (BLANK_VM_INPUTS - {
     "nix/docker-image.nix", "compose.yaml", "tools/ci_docker.sh", "tools/docker.apparmor",
     ".github/workflows/docker.yml", "compose.reapi.yaml", "tools/ci_reapi_cluster.sh",
 }
-ALL_SUITES = SUITES | {"newcomer", "blank_vm", "docker"}
+CACHE_INPUTS = (BLANK_VM_INPUTS - {
+    "tools/ci_blank_vm.sh", "tools/ci_blank_guest.sh",
+}) | {".github/workflows/cachix.yml", "tools/ci_cachix_restore.py", "tools/ci_cachix_restore_test.py"}
+ALL_SUITES = SUITES | {"newcomer", "blank_vm", "docker", "cache"}
 
 
 def affected(paths):
@@ -45,6 +48,8 @@ def affected(paths):
     selected = {"newcomer"} if NEWCOMER_INPUTS.intersection(paths) else set()
     if BLANK_VM_INPUTS.intersection(paths):
         selected.add("blank_vm")
+    if CACHE_INPUTS.intersection(paths):
+        selected.add("cache")
     if DOCKER_INPUTS.intersection(paths):
         selected.add("docker")
     for path in paths:

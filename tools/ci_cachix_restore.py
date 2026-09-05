@@ -11,7 +11,7 @@ from urllib.request import urlopen
 
 
 UPSTREAM = "https://cache.nixos.org"
-ATTIC = "http://abraxas.quetzal-celsius.ts.net:8080/ixyk-ci"
+CACHIX = "https://ixyk.cachix.org"
 
 
 def validate_paths(raw):
@@ -46,12 +46,12 @@ def restore(raw):
         upstream = list(pool.map(upstream_has, paths))
     targets = [path for path, cached in zip(paths, upstream) if not cached]
     if not targets:
-        raise ValueError("no Attic-dependent paths in published closure")
+        raise ValueError("no Cachix-dependent paths in published closure")
     for path in targets:
         if Path(path).exists():
             raise ValueError(f"restore is not cold: {path}")
     print(
-        f"Restoring {len(targets)} Attic-dependent paths; {sum(upstream)} upstream paths need no separate check",
+        f"Restoring {len(targets)} Cachix-dependent paths; {sum(upstream)} upstream paths need no separate check",
         flush=True,
     )
     for path in targets:
@@ -69,11 +69,13 @@ def restore(raw):
             "",
             "--option",
             "substituters",
-            f"{ATTIC} {UPSTREAM}",
+            f"{CACHIX} {UPSTREAM}",
+            "--option", "extra-trusted-public-keys",
+            "ixyk.cachix.org-1:BcMtFvSIYCFngmXH/S8028XN4katnbBRoD898nm3g3M=",
         ],
         check=True,
     )
-    print("Full Attic development closure restore verified", flush=True)
+    print("Full Cachix development closure restore verified", flush=True)
 
 
 if __name__ == "__main__":

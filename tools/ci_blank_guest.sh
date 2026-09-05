@@ -26,6 +26,7 @@ export PATH="$HOME/.nix-profile/bin:/usr/bin:/bin"
 mkdir -p "$HOME/.config/nix"
 cat > "$HOME/.config/nix/nix.conf" <<'CONFIG'
 experimental-features = nix-command flakes
+accept-flake-config = true
 max-jobs = 1
 cores = 4
 CONFIG
