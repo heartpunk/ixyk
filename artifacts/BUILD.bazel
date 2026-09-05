@@ -1,0 +1,14 @@
+# SPDX-FileCopyrightText: 2026 Sophie Smithburg
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+package(default_visibility = ["//visibility:public"])
+
+exports_files(["golden/MANIFEST.sha256"])
+
+filegroup(
+    name = "golden_cache",
+    srcs = glob([
+        "golden/*.acquisition.json",
+        "golden/*.model.json.zst",
+    ]) + ["golden/MANIFEST.sha256"],
+)

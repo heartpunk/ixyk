@@ -82,3 +82,6 @@ nix_native_deps = use_extension(
     "nix_native_deps",
 )
 use_repo(nix_native_deps, "nix_native_deps")
+
+inventory_inputs = use_extension("//tools:inventory_inputs.bzl", "inventory_inputs")
+use_repo(inventory_inputs, "bochs_inventory", "inventory_souffle", "inventory_zstd")

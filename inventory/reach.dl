@@ -1,0 +1,19 @@
+// SPDX-FileCopyrightText: 2026 Sophie Smithburg
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+.decl Group(g:unsigned)
+.input Group
+.decl Root(g:unsigned, b:unsigned)
+.input Root
+.decl Block(b:unsigned)
+.input Block
+.decl Edge(b:unsigned, next:unsigned)
+.input Edge
+.decl Unknown(b:unsigned, ordinal:unsigned, reason:symbol)
+.input Unknown
+.decl Reach(g:unsigned, b:unsigned)
+Reach(g,b) :- Root(g,b).
+Reach(g,next) :- Reach(g,b), Edge(b,next).
+.decl Unresolved(g:unsigned, b:unsigned, ordinal:unsigned, reason:symbol)
+Unresolved(g,b,p,r) :- Reach(g,b), Unknown(b,p,r).
+Unresolved(g,b,0,"missing_code_block") :- Reach(g,b), !Block(b).
