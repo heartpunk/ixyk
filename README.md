@@ -72,6 +72,27 @@ outputs for this release. they are research reference artifacts, not ordinary
 demonstrates, how to regenerate the set, and how to verify it against the pinned
 linux/reapi toolchain.
 
+## Repository Organization
+
+- `extractor/` — Python instruction-model pipeline.
+  - `artifact.py`, `typed_z3.py` — canonical typed QF_ABV models and Z3 conversion.
+  - `extractor.py`, `amd64_state.py` — Angr extraction and AMD64 architectural state.
+  - `model_syntax.py`, `operand_slots.py`, `instruction_schema.py` — typed syntax exposure, decoded operand correspondence, and instruction-schema generalization.
+  - `fuzzer.py` — differential validation against Unicorn.
+  - CLI entry points, runtime adapters, and tests live alongside their implementation.
+- `antiunification/` — generic typed anti-unification algebra and its unit/property tests; currently housed here.
+- `Ixyk/` — Lean embedding.
+  - `QfAbv/` — typed syntax, expression semantics, and symbolic transition systems.
+  - `Artifact.lean` — imports canonical model artifacts into the typed embedding.
+  - `GoldenCheck.lean`, `DifferentialEval.lean` — artifact checking and executable differential evaluation.
+- `catalog/` — instruction selections, generated probes, and Bazel validation targets.
+- `artifacts/golden/` — checked-in compressed model artifacts and their checksum manifest.
+- `notes/` — research notes and exploratory censuses.
+- `tools/` — validation and CI tooling, including golden-artifact checks, Lean differential tests, and REAPI execution.
+- `third_party/` — vendored Python dependencies with Bazel integration.
+- `.github/` — CI workflows and shared actions.
+- Root build files — Nix environments (`flake.nix`), Bazel dependencies/configuration, Python tooling (`pyproject.toml`), and Lean package/toolchain configuration.
+
 ## Known Limitations
 
 - intentionally linux only, bcz i didn't wanna focus on portability yet. should work on osx in principle p quickly. like. hard hard linux only. can only initiate build from linux client to linux server.
@@ -82,7 +103,6 @@ linux/reapi toolchain.
 ## Future Work
 
 - for this repo
-  - the lean [[16]](#ref-16) embedding for the symbolic transition system (sts) [[2]](#ref-2) fragment language we use, which should in principle enable at least some, but hopefully arbitrary proof for impls using the modeled instruction set (prototyped)
   - fill out the abstract, make easier understand for less specialized reader
   - build section describe what platforms work and don't rn and what is needed to make it do so
   - shared bazel/reapi environment in a standalone repo: this repo should only invoke its pinned nix flake; publish an equivalent OCI image from the same nix closure for people who don't use nix
@@ -91,6 +111,7 @@ linux/reapi toolchain.
   - generalize instruction variants using anti-unification [[11]](#ref-11), [[12]](#ref-12). not just one instr variant per opcode. should be exhaustive. was oversight. have technique impled in other repo, porting presently.
   - doesn't yet work where the symex engine doesn't model enough. for example, `VMENTER` may be difficult to directly extract by symbolic state diffs. 
     - the plan there is to read their defs out from emulators when they are defined in terms of instrs we already have, or to try other symex engines that do, or to cowardly admit defeat where we can't be perfectly total. still, i do expect in the end this can achieve higher coverage than prior instruction-semantics approaches [[13]](#ref-13)–[[15]](#ref-15). TBD!
+    - check the notes in the [Intel x86 semantic-source union census](notes/intel-x86-semantic-source-union-census-2026-09-04.md).
   - turning the readme into a paper
   - floating point
   - extension to other ISA targets
