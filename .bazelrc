@@ -8,13 +8,18 @@ common --repo_env=IXYK_NIX_PYTHON_RUNTIME
 build --incompatible_strict_action_env
 build --spawn_strategy=sandboxed
 
+build:reapi --config=reapi-common
 build:reapi --platforms=//tools:reapi_linux_x86_64
 build:reapi --extra_execution_platforms=//tools:reapi_linux_x86_64
-build:reapi --build_python_zip=false
-build:reapi --spawn_strategy=remote
-build:reapi --strategy=CopyFile=local
-build:reapi --remote_local_fallback=false
-build:reapi --remote_download_outputs=toplevel
-build:reapi --jobs=48
+build:reapi-local --config=reapi-common
+build:reapi-local --platforms=//tools:local_reapi_linux_x86_64
+build:reapi-local --extra_execution_platforms=//tools:local_reapi_linux_x86_64
+
+build:reapi-common --build_python_zip=false
+build:reapi-common --spawn_strategy=remote
+build:reapi-common --strategy=CopyFile=local
+build:reapi-common --remote_local_fallback=false
+build:reapi-common --remote_download_outputs=toplevel
+build:reapi-common --jobs=48
 
 try-import %workspace%/.bazelrc.local

@@ -1,6 +1,8 @@
 name: Select affected suites
 description: Conservative file dependency filters with full-run fallback
 outputs:
+  blank_vm:
+    value: ${{ steps.select.outputs.blank_vm }}
   newcomer:
     value: ${{ steps.select.outputs.newcomer }}
   lint:

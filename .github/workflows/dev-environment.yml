@@ -44,3 +44,18 @@ jobs:
             nix develop --command python tools/dev_smoke.py
           env -i HOME="$RUNNER_TEMP/package-home" PATH=/usr/bin:/bin \
             "$RUNNER_TEMP/ixyk-dev/bin/ixyk-dev" python tools/dev_smoke.py
+
+  blank-vm:
+    name: Blank Ubuntu onboarding and REAPI
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: ./.github/actions/changes
+        id: changes
+      - name: Test in a fresh Ubuntu cloud guest
+        if: steps.changes.outputs.blank_vm == 'true'
+        run: bash tools/ci_blank_vm.sh

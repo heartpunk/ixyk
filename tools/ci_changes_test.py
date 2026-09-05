@@ -10,7 +10,9 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
-from ci_changes import ALL_SUITES, NEWCOMER_INPUTS, SUITES, affected, changed_paths
+from ci_changes import (
+    ALL_SUITES, BLANK_VM_INPUTS, NEWCOMER_INPUTS, SUITES, affected, changed_paths,
+)
 
 
 class SelectionTest(unittest.TestCase):
@@ -21,6 +23,8 @@ class SelectionTest(unittest.TestCase):
             ".github/FUNDING.yml": set(),
             "third_party/arpy/arpy.py": {"lint", "au"},
             "tools/ci_reapi.py": {"lint", "au"},
+            "tools/reapi.py": {"lint", "au"},
+            "tools/reapi_test.py": {"lint", "au"},
             ".bazelrc": {"lint", "au"},
             ".bazelversion": {"lint", "au"},
             "tools/native.bzl": {"lint", "au"},
@@ -51,7 +55,8 @@ class SelectionTest(unittest.TestCase):
             with self.subTest(path=path):
                 self.assertEqual(
                     affected([path.encode().decode()]),
-                    expected | ({"newcomer"} if path in NEWCOMER_INPUTS else set()),
+                    expected | ({"newcomer"} if path in NEWCOMER_INPUTS else set())
+                    | ({"blank_vm"} if path in BLANK_VM_INPUTS else set()),
                 )
 
     def test_newcomer_exact_inputs(self):
@@ -81,6 +86,21 @@ class SelectionTest(unittest.TestCase):
             with self.subTest(path=path):
                 self.assertNotIn("newcomer", affected([path]))
         self.assertIn("newcomer", affected(["README.md", "flake.lock"]))
+
+    def test_blank_vm_exact_inputs(self):
+        self.assertEqual(BLANK_VM_INPUTS, NEWCOMER_INPUTS | {
+            ".bazelrc", "tools/reapi_platform.bzl",
+            "nix/reapi.nix", "tools/reapi.py", "tools/reapi_smoke.py",
+            "tools/ci_blank_vm.sh", "tools/ci_blank_guest.sh",
+        })
+        for path in BLANK_VM_INPUTS:
+            self.assertIn("blank_vm", affected([path]))
+        for path in (
+            "README.md", "unknown/file", "antiunification/algebra.py",
+            "catalog/x86_64_probes.json", "MODULE.bazel",
+            "tools/reapi_test.py", "tools/ci_changes_test.py",
+        ):
+            self.assertNotIn("blank_vm", affected([path]))
 
     def test_union_and_empty(self):
         self.assertEqual(SUITES, {"lint", "golden", "lean", "differential", "au"})

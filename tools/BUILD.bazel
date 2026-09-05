@@ -3,6 +3,7 @@
 
 load("@rules_python//python:defs.bzl", "py_binary", "py_library", "py_test")
 load("//catalog:x86_64_probes.bzl", "X86_64_PROBES")
+load(":reapi_platform.bzl", "local_reapi_platform")
 
 py_library(
     name = "xed_enc2_dispatch",
@@ -84,3 +85,5 @@ platform(
     },
     visibility = ["//visibility:public"],
 )
+
+local_reapi_platform()

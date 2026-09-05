@@ -20,13 +20,24 @@ NEWCOMER_INPUTS = {
     ".github/actions/changes/action.yml",
     "tools/ci_changes.py",
 }
-ALL_SUITES = SUITES | {"newcomer"}
+BLANK_VM_INPUTS = NEWCOMER_INPUTS | {
+    ".bazelrc",
+    "tools/reapi_platform.bzl",
+    "nix/reapi.nix",
+    "tools/reapi.py",
+    "tools/reapi_smoke.py",
+    "tools/ci_blank_vm.sh",
+    "tools/ci_blank_guest.sh",
+}
+ALL_SUITES = SUITES | {"newcomer", "blank_vm"}
 
 
 def affected(paths):
     # Unknown paths still run the project suites, but cannot implicitly
     # select the expensive environment realization.
     selected = {"newcomer"} if NEWCOMER_INPUTS.intersection(paths) else set()
+    if BLANK_VM_INPUTS.intersection(paths):
+        selected.add("blank_vm")
     for path in paths:
         name = Path(path).name
         if (
@@ -60,7 +71,7 @@ def affected(paths):
             selected |= {"lint", "au", "differential"}
         elif (
             path.startswith(("antiunification/", "third_party/"))
-            or path == "tools/ci_reapi.py"
+            or path in {"tools/ci_reapi.py", "tools/reapi.py", "tools/reapi_test.py"}
         ):
             selected |= {"lint", "au"}
         elif path in {"tools/ci_golden.py", "tools/ci_golden_test.py"}:

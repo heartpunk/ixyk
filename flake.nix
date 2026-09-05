@@ -19,9 +19,14 @@
         import ./nix/dev-environment.nix { inherit nixpkgs angr-nix system; });
     in {
       devShells = nixpkgs.lib.mapAttrs (_: env: { default = env.shell; }) environments;
-      packages = nixpkgs.lib.mapAttrs (_: env: {
+      packages = nixpkgs.lib.mapAttrs (system: env: {
         default = env.package;
         dev-environment = env.package;
+      } // nixpkgs.lib.optionalAttrs (system == "x86_64-linux") {
+        reapi = import ./nix/reapi.nix {
+          pkgs = import nixpkgs { inherit system; };
+          development = env.package;
+        };
       }) environments;
     };
 }
