@@ -23,6 +23,7 @@ CASES = (
     ("xchg", "4d87c8"),
     ("xadd", "4d0fc1c8"),
     ("inc", "49ffc0"),
+    ("lea", "4f8d444c08"),
 )
 SOURCE = 0x400000
 
