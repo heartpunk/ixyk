@@ -12,8 +12,55 @@ from typing import Protocol, cast
 import capstone  # pyright: ignore[reportMissingTypeStubs]
 
 from extractor.angr_boundary import Project
-from extractor.artifact import InstructionModel
-from extractor.model_syntax import CanonicalVariable, canonical_variable
+from extractor.artifact import Declaration, InstructionModel, TermSort
+from extractor.model_syntax import (
+    AddressAtom,
+    BitVectorAtom,
+    CanonicalVariable,
+    canonical_variable,
+)
+from extractor.au_inputs import parameters
+from extractor.xed import InstructionInfo, registers, relative_target
+
+
+def canonical_bindings(
+    decoded: InstructionInfo, declarations: tuple[Declaration, ...], source: int
+) -> dict[str, object]:
+    """Translate XED operand values to atoms of the canonical model syntax."""
+    bank = {register["name"]: register for register in registers()}
+
+    def variable(name: str) -> CanonicalVariable:
+        register = bank[name]
+        matches = [
+            declaration
+            for declaration in declarations
+            if declaration.name.upper() in bank
+            and bank[declaration.name.upper()]["parent"] == register["parent"]
+            and bank[declaration.name.upper()]["width"] >= register["width"]
+        ]
+        if len(matches) != 1:
+            raise OperandDecodeError(f"no unique canonical register for {name}")
+        return CanonicalVariable(matches[0].name, matches[0].sort)
+
+    bindings: dict[str, object] = {}
+    operands = {operand["name"]: operand for operand in decoded["operands"]}
+    for field, value in parameters(decoded).items():
+        if isinstance(value, str):
+            bindings[field] = variable(value)
+        elif field == "RELBR":
+            target = relative_target(decoded, source)
+            bindings[field + "_address"] = AddressAtom(target)
+            bindings[field + "_bv"] = BitVectorAtom(target, TermSort.bv(64))
+        elif field == "IMM0":
+            width = operands[field]["width"]
+            if decoded["immediate_signed"]:
+                encoded_width = decoded["immediate_width"]
+                if value & (1 << (encoded_width - 1)):
+                    value -= 1 << encoded_width
+            bindings[field] = BitVectorAtom(value % (1 << width), TermSort.bv(width))
+        else:
+            bindings[field] = BitVectorAtom(value % (1 << 64), TermSort.bv(64))
+    return bindings
 
 
 class OperandDecodeError(ValueError):
