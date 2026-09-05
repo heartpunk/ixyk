@@ -69,7 +69,7 @@ jobs:
           binary=$(find "$RUNNER_TEMP/nativelink" -type f -name nativelink -print -quit)
           test -n "$binary"
           # Root inside this disposable GitHub VM permits NativeLink namespaces.
-          nix develop --command sudo --preserve-env=PATH,IXYK_NIX_PYTHON_ROOT,IXYK_NIX_LIBSTDCXX_ROOT \
+          nix develop --command sudo --preserve-env=PATH,IXYK_NIX_PYTHON_ROOT,IXYK_NIX_LIBSTDCXX_ROOT,IXYK_NIX_XED_ROOT \
             python tools/ci_reapi.py "$binary" \
             //antiunification:algebra_test \
             //antiunification:algebra_property_test \
