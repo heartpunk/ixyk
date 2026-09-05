@@ -1,0 +1,23 @@
+{
+  "budget": {
+    "executions": 101,
+    "seconds": 60
+  },
+  "checkpoint": {
+    "entries": {},
+    "identity": {
+      "hypothesis": "6.160.0",
+      "instruction_hex": "48f7d0",
+      "model_sha256": "421079cfc626e1697c92efe06584c0f11ad28f78d12991e2a34155857e4ed93a",
+      "strategy": "ixyk.amd64-registers-flags.v1"
+    }
+  },
+  "elapsed_seconds": 4.31249494664371,
+  "examples_requested": 100,
+  "executions": 100,
+  "instruction_hex": "48f7d0",
+  "processing": "complete",
+  "schema": "ixyk.differential_fuzz.v1",
+  "stage": "discover",
+  "status": "pass"
+}
