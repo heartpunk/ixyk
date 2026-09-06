@@ -61,6 +61,9 @@ class FuzzReport(TypedDict):
     generation_findings: NotRequired[int]
     fallback_allocations: NotRequired[dict[str, int]]
     input_sha256: NotRequired[str]
+    active_input: NotRequired[dict]
+    worker_exit_code: NotRequired[int]
+    worker_signal: NotRequired[str]
 
 
 _PAGE_SIZE = 0x1000
@@ -380,8 +383,15 @@ def fuzz(
         if max_executions is not None and executions >= max_executions:
             raise _ExecutionBudget()
         executions += 1
-        publish()
         before = _input_state(code, source, memory, data, registers, flags, vary_inputs)
+        if campaign is not None:
+            report["active_input"] = {
+                "instruction_hex": code.hex(),
+                "source": source,
+                "scalars": dict(before.scalars),
+                "memory": {str(k): v for k, v in sorted(before.memory.items())},
+            }
+        publish()
         if campaign is not None:
             generated_code, generated_source = code, source
             code, source, selected = campaign.select(
@@ -391,8 +401,16 @@ def fuzz(
                 before = _input_state(
                     code, source, memory, data, registers, flags, vary_inputs
                 )
+                report["active_input"] = {
+                    "instruction_hex": code.hex(),
+                    "source": source,
+                    "scalars": dict(before.scalars),
+                    "memory": {str(k): v for k, v in sorted(before.memory.items())},
+                }
+                publish()
         if campaign is not None:
             campaign.compare(selected, code, before, executions)
+            report.pop("active_input", None)
             report.update(campaign.summary())
             publish()
             return
