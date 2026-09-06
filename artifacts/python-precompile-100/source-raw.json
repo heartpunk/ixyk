@@ -1,0 +1,282 @@
+{
+  "schema": "ixyk.evidence_benchmark.v1",
+  "commit": "99969fdb62d13b07d0a3978b72f5c2af74af26f9",
+  "invocation_id": "cc349b59-d52e-46df-94d3-06a435004005",
+  "recording": "reference-json",
+  "backend": null,
+  "samples_per_opcode": 100,
+  "queue_capacity": 64,
+  "compression": "zstd:3",
+  "elapsed_ns": 6651581865,
+  "peak_rss_bytes": 320663552,
+  "cases": [
+    {
+      "schema": "ixyk.differential_fuzz.v1",
+      "status": "pass",
+      "instruction_hex": "4801d8",
+      "examples_requested": 100,
+      "executions": 100,
+      "stage": "discover",
+      "processing": "complete",
+      "checkpoint": {
+        "identity": {
+          "hypothesis": "6.160.0",
+          "strategy": "ixyk.prepared-state-memory.v1",
+          "model_sha256": null,
+          "instruction_hex": "4801d8",
+          "prepared_models": [
+            {
+              "instruction_hex": "4801d8",
+              "source": 4194304,
+              "route": "generalized",
+              "model_sha256": "d1cac445c0f5423f5e7fca7c04267119a0672024d5e2403df6b7ed5d8a717eff"
+            }
+          ]
+        },
+        "entries": {}
+      },
+      "prepared_models": [
+        {
+          "instruction_hex": "4801d8",
+          "source": 4194304,
+          "route": "generalized",
+          "model_sha256": "d1cac445c0f5423f5e7fca7c04267119a0672024d5e2403df6b7ed5d8a717eff"
+        }
+      ],
+      "planned_fallback_allocations": {},
+      "agreements": 100,
+      "disagreements": 0,
+      "unusable": 0,
+      "acquisition_findings": 0,
+      "generation_findings": 0,
+      "fallback_allocations": {},
+      "input_sha256": "57a0adb5b135ba42bd3e9fa6f81e8f57224d30623999f6e25e50830f9124c0e8",
+      "preparation_seconds": 0.217536146286875,
+      "execution_seconds": 0.7684275219216943,
+      "total_seconds": 0.9859643001109362,
+      "opcode": "ADD",
+      "setup_ns": 6244380,
+      "compute_ns": 4200114826,
+      "elapsed_ns": 4207791512,
+      "finalize_ns": 16732,
+      "recording": {
+        "capture_ns": 10786157,
+        "submit_ns": 1089468,
+        "blocked_ns": 0,
+        "encode_ns": 210727625,
+        "write_ns": 6741216,
+        "flush_ns": 5514507,
+        "worker_cpu_ns": 189757441,
+        "drain_ns": 1411765,
+        "records": 216,
+        "flushes": 100,
+        "payload_bytes": 2151273,
+        "framed_bytes": 2163344,
+        "queue_high_water": 6
+      },
+      "io_ns": 1682922,
+      "output_bytes": 64569
+    },
+    {
+      "schema": "ixyk.differential_fuzz.v1",
+      "status": "pass",
+      "instruction_hex": "7400",
+      "examples_requested": 100,
+      "executions": 100,
+      "stage": "discover",
+      "processing": "complete",
+      "checkpoint": {
+        "identity": {
+          "hypothesis": "6.160.0",
+          "strategy": "ixyk.prepared-state-memory.v1",
+          "model_sha256": null,
+          "instruction_hex": "7400",
+          "prepared_models": [
+            {
+              "instruction_hex": "7400",
+              "source": 4194304,
+              "route": "generalized",
+              "model_sha256": "4087504769b33d6b09f9e1f8d3b7f7af8ce0ec3f5c1a04aa51699597f8a0efdb"
+            }
+          ]
+        },
+        "entries": {}
+      },
+      "prepared_models": [
+        {
+          "instruction_hex": "7400",
+          "source": 4194304,
+          "route": "generalized",
+          "model_sha256": "4087504769b33d6b09f9e1f8d3b7f7af8ce0ec3f5c1a04aa51699597f8a0efdb"
+        }
+      ],
+      "planned_fallback_allocations": {},
+      "agreements": 100,
+      "disagreements": 0,
+      "unusable": 0,
+      "acquisition_findings": 0,
+      "generation_findings": 0,
+      "fallback_allocations": {},
+      "input_sha256": "25fe92ec834c5593c50c49b86e4ebc5c1f1263fd6989de1fe3a1df3c8ca1ac0b",
+      "preparation_seconds": 0.19736545160412788,
+      "execution_seconds": 0.6093848790042102,
+      "total_seconds": 0.8067512540146708,
+      "opcode": "JE",
+      "setup_ns": 1893921,
+      "compute_ns": 806765592,
+      "elapsed_ns": 811296426,
+      "finalize_ns": 17204,
+      "recording": {
+        "capture_ns": 6627797,
+        "submit_ns": 1118697,
+        "blocked_ns": 0,
+        "encode_ns": 194212434,
+        "write_ns": 1396924,
+        "flush_ns": 45039438,
+        "worker_cpu_ns": 181296380,
+        "drain_ns": 2616294,
+        "records": 209,
+        "flushes": 100,
+        "payload_bytes": 2004051,
+        "framed_bytes": 2015816,
+        "queue_high_water": 25
+      },
+      "io_ns": 41055876,
+      "output_bytes": 62783
+    },
+    {
+      "schema": "ixyk.differential_fuzz.v1",
+      "status": "pass",
+      "instruction_hex": "488d444b08",
+      "examples_requested": 100,
+      "executions": 100,
+      "stage": "discover",
+      "processing": "complete",
+      "checkpoint": {
+        "identity": {
+          "hypothesis": "6.160.0",
+          "strategy": "ixyk.prepared-state-memory.v1",
+          "model_sha256": null,
+          "instruction_hex": "488d444b08",
+          "prepared_models": [
+            {
+              "instruction_hex": "488d444b08",
+              "source": 4194304,
+              "route": "generalized",
+              "model_sha256": "e4f3abf0cd92cbeb8d1be8d578afb29908ade0912016d6c80cc19ff5bbebb228"
+            }
+          ]
+        },
+        "entries": {}
+      },
+      "prepared_models": [
+        {
+          "instruction_hex": "488d444b08",
+          "source": 4194304,
+          "route": "generalized",
+          "model_sha256": "e4f3abf0cd92cbeb8d1be8d578afb29908ade0912016d6c80cc19ff5bbebb228"
+        }
+      ],
+      "planned_fallback_allocations": {},
+      "agreements": 100,
+      "disagreements": 0,
+      "unusable": 0,
+      "acquisition_findings": 0,
+      "generation_findings": 0,
+      "fallback_allocations": {},
+      "input_sha256": "ebba08c07d30786ff5a5f76b74158730cfede6fe5ad8ade71900c9fe6c086d73",
+      "preparation_seconds": 0.31491720024496317,
+      "execution_seconds": 0.6106519671157002,
+      "total_seconds": 0.9255695533938706,
+      "opcode": "LEA",
+      "setup_ns": 1743584,
+      "compute_ns": 925582510,
+      "elapsed_ns": 930597437,
+      "finalize_ns": 18792,
+      "recording": {
+        "capture_ns": 5870498,
+        "submit_ns": 1133770,
+        "blocked_ns": 0,
+        "encode_ns": 209273411,
+        "write_ns": 2408675,
+        "flush_ns": 7511364,
+        "worker_cpu_ns": 196068763,
+        "drain_ns": 3249830,
+        "records": 228,
+        "flushes": 100,
+        "payload_bytes": 2208944,
+        "framed_bytes": 2221537,
+        "queue_high_water": 12
+      },
+      "io_ns": 1791125,
+      "output_bytes": 65869
+    },
+    {
+      "schema": "ixyk.differential_fuzz.v1",
+      "status": "pass",
+      "instruction_hex": "f20f10c1",
+      "examples_requested": 100,
+      "executions": 100,
+      "stage": "discover",
+      "processing": "complete",
+      "checkpoint": {
+        "identity": {
+          "hypothesis": "6.160.0",
+          "strategy": "ixyk.prepared-state-memory.v1",
+          "model_sha256": null,
+          "instruction_hex": "f20f10c1",
+          "prepared_models": [
+            {
+              "instruction_hex": "f20f10c1",
+              "source": 4194304,
+              "route": "generalized",
+              "model_sha256": "6d643cff0e611f3f9c3a25cae59ac85508ca77eef31fc7760ad722f4a076ba2c"
+            }
+          ]
+        },
+        "entries": {}
+      },
+      "prepared_models": [
+        {
+          "instruction_hex": "f20f10c1",
+          "source": 4194304,
+          "route": "generalized",
+          "model_sha256": "6d643cff0e611f3f9c3a25cae59ac85508ca77eef31fc7760ad722f4a076ba2c"
+        }
+      ],
+      "planned_fallback_allocations": {},
+      "agreements": 100,
+      "disagreements": 0,
+      "unusable": 0,
+      "acquisition_findings": 0,
+      "generation_findings": 0,
+      "fallback_allocations": {},
+      "input_sha256": "7098dc3711420b69e003cdfac87b27a202e9d1d4f7239b6bf8419a772d4b4d82",
+      "preparation_seconds": 0.09314877213910222,
+      "execution_seconds": 0.6054542921483517,
+      "total_seconds": 0.6986034167930484,
+      "opcode": "MOVSD",
+      "setup_ns": 1732693,
+      "compute_ns": 698617243,
+      "elapsed_ns": 701697984,
+      "finalize_ns": 18568,
+      "recording": {
+        "capture_ns": 5739693,
+        "submit_ns": 1066157,
+        "blocked_ns": 0,
+        "encode_ns": 202811152,
+        "write_ns": 1549461,
+        "flush_ns": 9059862,
+        "worker_cpu_ns": 187117307,
+        "drain_ns": 1326833,
+        "records": 212,
+        "flushes": 100,
+        "payload_bytes": 1977080,
+        "framed_bytes": 1988977,
+        "queue_high_water": 5
+      },
+      "io_ns": 5138646,
+      "output_bytes": 62975
+    }
+  ]
+}

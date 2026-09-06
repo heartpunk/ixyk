@@ -56,6 +56,7 @@ def main():
         (root / "MODULE.bazel").write_text(
             'module(name = "reapi_smoke")\n'
             'bazel_dep(name = "platforms", version = "1.1.0")\n'
+            'bazel_dep(name = "rules_python", version = "1.7.0")\n'
         )
         shutil.copyfile(source / ".bazelrc", root / ".bazelrc")
         (root / "tools").mkdir()
