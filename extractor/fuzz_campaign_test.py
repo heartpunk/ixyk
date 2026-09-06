@@ -4,7 +4,7 @@
 from collections import Counter
 from io import BytesIO
 from types import SimpleNamespace
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 
 from hypothesis import given, settings, strategies as st
 import pytest
@@ -18,7 +18,6 @@ from extractor.evidence_events import (
     Comparison,
     EvidenceHooks,
     FuzzInput,
-    StateSnapshot,
     ToolFailure,
     evidence_types,
 )
@@ -26,11 +25,17 @@ from extractor.evidence_recording import BackgroundRecorder
 from extractor.evidence_reference_json import ReferenceJSONBackend
 from extractor.extractor import extract
 from extractor.fuzz_campaign import Campaign
-from extractor.fuzzer import ConcreteState, CompiledModel, _input_state, emulate
+from extractor.fuzzer import (
+    ConcreteState,
+    CompiledModel,
+    InputLayout,
+    _input_state,
+    emulate,
+    fuzz,
+)
 from extractor.amd64_state import FLAG_NAMES, GPR64, YMM256
 from extractor.operand_slots import OperandDecodeError
 from extractor import runtime
-from extractor.angr_boundary import lift_block
 from extractor.runtime import load_shellcode
 from extractor.unicorn_boundary import unicorn_constant
 import unicorn
@@ -54,8 +59,10 @@ def test_fallback_divides_one_budget_across_retained_variants(variants, budget):
         patch.object(campaign_module, "extract", side_effect=extraction) as acquire,
         patch.object(campaign_module, "load_shellcode"),
         patch.object(campaign_module, "CompiledModel", side_effect=lambda model: model),
+        patch.object(InputLayout, "prepare", return_value=None),
     ):
-        selected = [campaign.select(b"\xc3", 8192, i)[0] for i in range(budget)]
+        campaign.prepare(source=8192)
+        selected = [campaign.select(i + 1).code for i in range(budget)]
     counts = Counter(selected)
     allocation = [counts[code] for code, _ in retained]
     assert sum(allocation) == budget
@@ -161,55 +168,13 @@ def test_forced_au_failure_preserves_real_direct_models():
     assert dict(predictions[0].scalars) == after.scalars
 
 
-def test_loader_failure_is_scoped_and_later_campaign_work_continues():
-    state = ConcreteState({"rip": 4096}, {4096: 0x90})
-    stream = BytesIO()
-    recorder = BackgroundRecorder(
-        backend=ReferenceJSONBackend(),
-        types=evidence_types(),
-        run=RunContext("a" * 40, "test-invocation"),
-        output=stream,
-    )
-    hooks = EvidenceHooks(recorder)
-    model = SimpleNamespace(source=4096)
-    first, unrelated = Campaign(b"\x90", hooks), Campaign(b"\xc3", hooks)
+@pytest.mark.parametrize(
+    "operation,tool",
+    [("loader", "angr.load_shellcode"), ("lifter", "angr.factory.block")],
+)
+def test_preparation_failure_is_retained_without_retrying_in_samples(operation, tool):
+    from extractor.tool_errors import AngrOperationError, ShellcodeLoadError
 
-    loader = [AssertionError(), object(), object()]
-    with (
-        patch.object(runtime.angr, "load_shellcode", side_effect=loader),
-        patch.object(campaign_module, "extract", return_value=model) as acquire,
-        patch.object(campaign_module, "CompiledModel", side_effect=lambda item: item),
-    ):
-        assert first.select(b"\x90", 4096, 1, before=state)[2] is None
-        assert first.select(b"\x90", 4096, 2, before=state)[2] is model
-        assert unrelated.select(b"\xc3", 4096, 1, before=state)[2] is model
-
-    recorder.close()
-    records = list(
-        EvidenceReader(
-            BytesIO(stream.getvalue()),
-            backend=ReferenceJSONBackend(),
-            types=evidence_types(),
-        )
-    )
-    findings = [
-        record.value for record in records if isinstance(record.value, ToolFailure)
-    ]
-    assert len(findings) == 1
-    finding = findings[0]
-    assert finding.stage == "acquisition"
-    assert finding.instruction == b"\x90"
-    assert finding.error_kind == "AssertionError"
-    assert finding.message == "AssertionError()"
-    assert finding.tool == "angr.load_shellcode"
-    assert "AssertionError" in finding.traceback
-    assert finding.before == StateSnapshot.capture(state)
-    assert first.acquisition_findings == 1
-    assert acquire.call_count == 2
-
-
-def test_lifter_failure_is_scoped_and_next_sample_continues():
-    state = ConcreteState({"rip": 0}, {0: 0x90})
     stream = BytesIO()
     recorder = BackgroundRecorder(
         backend=ReferenceJSONBackend(),
@@ -218,40 +183,170 @@ def test_lifter_failure_is_scoped_and_next_sample_continues():
         output=stream,
     )
     campaign = Campaign(b"\x90", EvidenceHooks(recorder))
-    model = SimpleNamespace(source=0)
-    factory = SimpleNamespace(block=Mock(side_effect=ValueError("No bytes in memory")))
-    attempts = iter((SimpleNamespace(factory=factory), model))
-
-    def extraction(project, source, **kwargs):
-        attempt = next(attempts)
-        if attempt is model:
-            return model
-        return lift_block(attempt, source, num_inst=1)
-
-    with (
-        patch.object(campaign_module, "load_shellcode", return_value=object()),
-        patch.object(campaign_module, "extract", side_effect=extraction),
-        patch.object(campaign_module, "CompiledModel", side_effect=lambda item: item),
-    ):
-        assert campaign.select(b"\x90", 0, 1, before=state)[2] is None
-        assert campaign.select(b"\x90", 0, 2, before=state)[2] is model
-
+    error = (
+        ShellcodeLoadError(ValueError("failed"))
+        if operation == "loader"
+        else AngrOperationError(tool, ValueError("failed"))
+    )
+    with patch.object(campaign_module, "load_shellcode", side_effect=error) as acquire:
+        campaign.prepare()
+        assert campaign.models == ()
+        with pytest.raises(RuntimeError, match="already frozen"):
+            campaign.prepare()
+        with pytest.raises(RuntimeError, match="no executable models"):
+            campaign.select(1)
+        assert acquire.call_count == 1
     recorder.close()
-    records = list(
-        EvidenceReader(
+    failures = [
+        r.value
+        for r in EvidenceReader(
             BytesIO(stream.getvalue()),
             backend=ReferenceJSONBackend(),
             types=evidence_types(),
         )
-    )
-    failures = [
-        record.value for record in records if isinstance(record.value, ToolFailure)
+        if isinstance(r.value, ToolFailure)
     ]
-    assert len(failures) == 1
-    assert failures[0].tool == "angr.factory.block"
-    assert failures[0].error_kind == "ValueError"
-    assert failures[0].message == "No bytes in memory"
-    assert failures[0].before == StateSnapshot.capture(state)
+    assert len(failures) == campaign.acquisition_findings == 1
+    assert failures[0].tool == tool
+    assert failures[0].before is None
+
+
+@pytest.mark.parametrize("recording", [False, True])
+@pytest.mark.parametrize("fallback", [False, True])
+def test_frozen_campaign_has_no_acquisition_in_sampling(recording, fallback):
+    from contextlib import ExitStack
+    from extractor import xed
+    from extractor.extractor import _extract_concrete
+    import antiunification.many as au
+
+    codes = [
+        bytes.fromhex(h) for h in (["4801d8", "4801c8"] if fallback else ["4801d8"])
+    ]
+    models = [
+        _extract_concrete(load_shellcode(code, 0x400000), 0x400000) for code in codes
+    ]
+    acquisition = dict(
+        schema="ixyk.instruction_acquisition.v1",
+        instruction_hex=codes[0].hex(),
+        status="acquisition_error" if fallback else "pass",
+        model_route="direct" if fallback else "generalized",
+        retained_models=[
+            dict(instruction_hex=c.hex(), model=m.to_data())
+            for c, m in zip(codes, models)
+        ],
+        findings=[],
+    )
+    stream = BytesIO()
+    recorder = (
+        BackgroundRecorder(
+            backend=ReferenceJSONBackend(),
+            types=evidence_types(),
+            run=RunContext("a" * 40, "frozen-test"),
+            output=stream,
+        )
+        if recording
+        else None
+    )
+    prepare = Campaign.prepare
+    observed = []
+    original_emulate = campaign_module.emulate
+
+    def emulate_checked(code, before):
+        observed.append((code, before))
+        return original_emulate(code, before)
+
+    with ExitStack() as stack:
+
+        def prepare_checked(self, **kwargs):
+            prepare(self, **kwargs)
+            for target, name in [
+                (xed, "_invoke"),
+                (campaign_module, "extract"),
+                (campaign_module, "load_shellcode"),
+                (runtime, "load_shellcode"),
+                (CompiledModel, "__init__"),
+                (au, "antiunify_many"),
+            ]:
+                stack.enter_context(
+                    patch.object(
+                        target,
+                        name,
+                        side_effect=AssertionError("forbidden hot-loop call"),
+                    )
+                )
+
+        stack.enter_context(patch.object(Campaign, "prepare", prepare_checked))
+        stack.enter_context(patch.object(campaign_module, "emulate", emulate_checked))
+        try:
+            report = fuzz(
+                models[0],
+                codes[0],
+                17,
+                max_executions=17,
+                vary_inputs=True,
+                continue_on_findings=True,
+                acquisition=acquisition,
+                evidence=EvidenceHooks(recorder) if recorder else None,
+            )
+        finally:
+            if recorder:
+                recorder.close()
+    assert report["executions"] == len(observed) == 17
+    assert [code for code, _ in observed] == [codes[i % len(codes)] for i in range(17)]
+    assert {state.scalars["rip"] for _, state in observed} == {0x400000}
+    assert len({tuple(state.scalars.items()) for _, state in observed}) > 1
+    assert len({tuple(state.memory.items()) for _, state in observed}) > 1
+    if fallback:
+        assert report["fallback_allocations"] == {codes[0].hex(): 9, codes[1].hex(): 8}
+    else:
+        assert report["fallback_allocations"] == {}
+    assert report["agreements"] + report["disagreements"] + report["unusable"] == 17
+    if recorder:
+        records = list(
+            EvidenceReader(
+                BytesIO(stream.getvalue()),
+                backend=ReferenceJSONBackend(),
+                types=evidence_types(),
+            )
+        )
+        assert sum(isinstance(r.value, FuzzInput) for r in records) == 17
+        assert sum(isinstance(r.value, Comparison) for r in records) == 17
+        assert sum(isinstance(r.value, InstructionModel) for r in records) == len(
+            models
+        )
+
+
+def test_unavailable_acquisition_is_reported_without_new_discovery():
+    acquisition = dict(
+        schema="ixyk.instruction_acquisition.v1",
+        instruction_hex="90",
+        status="unsupported",
+        model_route=None,
+        retained_models=[],
+        findings=[
+            dict(
+                stage="generalization",
+                instruction_hex="90",
+                error_kind="OperandDecodeError",
+                message="no model",
+            )
+        ],
+    )
+    with patch.object(
+        campaign_module, "extract", side_effect=AssertionError("new discovery")
+    ):
+        report = fuzz(
+            None,
+            b"\x90",
+            17,
+            vary_inputs=True,
+            continue_on_findings=True,
+            acquisition=acquisition,
+        )
+    assert report["executions"] == 0
+    assert report["status"] == "incomplete"
+    assert report["acquisition_findings"] == 1
+    assert report["prepared_models"] == []
 
 
 if __name__ == "__main__":

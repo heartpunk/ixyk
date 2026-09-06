@@ -254,5 +254,70 @@ def test_fuzz_cli_records_subprocess_comparisons(samples):
         )
 
 
+@pytest.mark.parametrize("fallback", [False, True])
+@pytest.mark.parametrize("fixed_inputs", [False, True])
+def test_fuzz_cli_consumes_the_frozen_acquisition(tmp_path, fallback, fixed_inputs):
+    from antiunification.algebra import AlgebraError
+    from extractor import fuzz_cli
+
+    code = "4801d8"
+
+    def acquire(project, source, **kwargs):
+        if fallback:
+            with patch(
+                "antiunification.many.antiunify_many",
+                side_effect=AlgebraError("forced AU failure"),
+            ):
+                return extraction.extract(project, source, **kwargs)
+        return extraction.extract(project, source, **kwargs)
+
+    model_path, acquisition_path, output_path = [
+        tmp_path / name for name in ("model.json", "acquisition.json", "fuzz.json")
+    ]
+    with patch.object(acquire_cli, "extract", acquire):
+        acquire_cli.main(
+            [
+                "--instruction-hex",
+                code,
+                "--model-output",
+                str(model_path),
+                "--result-output",
+                str(acquisition_path),
+            ]
+        )
+    acquisition = json.loads(acquisition_path.read_text())
+    assert acquisition["model_route"] == ("direct" if fallback else "generalized")
+    args = [
+        "--instruction-hex",
+        code,
+        "--model",
+        str(model_path),
+        "--acquisition",
+        str(acquisition_path),
+        "--examples",
+        "17",
+        "--seconds",
+        "60",
+        "--output",
+        str(output_path),
+    ]
+    if fixed_inputs:
+        args.append("--fixed-inputs")
+    fuzz_cli.main(args)
+    report = json.loads(output_path.read_text())
+    assert report["executions"] == 17, report
+    assert len(report["prepared_models"]) == (
+        len(acquisition["retained_models"]) if fallback else 1
+    )
+    assert report["fallback_allocations"] == report["planned_fallback_allocations"]
+    assert report["acquisition_findings"] == len(acquisition["findings"])
+    if fallback:
+        assert set(report["fallback_allocations"]) == {
+            item["instruction_hex"] for item in acquisition["retained_models"]
+        }
+    else:
+        assert report["prepared_models"][0]["instruction_hex"] == code
+
+
 if __name__ == "__main__":
     raise SystemExit(pytest.main([__file__]))

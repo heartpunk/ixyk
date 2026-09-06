@@ -1,0 +1,22 @@
+{
+  "parent_commit": "1ca1aef6e15025a223a2822fd988137138ca87c0",
+  "working_copy": true,
+  "host": "shire",
+  "memory_limit_bytes": 4294967296,
+  "swap_limit_bytes": 0,
+  "workers": 1,
+  "cpu_quota_percent": 200,
+  "note": "Final extractor overlay on measured snapshot; matching parent is named for provenance, not as the dirty snapshot revision.",
+  "files": {
+    "extractor/fuzzer.py": "a1998b15ef21b78f70cf40950bf0c48086b26fcf6edf35b34ceff31acd52238d",
+    "extractor/fuzz_campaign.py": "501a6271a5241b1c7a31cbc4dd9135ebc14b1d774aebc3e29ae3a0d0138504d3",
+    "extractor/fuzz_cli.py": "3bb7871e417159ce92446af5f2e142fbb1849bb9e48d0d32c537b071fb77289d",
+    "extractor/fuzz_campaign_test.py": "7b6807019e7eb8199a2b4c68bc2787bf1a0b484b73ec73fc416c9e58adf97b61",
+    "extractor/evidence_integration_test.py": "c3c34726349c241f6e6b1cb04e4480b88616d9bfa47775167a0070d60f73995c",
+    "extractor/fuzz_inputs_test.py": "c35105948af33cdbf610e72430932853f68c56e1a198f434342449333f137fa9",
+    "extractor/evidence_benchmark.py": "128424ac9aa685ffd36609528bc6fa83661565f057c8bb9e5a5d2755a5c9ee5d"
+  },
+  "snapshot": "final-source.tar.gz",
+  "snapshot_sha256": "29f7686ea6bf61971e552c602b066904492c4e61b3d23f1e891de69d6638d691",
+  "base_snapshot": "source.tar.gz"
+}

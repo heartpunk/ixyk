@@ -1,0 +1,80 @@
+[
+  {
+    "path": "results/final-ADD-reference-json/ADD.evidence.zst",
+    "records": {
+      "InstructionModel": 8,
+      "Acquisition": 8,
+      "FuzzInput": 100,
+      "Comparison": 100
+    },
+    "outcomes": {
+      "agreement": 100
+    },
+    "input_sha256": "afc3bb9a9c963a5085067cad70aa1ede5349680f9460123de8a4545e9c961317"
+  },
+  {
+    "path": "results/final-JE-reference-json/JE.evidence.zst",
+    "records": {
+      "InstructionModel": 3,
+      "Acquisition": 6,
+      "FuzzInput": 100,
+      "Comparison": 100
+    },
+    "outcomes": {
+      "agreement": 100
+    },
+    "input_sha256": "50994d891171c19d11c17b12342b065dd533246e16bb9856e9fa9034e9b38e08"
+  },
+  {
+    "path": "results/final-LEA-reference-json/LEA.evidence.zst",
+    "records": {
+      "InstructionModel": 14,
+      "Acquisition": 14,
+      "FuzzInput": 100,
+      "Comparison": 100
+    },
+    "outcomes": {
+      "agreement": 100
+    },
+    "input_sha256": "c79ae956a3b1176719cacdea8f8512ee1ca45c4fc565df7d8618b7cd358efb1b"
+  },
+  {
+    "path": "results/final-MOVSD-reference-json/MOVSD.evidence.zst",
+    "records": {
+      "InstructionModel": 4,
+      "Acquisition": 8,
+      "FuzzInput": 100,
+      "Comparison": 100
+    },
+    "outcomes": {
+      "agreement": 100
+    },
+    "input_sha256": "af810bbdba0ae52f290b02fa05bba3386b9a2ca60f74912e066da8369186bcf3"
+  },
+  {
+    "path": "results/je10k-json/JE.evidence.zst",
+    "records": {
+      "InstructionModel": 3,
+      "Acquisition": 6,
+      "FuzzInput": 10000,
+      "Comparison": 10000
+    },
+    "outcomes": {
+      "agreement": 10000
+    },
+    "input_sha256": "fa9f3352e7afd1cd701e298f2e6208d525d47749e8adff86fdebd98f66db33d6"
+  },
+  {
+    "path": "results/lea10k-json/LEA.evidence.zst",
+    "records": {
+      "InstructionModel": 14,
+      "Acquisition": 14,
+      "FuzzInput": 10000,
+      "Comparison": 10000
+    },
+    "outcomes": {
+      "agreement": 10000
+    },
+    "input_sha256": "a46773ecc4ef38453f34d982cd48481e4a8e1f3f5ec349ed41df5424ed95ee92"
+  }
+]

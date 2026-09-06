@@ -1,0 +1,5 @@
+Running as unit: ixyk-frozen-20260906-final-tests.service
+Finished with result: exit-code
+Main processes terminated with: code=exited/status=1
+Service runtime: 28.440s
+CPU time consumed: 25.835s

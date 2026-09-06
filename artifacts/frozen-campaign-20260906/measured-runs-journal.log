@@ -1,0 +1,4 @@
+Sep 06 07:30:58 shire systemd[1042702]: Started /home/heartpunk/workspaces/ixyk-perf/runtime/python-root/bin/python bootstrap.py guarded_benchmark.py --opcode JE --samples 10000 --recording off --commit 1ca1aef6e15025a223a2822fd988137138ca87c0 --invocation-id frozen-working-copy-je10k-off --output-dir results/je10k-off.
+Sep 06 07:32:04 shire systemd[1042702]: ixyk-frozen-20260906-je10k-off.service: Consumed 1min 5.516s CPU time.
+Sep 06 07:33:10 shire systemd[1042924]: Started /bin/bash run-validation.sh.
+Sep 06 07:42:25 shire systemd[1042924]: ixyk-frozen-20260906-recorded.service: Consumed 9min 32.215s CPU time.

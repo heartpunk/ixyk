@@ -1,0 +1,20 @@
+Sep 06 07:45:25 shire systemd[1043559]: Started /bin/bash -c set -e; p=/home/heartpunk/workspaces/ixyk-perf/runtime/python-root/bin/python; "$p" bootstrap.py pytest -q source/extractor/fuzz_campaign_test.py source/extractor/evidence_benchmark_test.py source/extractor/fuzz_runner_test.py source/extractor/evidence_integration_test.py; for t in fuzz_inputs fuzz_stages fuzz_bootstrap; do "$p" bootstrap.py source/extractor/${t}_test.py; done.
+Sep 06 07:45:53 shire bash[1043616]: ...................................                                      [100%]
+Sep 06 07:45:53 shire bash[1043616]: =============================== warnings summary ===============================
+Sep 06 07:45:53 shire bash[1043616]: source/extractor/fuzz_campaign_test.py::test_outcomes_continue_and_recording_does_not_change_comparisons
+Sep 06 07:45:53 shire bash[1043616]:   /home/heartpunk/workspaces/ixyk-perf/ixyk-small-probe-20260906/wheels/hypothesis/core.py:1008: HypothesisWarning: The recursion limit will not be reset, since it was changed during test execution (from 1000 to 10000).
+Sep 06 07:45:53 shire bash[1043616]:     with unwrap_markers_from_group(), ensure_free_stackframes():
+Sep 06 07:45:53 shire bash[1043616]: source/extractor/fuzz_campaign_test.py::test_outcomes_continue_and_recording_does_not_change_comparisons
+Sep 06 07:45:53 shire bash[1043616]:   /home/heartpunk/workspaces/ixyk-perf/ixyk-small-probe-20260906/wheels/hypothesis/internal/conjecture/engine.py:432: HypothesisWarning: The recursion limit will not be reset, since it was changed during test execution (from 1000 to 10000).
+Sep 06 07:45:53 shire bash[1043616]:     with ensure_free_stackframes():
+Sep 06 07:45:53 shire bash[1043616]: -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+Sep 06 07:45:53 shire bash[1043616]: 35 passed, 2 warnings in 27.61s
+Sep 06 07:45:54 shire bash[1044533]: Traceback (most recent call last):
+Sep 06 07:45:54 shire bash[1044533]:   File "/home/heartpunk/workspaces/ixyk-perf/frozen-campaign-20260906/bootstrap.py", line 13, in <module>
+Sep 06 07:45:54 shire bash[1044533]:     runpy.run_path(module, run_name='__main__')
+Sep 06 07:45:54 shire bash[1044533]:   File "<frozen runpy>", line 286, in run_path
+Sep 06 07:45:54 shire bash[1044533]:   File "<frozen runpy>", line 254, in _get_code_from_file
+Sep 06 07:45:54 shire bash[1044533]: FileNotFoundError: [Errno 2] No such file or directory: '/home/heartpunk/workspaces/ixyk-perf/frozen-campaign-20260906/source/extractor/_test.py'
+Sep 06 07:45:54 shire systemd[1043559]: ixyk-frozen-20260906-final-tests.service: Main process exited, code=exited, status=1/FAILURE
+Sep 06 07:45:54 shire systemd[1043559]: ixyk-frozen-20260906-final-tests.service: Failed with result 'exit-code'.
+Sep 06 07:45:54 shire systemd[1043559]: ixyk-frozen-20260906-final-tests.service: Consumed 25.835s CPU time.

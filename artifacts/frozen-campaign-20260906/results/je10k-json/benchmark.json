@@ -1,0 +1,72 @@
+{
+  "schema": "ixyk.evidence_benchmark.v1",
+  "commit": "1ca1aef6e15025a223a2822fd988137138ca87c0",
+  "invocation_id": "frozen-working-copy-je10k-json",
+  "recording": "reference-json",
+  "backend": null,
+  "samples_per_opcode": 10000,
+  "queue_capacity": 64,
+  "compression": "zstd:3",
+  "elapsed_ns": 262923891358,
+  "peak_rss_bytes": 533663744,
+  "cases": [
+    {
+      "schema": "ixyk.differential_fuzz.v1",
+      "status": "pass",
+      "instruction_hex": "7400",
+      "examples_requested": 10000,
+      "executions": 10000,
+      "stage": "discover",
+      "processing": "complete",
+      "checkpoint": {
+        "identity": {
+          "hypothesis": "6.160.0",
+          "strategy": "ixyk.prepared-state-memory.v1",
+          "model_sha256": null,
+          "instruction_hex": "7400"
+        },
+        "entries": {}
+      },
+      "prepared_models": [
+        {
+          "instruction_hex": "7400",
+          "source": 4194304,
+          "route": "generalized"
+        }
+      ],
+      "planned_fallback_allocations": {},
+      "agreements": 10000,
+      "disagreements": 0,
+      "unusable": 0,
+      "acquisition_findings": 0,
+      "generation_findings": 0,
+      "fallback_allocations": {},
+      "input_sha256": "fa9f3352e7afd1cd701e298f2e6208d525d47749e8adff86fdebd98f66db33d6",
+      "preparation_seconds": 0.250927418936044,
+      "execution_seconds": 262.66640282515436,
+      "total_seconds": 262.91733107483014,
+      "opcode": "JE",
+      "setup_ns": 4968316,
+      "compute_ns": 262917616269,
+      "elapsed_ns": 262923808112,
+      "finalize_ns": 28157,
+      "recording": {
+        "capture_ns": 68870586247,
+        "submit_ns": 160554795,
+        "blocked_ns": 0,
+        "encode_ns": 144688783543,
+        "write_ns": 1629156880,
+        "flush_ns": 2057870992,
+        "worker_cpu_ns": 136757988175,
+        "drain_ns": 1191072,
+        "records": 20009,
+        "flushes": 10000,
+        "payload_bytes": 1813021942,
+        "framed_bytes": 1814077809,
+        "queue_high_water": 20
+      },
+      "io_ns": 782846034,
+      "output_bytes": 12122090
+    }
+  ]
+}

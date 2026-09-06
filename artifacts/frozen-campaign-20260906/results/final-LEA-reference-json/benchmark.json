@@ -1,0 +1,81 @@
+{
+  "schema": "ixyk.evidence_benchmark.v1",
+  "commit": "1ca1aef6e15025a223a2822fd988137138ca87c0",
+  "invocation_id": "final-LEA-reference-json",
+  "recording": "reference-json",
+  "backend": null,
+  "samples_per_opcode": 100,
+  "queue_capacity": 64,
+  "compression": "zstd:3",
+  "elapsed_ns": 2968814711,
+  "peak_rss_bytes": 233005056,
+  "cases": [
+    {
+      "schema": "ixyk.differential_fuzz.v1",
+      "status": "pass",
+      "instruction_hex": "488d444b08",
+      "examples_requested": 100,
+      "executions": 100,
+      "stage": "discover",
+      "processing": "complete",
+      "checkpoint": {
+        "identity": {
+          "hypothesis": "6.160.0",
+          "strategy": "ixyk.prepared-state-memory.v1",
+          "model_sha256": null,
+          "instruction_hex": "488d444b08",
+          "prepared_models": [
+            {
+              "instruction_hex": "488d444b08",
+              "source": 4194304,
+              "route": "generalized",
+              "model_sha256": "e4f3abf0cd92cbeb8d1be8d578afb29908ade0912016d6c80cc19ff5bbebb228"
+            }
+          ]
+        },
+        "entries": {}
+      },
+      "prepared_models": [
+        {
+          "instruction_hex": "488d444b08",
+          "source": 4194304,
+          "route": "generalized",
+          "model_sha256": "e4f3abf0cd92cbeb8d1be8d578afb29908ade0912016d6c80cc19ff5bbebb228"
+        }
+      ],
+      "planned_fallback_allocations": {},
+      "agreements": 100,
+      "disagreements": 0,
+      "unusable": 0,
+      "acquisition_findings": 0,
+      "generation_findings": 0,
+      "fallback_allocations": {},
+      "input_sha256": "c79ae956a3b1176719cacdea8f8512ee1ca45c4fc565df7d8618b7cd358efb1b",
+      "preparation_seconds": 0.35107750818133354,
+      "execution_seconds": 2.611253180075437,
+      "total_seconds": 2.9623314291238785,
+      "opcode": "LEA",
+      "setup_ns": 4998487,
+      "compute_ns": 2962637655,
+      "elapsed_ns": 2968733586,
+      "finalize_ns": 28013,
+      "recording": {
+        "capture_ns": 581902313,
+        "submit_ns": 1678205,
+        "blocked_ns": 0,
+        "encode_ns": 1294168679,
+        "write_ns": 38331918,
+        "flush_ns": 9337549,
+        "worker_cpu_ns": 1217969545,
+        "drain_ns": 1065029,
+        "records": 228,
+        "flushes": 100,
+        "payload_bytes": 17613910,
+        "framed_bytes": 17626491,
+        "queue_high_water": 12
+      },
+      "io_ns": 8994265,
+      "output_bytes": 145132
+    }
+  ]
+}

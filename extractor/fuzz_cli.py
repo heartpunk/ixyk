@@ -86,6 +86,7 @@ def main(arguments: Sequence[str] | None = None) -> None:
     if (
         status == "pass"
         or acquisition.get("model_route") == "direct"
+        or bool(acquisition.get("retained_models"))
         or not options.fixed_inputs
     ):
         if previous is not None and previous.get("status") != "mismatch":
@@ -108,7 +109,7 @@ def main(arguments: Sequence[str] | None = None) -> None:
             )
         else:
             executions = options.max_executions or (
-                options.examples + 1 if options.stage == "discover" else 500
+                options.examples if options.stage == "discover" else 500
             )
             report = run_bounded(
                 options.model.read_text(encoding="utf-8"),
@@ -119,6 +120,7 @@ def main(arguments: Sequence[str] | None = None) -> None:
                 vary_inputs=not options.fixed_inputs,
                 continue_on_findings=options.stage == "discover",
                 recording=recording,
+                acquisition=acquisition if options.stage == "discover" else None,
                 previous=previous,
                 max_executions=executions,
             )

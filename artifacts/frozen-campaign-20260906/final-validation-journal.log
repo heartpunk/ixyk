@@ -1,0 +1,31 @@
+Sep 06 07:47:08 shire systemd[1044657]: Started /bin/bash /home/heartpunk/workspaces/ixyk-perf/frozen-campaign-20260906/finish-validation.sh.
+Sep 06 07:47:25 shire bash[1045650]: ADD: 100/100 samples
+Sep 06 07:47:25 shire bash[1045650]: {"guards": {"preparations": 1, "hot_loop_forbidden_calls": 0}, "preparation_s": 0.19929254008457065, "execution_s": 0.8960610753856599, "total_s": 1.095913339, "peak_rss_bytes": 207310848, "input_sha256": "afc3bb9a9c963a5085067cad70aa1ede5349680f9460123de8a4545e9c961317"}
+Sep 06 07:47:29 shire bash[1045672]: ADD: 100/100 samples
+Sep 06 07:47:29 shire bash[1045672]: {"guards": {"preparations": 1, "hot_loop_forbidden_calls": 0}, "preparation_s": 0.20205396693199873, "execution_s": 2.639352646190673, "total_s": 2.847927066, "peak_rss_bytes": 227205120, "input_sha256": "afc3bb9a9c963a5085067cad70aa1ede5349680f9460123de8a4545e9c961317"}
+Sep 06 07:47:32 shire bash[1045695]: JE: 100/100 samples
+Sep 06 07:47:32 shire bash[1045695]: {"guards": {"preparations": 1, "hot_loop_forbidden_calls": 0}, "preparation_s": 0.2578646861948073, "execution_s": 0.8851420320570469, "total_s": 1.143274196, "peak_rss_bytes": 230203392, "input_sha256": "50994d891171c19d11c17b12342b065dd533246e16bb9856e9fa9034e9b38e08"}
+Sep 06 07:47:36 shire bash[1045711]: JE: 100/100 samples
+Sep 06 07:47:36 shire bash[1045711]: {"guards": {"preparations": 1, "hot_loop_forbidden_calls": 0}, "preparation_s": 0.25338153587654233, "execution_s": 2.5543381492607296, "total_s": 2.814040021, "peak_rss_bytes": 250204160, "input_sha256": "50994d891171c19d11c17b12342b065dd533246e16bb9856e9fa9034e9b38e08"}
+Sep 06 07:47:39 shire bash[1045728]: LEA: 100/100 samples
+Sep 06 07:47:39 shire bash[1045728]: {"guards": {"preparations": 1, "hot_loop_forbidden_calls": 0}, "preparation_s": 0.3463477180339396, "execution_s": 0.9373083990067244, "total_s": 1.283932239, "peak_rss_bytes": 213721088, "input_sha256": "c79ae956a3b1176719cacdea8f8512ee1ca45c4fc565df7d8618b7cd358efb1b"}
+Sep 06 07:47:43 shire bash[1045814]: LEA: 100/100 samples
+Sep 06 07:47:43 shire bash[1045814]: {"guards": {"preparations": 1, "hot_loop_forbidden_calls": 0}, "preparation_s": 0.35107750818133354, "execution_s": 2.611253180075437, "total_s": 2.968733586, "peak_rss_bytes": 233005056, "input_sha256": "c79ae956a3b1176719cacdea8f8512ee1ca45c4fc565df7d8618b7cd358efb1b"}
+Sep 06 07:47:46 shire bash[1045861]: MOVSD: 100/100 samples
+Sep 06 07:47:46 shire bash[1045861]: {"guards": {"preparations": 1, "hot_loop_forbidden_calls": 0}, "preparation_s": 0.1422432172112167, "execution_s": 0.8885425208136439, "total_s": 1.031061062, "peak_rss_bytes": 204070912, "input_sha256": "af810bbdba0ae52f290b02fa05bba3386b9a2ca60f74912e066da8369186bcf3"}
+Sep 06 07:47:50 shire bash[1045883]: MOVSD: 100/100 samples
+Sep 06 07:47:50 shire bash[1045883]: {"guards": {"preparations": 1, "hot_loop_forbidden_calls": 0}, "preparation_s": 0.14460254926234484, "execution_s": 2.5804135547950864, "total_s": 2.731427336, "peak_rss_bytes": 229011456, "input_sha256": "af810bbdba0ae52f290b02fa05bba3386b9a2ca60f74912e066da8369186bcf3"}
+Sep 06 07:47:58 shire bash[1045906]: {"samples": 1000, "elapsed_s": 6.55}
+Sep 06 07:48:05 shire bash[1045906]: {"samples": 2000, "elapsed_s": 12.95}
+Sep 06 07:48:11 shire bash[1045906]: {"samples": 3000, "elapsed_s": 19.67}
+Sep 06 07:48:18 shire bash[1045906]: {"samples": 4000, "elapsed_s": 26.5}
+Sep 06 07:48:26 shire bash[1045906]: {"samples": 5000, "elapsed_s": 33.9}
+Sep 06 07:48:33 shire bash[1045906]: {"samples": 6000, "elapsed_s": 40.89}
+Sep 06 07:48:39 shire bash[1045906]: {"samples": 7000, "elapsed_s": 47.38}
+Sep 06 07:48:46 shire bash[1045906]: {"samples": 8000, "elapsed_s": 54.02}
+Sep 06 07:48:52 shire bash[1045906]: {"samples": 9000, "elapsed_s": 59.99}
+Sep 06 07:48:58 shire bash[1045906]: {"samples": 10000, "elapsed_s": 66.78}
+Sep 06 07:48:58 shire bash[1045906]: ADD: 10000/10000 samples
+Sep 06 07:48:58 shire bash[1045906]: {"guards": {"preparations": 1, "hot_loop_forbidden_calls": 0}, "preparation_s": 0.19187776185572147, "execution_s": 66.59075904916972, "total_s": 66.782910532, "peak_rss_bytes": 446386176, "input_sha256": "2d5ca0901d8708de998e7a64c7828afc3b17c4872959aae4ef919a3eb75c3d5a"}
+Sep 06 07:55:41 shire bash[1046015]: {"evidence_streams_validated": 6}
+Sep 06 07:55:41 shire systemd[1044657]: ixyk-frozen-20260906-final-validation.service: Consumed 8min 32.046s CPU time.

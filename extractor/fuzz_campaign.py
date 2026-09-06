@@ -4,27 +4,37 @@
 """Cumulative outcomes and shared fallback scheduling for differential fuzzing."""
 
 import hashlib
+from dataclasses import dataclass
 from time import perf_counter_ns
+from typing import Literal
 
 from extractor.acquisition_errors import EXPECTED_ACQUISITION
 from extractor.evidence_events import Comparison, FuzzInput, StateSnapshot
 from extractor.extractor import extract
-from extractor.fuzzer import ComparisonUnavailable, CompiledModel, emulate
+from extractor.fuzzer import ComparisonUnavailable, CompiledModel, InputLayout, emulate
 from extractor.runtime import load_shellcode
 from extractor.unicorn_boundary import is_cpu_exception, is_emulator_error
+
+
+@dataclass(frozen=True)
+class PreparedModel:
+    code: bytes
+    source: int
+    compiled: CompiledModel
+    layout: InputLayout
+    route: Literal["generalized", "fallback"]
+    model_id: str | None
 
 
 class Campaign:
     def __init__(self, instruction, evidence=None, *, fixed_model=None):
         self.instruction, self.evidence = instruction, evidence
-        self.fixed_model = (
-            CompiledModel(fixed_model) if fixed_model is not None else None
-        )
-        self.pool = []
-        self.pool_index = 0
+        self.fixed_model = fixed_model
+        self.models: tuple[PreparedModel, ...] = ()
+        self.prepared = False
         self.allocations = {}
         self.model_id = None
-        self.route = "unavailable"
+        self.route: Literal["generalized", "fallback", "unavailable"] = "unavailable"
         self.agreements = self.disagreements = self.unusable = 0
         self.acquisition_findings = self.generation_findings = 0
         self.first_disagreement = None
@@ -35,72 +45,114 @@ class Campaign:
         if self.evidence is not None:
             self.evidence.finding(f"generation:form:{form}", self.instruction, error)
 
-    def select(self, code, source, sample, *, before=None):
-        context = f"sample:{self.instruction.hex()}:{sample}"
-        if self.fixed_model is not None:
-            self.route = "fallback"
+    def prepare(self, *, source=0x400000, acquisition=None):
+        if self.prepared:
+            raise RuntimeError("campaign models are already frozen")
+        retained = []
+        stage = ["acquisition", self.instruction]
+        identifiers = {}
+
+        def on_model(code, model, route):
+            if route == "direct":
+                retained.append((code, model))
             if self.evidence is not None:
-                self.model_id = self.evidence.model(
-                    code, self.fixed_model.artifact, "direct", context=context
+                identifiers[code, route] = self.evidence.model(
+                    code, model, route, context="preparation"
                 )
-            return code, self.fixed_model.artifact.source, self.fixed_model
-        if not self.pool:
-            retained = []
-            stage = ["acquisition", code]
 
-            def on_model(encoding, model, route):
-                if route == "direct":
-                    retained.append((encoding, model))
-                if self.evidence is not None:
-                    identifier = self.evidence.model(
-                        encoding, model, route, context=context
-                    )
-                    if route == "generalized":
-                        self.model_id = identifier
+        def on_stage(name, code):
+            stage[:] = [name, code]
 
-            def on_stage(name, encoding):
-                stage[:] = [name, encoding]
+        def on_finding(name, code, error):
+            self.acquisition_findings += 1
+            if self.evidence is not None:
+                self.evidence.finding(name, code, error, context="preparation")
 
-            def on_finding(name, encoding, error):
+        model = self.fixed_model
+        if acquisition is not None:
+            from extractor.artifact import InstructionModel
+
+            if acquisition.get("schema") != "ixyk.instruction_acquisition.v1":
+                raise ValueError("acquisition result has the wrong schema")
+            if acquisition.get("instruction_hex") != self.instruction.hex():
+                raise ValueError(
+                    "acquisition result belongs to a different instruction"
+                )
+            for finding in acquisition.get("findings", ()):
                 self.acquisition_findings += 1
                 if self.evidence is not None:
-                    self.evidence.finding(
-                        name, encoding, error, context=context, before=before
-                    )
+                    from extractor.evidence_events import Finding
 
+                    self.evidence.recorder.emit(
+                        Finding(
+                            finding["stage"],
+                            bytes.fromhex(finding["instruction_hex"]),
+                            finding["error_kind"],
+                            finding["message"],
+                        ),
+                        context="preparation",
+                    )
+            if (
+                acquisition.get(
+                    "model_route",
+                    "generalized" if acquisition.get("status") == "pass" else None,
+                )
+                != "generalized"
+            ):
+                model = None
+                retained = [
+                    (
+                        bytes.fromhex(item["instruction_hex"]),
+                        InstructionModel.from_data(item["model"]),
+                    )
+                    for item in acquisition.get("retained_models", ())
+                ]
+                if not retained and self.fixed_model is not None:
+                    retained = [(self.instruction, self.fixed_model)]
+        elif model is None:
             try:
                 model = extract(
-                    load_shellcode(code, source),
+                    load_shellcode(self.instruction, source),
                     source,
                     on_model=on_model,
                     on_stage=on_stage,
                     on_finding=on_finding,
                 )
             except EXPECTED_ACQUISITION as error:
-                self.acquisition_findings += 1
-                if self.evidence is not None:
-                    self.evidence.finding(
-                        stage[0], stage[1], error, context=context, before=before
-                    )
-                self.pool = [
-                    (encoding, model, CompiledModel(model))
-                    for encoding, model in retained
-                ]
-                if not self.pool:
-                    self.model_id, self.route = None, "unavailable"
-                    return code, source, None
-            else:
-                self.route = "generalized"
-                return code, source, CompiledModel(model)
-        # The first failure establishes the pool. Subsequent samples spend the
-        # remaining *existing* budget round-robin; they do not start sub-runs.
-        code, model, compiled = self.pool[self.pool_index % len(self.pool)]
-        self.pool_index += 1
-        self.allocations[code.hex()] = self.allocations.get(code.hex(), 0) + 1
-        self.route = "fallback"
-        if self.evidence is not None:
-            self.model_id = self.evidence.model(code, model, "direct", context=context)
-        return code, model.source, compiled
+                on_finding(stage[0], stage[1], error)
+
+        entries = [(self.instruction, model)] if model is not None else retained
+        route = "generalized" if model is not None else "fallback"
+        prepared = []
+
+        for code, artifact in entries:
+            compiled = CompiledModel(artifact)
+            layout = InputLayout.prepare(code)
+            evidence_route = "generalized" if model is not None else "direct"
+            identifier = identifiers.get((code, evidence_route))
+            if self.evidence is not None and identifier is None:
+                identifier = self.evidence.model(
+                    code, artifact, evidence_route, context="preparation"
+                )
+            prepared.append(
+                PreparedModel(
+                    code, artifact.source, compiled, layout, route, identifier
+                )
+            )
+        self.models = tuple(prepared)
+        self.prepared = True
+
+    def select(self, sample):
+        if not self.prepared:
+            raise RuntimeError("campaign must be prepared before sampling")
+        if not self.models:
+            raise RuntimeError("campaign has no executable models")
+        selected = self.models[(sample - 1) % len(self.models)]
+        self.model_id, self.route = selected.model_id, selected.route
+        if selected.route == "fallback":
+            key = selected.code.hex()
+            self.allocations[key] = self.allocations.get(key, 0) + 1
+        return selected
 
     def _fingerprint(self, code, before):
         # Same audit in all configurations; catches any timing-dependent input drift.

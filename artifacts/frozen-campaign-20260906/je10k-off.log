@@ -1,0 +1,12 @@
+{"samples": 1000, "elapsed_s": 7.68}
+{"samples": 2000, "elapsed_s": 13.78}
+{"samples": 3000, "elapsed_s": 19.82}
+{"samples": 4000, "elapsed_s": 25.9}
+{"samples": 5000, "elapsed_s": 31.81}
+{"samples": 6000, "elapsed_s": 38.1}
+{"samples": 7000, "elapsed_s": 44.04}
+{"samples": 8000, "elapsed_s": 50.49}
+{"samples": 9000, "elapsed_s": 56.69}
+{"samples": 10000, "elapsed_s": 63.55}
+JE: 10000/10000 samples
+{"guards": {"preparations": 1, "hot_loop_forbidden_calls": 0}, "preparation_s": 0.2543817809782922, "execution_s": 63.297043565195054, "total_s": 63.551702785, "peak_rss_bytes": 476053504, "input_sha256": "fa9f3352e7afd1cd701e298f2e6208d525d47749e8adff86fdebd98f66db33d6"}

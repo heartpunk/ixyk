@@ -48,7 +48,7 @@ def main():
     ):
         report = fuzz(model, seed, 10, vary_inputs=True)
     assert report["status"] == "pass", report
-    assert len({state.scalars["rip"] for _, state in observed}) > 1
+    assert {state.scalars["rip"] for _, state in observed} == {model.source}
     assert any(
         any(
             value

@@ -1,0 +1,21 @@
+{
+  "parent_commit": "1ca1aef6e15025a223a2822fd988137138ca87c0",
+  "working_copy": true,
+  "host": "shire",
+  "memory_limit_bytes": 4294967296,
+  "swap_limit_bytes": 0,
+  "workers": 1,
+  "cpu_quota_percent": 200,
+  "files": {
+    "extractor/fuzzer.py": "6516c7008c3fcb45b012124aa85a02409e51093749f1f877d3021ce9015457b8",
+    "extractor/fuzz_campaign.py": "190e0f0b2a213f6327bd64c88f25a85adfd15eaad15ab3b6c3869ed47a5fb9c4",
+    "extractor/fuzz_cli.py": "301f29aad3ee86321cb6ea27ead117faefb243871113b204c769585640cd05e1",
+    "extractor/fuzz_campaign_test.py": "ef5e1a26a779097694794a22abfede439514344f9ed6d8e04ed622f56136ef04",
+    "extractor/evidence_integration_test.py": "5576637635bc65626a429ef9ca6f51edc3db8840ae6c08df70532879d04d0b56",
+    "extractor/fuzz_inputs_test.py": "c35105948af33cdbf610e72430932853f68c56e1a198f434342449333f137fa9",
+    "extractor/evidence_benchmark.py": "7bc2bc7e02bf69f34ec3bf07e346fdeca562d58e7287ede40038dbba519d0dae"
+  },
+  "measured_snapshot_sha256": "a6874f050d123945eb4d2d2d5969d623f95c762f7ca25db1c0671a59f5e63673",
+  "note": "Benchmark commit label names the parent; measured code is the attached working-copy snapshot, not an unchanged parent checkout.",
+  "snapshot": "source.tar.gz"
+}

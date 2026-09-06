@@ -9,11 +9,12 @@ from collections.abc import Callable, Iterable, Mapping, Sequence
 from dataclasses import dataclass
 from typing import Literal, NotRequired, TypedDict
 import hashlib
+from time import perf_counter
 
 import hypothesis
 from hypothesis.database import ExampleDatabase
 
-from hypothesis import HealthCheck, Phase, given, seed, settings, strategies as st
+from hypothesis import Phase, given, seed, settings, strategies as st
 
 from extractor.amd64_state import (
     AMD64_FLAG_BIT,
@@ -62,6 +63,11 @@ class FuzzReport(TypedDict):
     fallback_allocations: NotRequired[dict[str, int]]
     input_sha256: NotRequired[str]
     active_input: NotRequired[dict]
+    preparation_seconds: NotRequired[float]
+    execution_seconds: NotRequired[float]
+    total_seconds: NotRequired[float]
+    prepared_models: NotRequired[list[dict]]
+    planned_fallback_allocations: NotRequired[dict[str, int]]
     worker_exit_code: NotRequired[int]
     worker_signal: NotRequired[str]
 
@@ -213,7 +219,29 @@ class _ReplayDatabase(ExampleDatabase):
         }
 
 
-def _input_state(code, source, memory, data, registers, flags, vary_inputs):
+@dataclass(frozen=True)
+class InputLayout:
+    base: str
+    index: str
+    scale: int
+    displacement: int
+
+    @classmethod
+    def prepare(cls, code):
+        from extractor.xed import decode
+
+        decoded = decode(code)
+        return cls(
+            decoded["base"]["name"].lower(),
+            decoded["index"]["name"].lower(),
+            decoded["scale"],
+            decoded["displacement"],
+        )
+
+
+def _input_state(
+    code, source, memory, data, registers, flags, vary_inputs, *, layout=None
+):
     scalars = (
         dict(zip(_FUZZED_REGISTERS, registers, strict=True))
         | {"rip": source}
@@ -225,16 +253,13 @@ def _input_state(code, source, memory, data, registers, flags, vary_inputs):
     memory = dict(memory)
     if vary_inputs:
         # Exercise loads from generated register addresses, including RSP.
-        from extractor.xed import decode
-
-        decoded = decode(code)
+        if layout is None:
+            layout = InputLayout.prepare(code)
         for address in registers[: len(GPR64)]:
             memory[address] = data
-        base = scalars.get(decoded["base"]["name"].lower(), 0)
-        index = scalars.get(decoded["index"]["name"].lower(), 0)
-        address = (base + index * decoded["scale"] + decoded["displacement"]) % (
-            1 << 64
-        )
+        base = scalars.get(layout.base, 0)
+        index = scalars.get(layout.index, 0)
+        address = (base + index * layout.scale + layout.displacement) % (1 << 64)
         memory[address] = data
     initial = {
         (address + i) % (1 << 64): byte
@@ -257,14 +282,16 @@ def fuzz(
     vary_inputs: bool = False,
     continue_on_findings: bool = False,
     evidence=None,
+    acquisition: dict | None = None,
 ) -> FuzzReport:
     """Discover or resume a failure, exporting an action-local replay database."""
     if examples <= 0 or (max_executions is not None and max_executions <= 0):
         raise ValueError("example and execution budgets must be positive")
-    from extractor.fuzz_inputs import MEMORY, instruction_strategy
-    from extractor.xed import EncodingError
+    from extractor.fuzz_inputs import MEMORY
 
-    if artifact is None and not vary_inputs:
+    started = perf_counter()
+
+    if artifact is None and not vary_inputs and not continue_on_findings:
         raise ValueError("fixed-input fuzzing requires an available model")
     campaign = None
     if continue_on_findings:
@@ -272,24 +299,18 @@ def fuzz(
             raise ValueError("cumulative fuzzing requires discovery")
         from extractor.fuzz_campaign import Campaign
 
-        campaign = Campaign(
-            instruction, evidence, fixed_model=artifact if not vary_inputs else None
-        )
+        campaign = Campaign(instruction, evidence, fixed_model=artifact)
     elif evidence is not None:
         raise ValueError("evidence recording requires cumulative fuzzing")
-    try:
-        codes = (
-            instruction_strategy(instruction, on_unavailable=campaign.form_unavailable)
-            if vary_inputs and campaign is not None
-            else instruction_strategy(instruction)
-            if vary_inputs
-            else st.just(instruction)
-        )
-    except EncodingError as error:
-        if campaign is None:
-            raise
-        campaign.form_unavailable("all", error)
-        codes = st.just(instruction)
+    if campaign is not None:
+        campaign.prepare(acquisition=acquisition)
+    elif artifact is None:
+        raise ValueError("fuzzing requires a prepared model")
+    codes = st.just(instruction)
+    source = artifact.source if artifact is not None else 0x400000
+    layout = (
+        InputLayout.prepare(instruction) if vary_inputs and campaign is None else None
+    )
     phases = {
         "discover": (Phase.generate,),
         "shrink": (Phase.reuse, Phase.shrink),
@@ -297,7 +318,7 @@ def fuzz(
     }
     identity = {
         "hypothesis": hypothesis.__version__,
-        "strategy": "ixyk.xed-state-memory.v1"
+        "strategy": "ixyk.prepared-state-memory.v1"
         if vary_inputs
         else "ixyk.amd64-registers-flags.v1",
         "model_sha256": hashlib.sha256(artifact.to_json().encode()).hexdigest()
@@ -305,6 +326,23 @@ def fuzz(
         else None,
         "instruction_hex": instruction.hex(),
     }
+    prepared_models = (
+        [
+            {
+                "instruction_hex": item.code.hex(),
+                "source": item.source,
+                "route": item.route,
+                "model_sha256": hashlib.sha256(
+                    item.compiled.artifact.to_json().encode()
+                ).hexdigest(),
+            }
+            for item in campaign.models
+        ]
+        if campaign is not None
+        else []
+    )
+    if campaign is not None:
+        identity["prepared_models"] = prepared_models
     entries = {}
     if stage != "discover":
         if previous is None or previous.get("status") != "mismatch":
@@ -343,23 +381,50 @@ def fuzz(
 
     database.changed = publish
     publish()
-    compiled = CompiledModel(artifact) if artifact else None
+    compiled = (
+        CompiledModel(artifact) if artifact is not None and campaign is None else None
+    )
+    preparation_seconds = perf_counter() - started
+    sampling_started = perf_counter()
+    if campaign is not None:
+        report["prepared_models"] = prepared_models
+        budget = (
+            min(examples, max_executions) if max_executions is not None else examples
+        )
+        report["planned_fallback_allocations"] = {
+            item.code.hex(): (
+                budget // len(campaign.models) + (index < budget % len(campaign.models))
+            )
+            for index, item in enumerate(campaign.models)
+            if item.route == "fallback"
+        }
+        if not campaign.models:
+            report.update(
+                campaign.summary(),
+                reason="preparation produced no executable models",
+                preparation_seconds=preparation_seconds,
+                execution_seconds=0.0,
+                total_seconds=perf_counter() - started,
+            )
+            publish()
+            return report
     sample_input = {}
 
     # settings must wrap seed: seed itself disables the database. Keep a fixed
     # seed while explicitly restoring our declared, action-local replay input.
     @settings(
-        max_examples=examples,
+        max_examples=min(examples, max_executions)
+        if max_executions is not None
+        else examples,
         deadline=None,
         database=database,
         phases=phases[stage],
         report_multiple_bugs=False,
-        suppress_health_check=[HealthCheck.filter_too_much] if vary_inputs else [],
     )
     @seed(0)
     @given(
         code=codes,
-        source=_U64 if vary_inputs else st.just(artifact.source if artifact else 0),
+        source=st.just(source),
         memory=MEMORY if vary_inputs else st.just({}),
         data=st.binary(min_size=32, max_size=32) if vary_inputs else st.just(b""),
         registers=st.tuples(
@@ -383,7 +448,19 @@ def fuzz(
         if max_executions is not None and executions >= max_executions:
             raise _ExecutionBudget()
         executions += 1
-        before = _input_state(code, source, memory, data, registers, flags, vary_inputs)
+        selected = campaign.select(executions) if campaign is not None else None
+        if selected is not None:
+            code, source = selected.code, selected.source
+        before = _input_state(
+            code,
+            source,
+            memory,
+            data,
+            registers,
+            flags,
+            vary_inputs,
+            layout=selected.layout if selected is not None else layout,
+        )
         if campaign is not None:
             report["active_input"] = {
                 "instruction_hex": code.hex(),
@@ -393,23 +470,8 @@ def fuzz(
             }
         publish()
         if campaign is not None:
-            generated_code, generated_source = code, source
-            code, source, selected = campaign.select(
-                code, source, executions, before=before
-            )
-            if code != generated_code or source != generated_source:
-                before = _input_state(
-                    code, source, memory, data, registers, flags, vary_inputs
-                )
-                report["active_input"] = {
-                    "instruction_hex": code.hex(),
-                    "source": source,
-                    "scalars": dict(before.scalars),
-                    "memory": {str(k): v for k, v in sorted(before.memory.items())},
-                }
-                publish()
-        if campaign is not None:
-            campaign.compare(selected, code, before, executions)
+            assert selected is not None
+            campaign.compare(selected.compiled, code, before, executions)
             report.pop("active_input", None)
             report.update(campaign.summary())
             publish()
@@ -421,20 +483,6 @@ def fuzz(
             "memory": {str(k): v for k, v in sorted(initial.items())},
         }
         current = compiled
-        if vary_inputs:
-            from extractor.extractor import extract
-            from extractor.runtime import load_shellcode
-
-            try:
-                current = CompiledModel(extract(load_shellcode(code, source), source))
-            except Exception as error:
-                report.update(
-                    status="acquisition_error",
-                    error=f"{type(error).__name__}: {error}",
-                    input=sample_input,
-                    processing="complete",
-                )
-                raise _InputAcquisitionError()
         assert current is not None
         try:
             after = emulate(code, before)
@@ -490,6 +538,11 @@ def fuzz(
             if campaign.unusable
             else "pass"
         )
+    report.update(
+        preparation_seconds=preparation_seconds,
+        execution_seconds=perf_counter() - sampling_started,
+        total_seconds=perf_counter() - started,
+    )
     publish()
     return report
 
