@@ -9,6 +9,7 @@ from unittest.mock import Mock, patch
 from hypothesis import given, settings, strategies as st
 import pytest
 
+from antiunification.algebra import AlgebraError
 from extractor import z3_runtime as _z3_runtime  # noqa: F401
 from extractor import fuzz_campaign as campaign_module
 from extractor.artifact import InstructionModel
@@ -124,9 +125,9 @@ def test_forced_au_failure_preserves_real_direct_models():
     retained = []
     with patch(
         "antiunification.many.antiunify_many",
-        side_effect=OperandDecodeError("forced AU failure"),
+        side_effect=AlgebraError("sparse state update has duplicate keys"),
     ):
-        with pytest.raises(OperandDecodeError, match="forced AU"):
+        with pytest.raises(OperandDecodeError, match="AU algebra.*duplicate keys"):
             extract(
                 load_shellcode(code, source),
                 source,

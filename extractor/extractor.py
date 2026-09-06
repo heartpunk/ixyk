@@ -211,6 +211,7 @@ def extract(
     raw_project: object, source: int, *, on_model=None, on_stage=None, on_finding=None
 ) -> InstructionModel:
     """Extract separating inputs, anti-unify them, and instantiate this request."""
+    from antiunification.algebra import AlgebraError
     from antiunification.many import antiunify_many
     from extractor.au_inputs import instruction_inputs
     from extractor.model_syntax import QFAbvSyntax
@@ -291,16 +292,26 @@ def extract(
     columns = {name: tuple(row[name] for row in rows) for name in rows[0]}
     if any(all(value == column[0] for value in column) for column in columns.values()):
         raise OperandDecodeError("an AU parameter did not vary")
-    result = antiunify_many(QFAbvSyntax(), models, correspondences=columns)
+    try:
+        result = antiunify_many(QFAbvSyntax(), models, correspondences=columns)
+    except AlgebraError as error:
+        raise OperandDecodeError(
+            f"AU algebra could not reconstruct model: {error}"
+        ) from error
     unexplained = set(result.substitutions[0]) - columns.keys()
     if unexplained:
         raise OperandDecodeError(
             f"AU differences are not explained by operands: {sorted(unexplained)}"
         )
     requested = canonical_bindings(decode(code), declarations, source)
-    value = result.instantiate(
-        {name: requested[name] for name in result.substitutions[0]}
-    )
+    try:
+        value = result.instantiate(
+            {name: requested[name] for name in result.substitutions[0]}
+        )
+    except AlgebraError as error:
+        raise OperandDecodeError(
+            f"AU algebra could not reconstruct model: {error}"
+        ) from error
     if not isinstance(value, InstructionModel):
         raise OperandDecodeError("AU did not reconstruct an instruction model")
     model = normalize_model(value, normalization_labels(requested))
