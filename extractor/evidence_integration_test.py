@@ -71,6 +71,8 @@ def test_acquire_cli_retains_model_when_generalization_fails(source, recording):
         args = [
             "--instruction-hex",
             "90",
+            "--source",
+            str(source),
             "--model-output",
             str(root / "model.json"),
             "--result-output",
@@ -89,6 +91,7 @@ def test_acquire_cli_retains_model_when_generalization_fails(source, recording):
             ]
         with (
             patch.object(acquire_cli, "extract", side_effect=acquire),
+            patch("extractor.prepared_cases.prepare_catalog", return_value=[]),
             patch.object(acquire_cli, "load_shellcode"),
         ):
             acquire_cli.main(args)
@@ -258,7 +261,8 @@ def test_fuzz_cli_records_subprocess_comparisons(samples):
 @pytest.mark.parametrize("fixed_inputs", [False, True])
 def test_fuzz_cli_consumes_the_frozen_acquisition(tmp_path, fallback, fixed_inputs):
     from antiunification.algebra import AlgebraError
-    from extractor import fuzz_cli
+    from extractor import fuzz_cli, prepared_cases
+    from extractor.operand_slots import OperandDecodeError
 
     code = "4801d8"
 
@@ -274,7 +278,24 @@ def test_fuzz_cli_consumes_the_frozen_acquisition(tmp_path, fallback, fixed_inpu
     model_path, acquisition_path, output_path = [
         tmp_path / name for name in ("model.json", "acquisition.json", "fuzz.json")
     ]
-    with patch.object(acquire_cli, "extract", acquire):
+    original_invoke = prepared_cases._invoke
+    form = next(
+        f
+        for f in original_invoke("forms", "ADD")
+        if "_APX" not in f["form"]
+        and [a["kind"] for a in f["args"]] == ["gpr64", "gpr64"]
+        and all(a["name"].startswith("reg") for a in f["args"])
+    )
+    original_generalize = prepared_cases.generalize
+
+    def generalize(observations):
+        if fallback:
+            raise OperandDecodeError("forced AU failure")
+        return original_generalize(observations)
+
+    with patch.object(acquire_cli, "extract", acquire), patch.object(
+        prepared_cases, "_invoke", return_value=[form]
+    ), patch.object(prepared_cases, "generalize", side_effect=generalize):
         acquire_cli.main(
             [
                 "--instruction-hex",
@@ -306,17 +327,21 @@ def test_fuzz_cli_consumes_the_frozen_acquisition(tmp_path, fallback, fixed_inpu
     fuzz_cli.main(args)
     report = json.loads(output_path.read_text())
     assert report["executions"] == 17, report
-    assert len(report["prepared_models"]) == (
-        len(acquisition["retained_models"]) if fallback else 1
-    )
+    assert report["prepared_models"]
     assert report["fallback_allocations"] == report["planned_fallback_allocations"]
     assert report["acquisition_findings"] == len(acquisition["findings"])
-    if fallback:
-        assert set(report["fallback_allocations"]) == {
-            item["instruction_hex"] for item in acquisition["retained_models"]
-        }
+    if fixed_inputs:
+        assert len(report["prepared_models"]) == (
+            len(acquisition["retained_models"]) if fallback else 1
+        )
     else:
-        assert report["prepared_models"][0]["instruction_hex"] == code
+        assert len(acquisition["prepared_cases"]) >= 2
+        assert all(
+            item["route"] == ("fallback" if fallback else "generalized")
+            for item in report["prepared_models"]
+        )
+    if fallback:
+        assert sum(report["fallback_allocations"].values()) == 17
 
 
 if __name__ == "__main__":

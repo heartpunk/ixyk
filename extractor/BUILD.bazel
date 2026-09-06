@@ -115,10 +115,20 @@ cc_binary(
     deps = ["@nix_native_deps//:xed_enc2"],
 )
 
+cc_binary(
+    name = "xed_native.so",
+    srcs = ["xed_bridge.c"],
+    linkshared = True,
+    deps = ["@nix_native_deps//:xed_enc2"],
+)
+
 py_library(
     name = "xed",
     srcs = ["xed.py"],
-    data = [":xed_bridge"],
+    data = [
+        ":xed_bridge",
+        ":xed_native.so",
+    ],
     deps = [":native_runtime"],
 )
 
@@ -280,9 +290,11 @@ py_library(
 py_library(
     name = "fuzzer",
     srcs = [
+        "constructor_inputs.py",
         "fuzz_campaign.py",
         "fuzz_inputs.py",
         "fuzzer.py",
+        "prepared_cases.py",
     ],
     target_compatible_with = _LINUX_X86_64,
     deps = [
@@ -292,6 +304,8 @@ py_library(
         ":concrete_eval",
         ":evidence_events",
         ":extractor",
+        ":model_syntax",
+        ":normalization",
         ":operand_slots",
         ":runtime",
         ":typed_z3",
@@ -400,6 +414,7 @@ py_library(
         ":evidence_session",
         ":extract_cli",
         ":extractor",
+        ":fuzzer",
         ":runtime",
     ],
 )
@@ -442,7 +457,8 @@ py_test(
 
 py_test(
     name = "acquire_cli_test",
-    size = "small",
+    # Exercises full constructor-catalog preparation for four instruction families.
+    size = "large",
     srcs = ["acquire_cli_test.py"],
     data = ["@nix_native_deps//:libstdcxx"],
     env = {
@@ -891,5 +907,22 @@ py_test(
         requirement("hypothesis"),
         requirement("pytest"),
         requirement("unicorn"),
+    ],
+)
+
+py_test(
+    name = "prepared_encoding_test",
+    srcs = ["prepared_encoding_test.py"],
+    data = ["@nix_native_deps//:libstdcxx"],
+    env = {"GHOT_LIBSTDCXX_RLOCATION": "$(rlocationpath @nix_native_deps//:libstdcxx)"},
+    deps = [
+        ":amd64_state",
+        ":extractor",
+        ":fuzzer",
+        ":runtime",
+        ":xed",
+        ":z3_runtime",
+        requirement("hypothesis"),
+        requirement("pytest"),
     ],
 )

@@ -4,6 +4,7 @@
 """Bounded background recording and measurements shared by every codec."""
 
 from dataclasses import dataclass
+import gc
 from queue import Full, Queue
 from threading import Thread
 from time import perf_counter_ns, thread_time_ns, time_ns
@@ -70,6 +71,18 @@ class MeasuredOutput:
 
 
 _STOP, _FLUSH = object(), object()
+_active_recorders = 0
+_restore_gc = False
+
+
+def _producer_collect():
+    # CPython may otherwise finalize cyclic Z3 objects on the writer thread
+    # while the producer is inside a native solver call. Collect only at the
+    # producer's recording boundary, where it is outside native calls.
+    counts, limits = gc.get_count(), gc.get_threshold()
+    if limits[0] and counts[0] >= limits[0]:
+        generation = 2 if counts[2] >= limits[2] else 1 if counts[1] >= limits[1] else 0
+        gc.collect(generation)
 
 
 class BackgroundRecorder:
@@ -90,6 +103,11 @@ class BackgroundRecorder:
         self._error = None
         self._closed = False
         self._worker = Thread(target=self._consume, name="evidence-writer", daemon=True)
+        global _active_recorders, _restore_gc
+        if not _active_recorders:
+            _restore_gc = gc.isenabled()
+            gc.disable()
+        _active_recorders += 1
         self._worker.start()
 
     def _check(self):
@@ -126,6 +144,7 @@ class BackgroundRecorder:
     def emit(self, value, *, context=None):
         if self._closed:
             raise ValueError("recorder is closed")
+        _producer_collect()
         identifier = f"{self.adapter.stream_id}:{self._sequence}"
         self._put((identifier, time_ns(), context, value))
         self._sequence += 1
@@ -155,7 +174,9 @@ class BackgroundRecorder:
                 if actual != identifier:
                     raise AssertionError("producer/writer record sequences diverged")
                 self.metrics.records += 1
-        except BaseException as error:  # noqa: BLE001  # Re-raise on the producer thread.
+        except (
+            BaseException
+        ) as error:  # noqa: BLE001  # Re-raise on the producer thread.
             self._error = error
         finally:
             self.metrics.worker_cpu_ns = thread_time_ns() - started
@@ -172,3 +193,7 @@ class BackgroundRecorder:
             self._check()
         finally:
             self.metrics.drain_ns = perf_counter_ns() - started
+            global _active_recorders
+            _active_recorders -= 1
+            if not _active_recorders and _restore_gc:
+                gc.enable()

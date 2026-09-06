@@ -4,6 +4,8 @@
 // A process boundary around XED's public API, not instruction semantics.
 #include <xed/xed-interface.h>
 #include <errno.h>
+#include <setjmp.h>
+#include <xed/xed-encode-direct.h>
 #include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -24,8 +26,8 @@ static int64_t integer(const char *text) {
     return value;
 }
 
-static void register_json(xed_reg_enum_t reg) {
-    printf("{\"value\":%u,\"name\":\"%s\",\"class\":\"%s\",\"width\":%u,"
+static void register_json(FILE *out, xed_reg_enum_t reg) {
+    fprintf(out, "{\"value\":%u,\"name\":\"%s\",\"class\":\"%s\",\"width\":%u,"
            "\"parent\":\"%s\"}",
            (unsigned)reg, xed_reg_enum_t2str(reg),
            xed_reg_class_enum_t2str(xed_reg_class(reg)),
@@ -96,34 +98,34 @@ static int matches(const xed_decoded_inst_t *wanted, const unsigned char *bytes,
         xed_decoded_inst_get_memory_displacement_width_bits(wanted, 0) == xed_decoded_inst_get_memory_displacement_width_bits(&actual, 0);
 }
 
-static void describe(xed_decoded_inst_t *inst, const unsigned char *bytes,
+static void describe(FILE *out, xed_decoded_inst_t *inst, const unsigned char *bytes,
                      unsigned length) {
     const xed_inst_t *form = xed_decoded_inst_inst(inst);
-    printf("{\"hex\":\"");
-    for (unsigned i = 0; i < length; ++i) printf("%02x", bytes[i]);
-    printf("\",\"length\":%u,\"form\":\"%s\",\"iclass\":\"%s\","
+    fprintf(out, "{\"hex\":\"");
+    for (unsigned i = 0; i < length; ++i) fprintf(out, "%02x", bytes[i]);
+    fprintf(out, "\",\"length\":%u,\"form\":\"%s\",\"iclass\":\"%s\","
            "\"operands\":[", length,
            xed_iform_enum_t2str(xed_decoded_inst_get_iform_enum(inst)),
            xed_iclass_enum_t2str(xed_decoded_inst_get_iclass(inst)));
     for (unsigned i = 0; i < xed_inst_noperands(form); ++i) {
         const xed_operand_t *op = xed_inst_operand(form, i);
         xed_operand_enum_t name = xed_operand_name(op);
-        if (i) printf(",");
-        printf("{\"name\":\"%s\",\"visibility\":\"%s\","
+        if (i) fprintf(out, ",");
+        fprintf(out, "{\"name\":\"%s\",\"visibility\":\"%s\","
                "\"width\":%u,\"action\":\"%s\",\"register\":",
                xed_operand_enum_t2str(name),
                xed_operand_visibility_enum_t2str(xed_operand_operand_visibility(op)),
                xed_decoded_inst_operand_length_bits(inst, i),
                xed_operand_action_enum_t2str(xed_operand_rw(op)));
-        register_json(xed_operand_is_register(name)
+        register_json(out, xed_operand_is_register(name)
                       ? xed_decoded_inst_get_reg(inst, name) : XED_REG_INVALID);
-        printf("}");
+        fprintf(out, "}");
     }
-    printf("],\"base\":");
-    register_json(xed_decoded_inst_get_base_reg(inst, 0));
-    printf(",\"index\":");
-    register_json(xed_decoded_inst_get_index_reg(inst, 0));
-    printf(",\"scale\":%u,\"displacement\":%" PRId64
+    fprintf(out, "],\"base\":");
+    register_json(out, xed_decoded_inst_get_base_reg(inst, 0));
+    fprintf(out, ",\"index\":");
+    register_json(out, xed_decoded_inst_get_index_reg(inst, 0));
+    fprintf(out, ",\"scale\":%u,\"displacement\":%" PRId64
            ",\"displacement_width\":%u,\"branch\":%" PRId64
            ",\"branch_width\":%u,\"immediate\":%" PRIu64
            ",\"immediate_signed\":%s,\"immediate_width\":%u}\n",
@@ -168,15 +170,15 @@ int main(int argc, char **argv) {
         decode(&inst, bytes, length);
         if (strcmp(xed_iclass_enum_t2str(xed_decoded_inst_get_iclass(&inst)),
                    ixyk_fuzz_classes[index])) fail("encoding changed instruction class");
-        describe(&inst, bytes, length);
+        describe(stdout, &inst, bytes, length);
         return 0;
     }
 
     if (argc == 2 && !strcmp(argv[1], "registers")) {
         printf("[");
-        for (int r = XED_REG_INVALID + 1; r < XED_REG_LAST; ++r) {
-            if (r != XED_REG_INVALID + 1) printf(",");
-            register_json((xed_reg_enum_t)r);
+        for (int r = XED_REG_INVALID; r < XED_REG_LAST; ++r) {
+            if (r != XED_REG_INVALID) printf(",");
+            register_json(stdout, (xed_reg_enum_t)r);
         }
         printf("]\n");
         return 0;
@@ -236,6 +238,55 @@ int main(int argc, char **argv) {
             fail("no ENC2 candidate preserves the instruction form and requested operands");
         decode(&inst, bytes, length);
     }
-    describe(&inst, bytes, length);
+    describe(stdout, &inst, bytes, length);
     return 0;
+}
+
+/* Native calls return an owned JSON buffer, or NULL with a scoped error.
+ * The longjmp stays entirely within C; no Python frames are unwound. */
+static _Thread_local jmp_buf encoder_escape;
+static _Thread_local int encoder_active;
+static _Thread_local char encoder_error[256];
+static void native_error(const char *format, va_list args) {
+    if (!encoder_active) abort();
+    vsnprintf(encoder_error, sizeof(encoder_error), format, args);
+    encoder_active = 0;
+    longjmp(encoder_escape, 1);
+}
+void ixyk_native_init(void) {
+    xed_tables_init();
+    xed_enc2_set_error_handler(native_error);
+}
+const char *ixyk_native_error(void) { return encoder_error; }
+void ixyk_native_free(void *value) { free(value); }
+char *ixyk_native_encode(unsigned index, const uint64_t *values, unsigned argc) {
+    const unsigned count = sizeof(ixyk_fuzz_argc) / sizeof(ixyk_fuzz_argc[0]);
+    encoder_error[0] = 0;
+    if (index >= count || argc != ixyk_fuzz_argc[index]) {
+        snprintf(encoder_error, sizeof(encoder_error), "invalid constructor arguments");
+        return NULL;
+    }
+    if (setjmp(encoder_escape)) return NULL;
+    unsigned char bytes[64];
+    encoder_active = 1;
+    unsigned length = ixyk_fuzz_encoders[index](values, bytes);
+    encoder_active = 0;
+    xed_decoded_inst_t inst;
+    xed_state_t mode;
+    xed_state_init2(&mode, XED_MACHINE_MODE_LONG_64, XED_ADDRESS_WIDTH_64b);
+    xed_decoded_inst_zero_set_mode(&inst, &mode);
+    xed_error_enum_t error = xed_decode(&inst, bytes, length > 15 ? 15 : length);
+    if (!length || length > 15 || error != XED_ERROR_NONE ||
+        xed_decoded_inst_get_length(&inst) != length ||
+        strcmp(xed_iclass_enum_t2str(xed_decoded_inst_get_iclass(&inst)), ixyk_fuzz_classes[index])) {
+        snprintf(encoder_error, sizeof(encoder_error), "constructor produced an invalid encoding");
+        return NULL;
+    }
+    char *json = NULL;
+    size_t size = 0;
+    FILE *out = open_memstream(&json, &size);
+    if (!out) abort();
+    describe(out, &inst, bytes, length);
+    if (fclose(out)) abort();
+    return json;
 }

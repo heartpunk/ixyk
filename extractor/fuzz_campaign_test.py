@@ -6,17 +6,22 @@ from io import BytesIO
 from types import SimpleNamespace
 from unittest.mock import patch
 
-from hypothesis import given, settings, strategies as st
 import pytest
+import unicorn
+from hypothesis import given, settings
+from hypothesis import strategies as st
 
 from antiunification.algebra import AlgebraError
-from extractor import z3_runtime as _z3_runtime  # noqa: F401
 from extractor import fuzz_campaign as campaign_module
+from extractor import runtime
+from extractor import z3_runtime as _z3_runtime  # noqa: F401
+from extractor.amd64_state import FLAG_NAMES, GPR64, YMM256
 from extractor.artifact import InstructionModel
 from extractor.evidence import EvidenceReader, RunContext
 from extractor.evidence_events import (
     Comparison,
     EvidenceHooks,
+    Finding,
     FuzzInput,
     ToolFailure,
     evidence_types,
@@ -26,19 +31,16 @@ from extractor.evidence_reference_json import ReferenceJSONBackend
 from extractor.extractor import extract
 from extractor.fuzz_campaign import Campaign
 from extractor.fuzzer import (
-    ConcreteState,
     CompiledModel,
+    ConcreteState,
     InputLayout,
     _input_state,
     emulate,
     fuzz,
 )
-from extractor.amd64_state import FLAG_NAMES, GPR64, YMM256
 from extractor.operand_slots import OperandDecodeError
-from extractor import runtime
 from extractor.runtime import load_shellcode
 from extractor.unicorn_boundary import unicorn_constant
-import unicorn
 
 
 @given(st.integers(1, 10), st.integers(1, 100))
@@ -125,23 +127,32 @@ def test_outcomes_continue_and_recording_does_not_change_comparisons(outcomes):
     assert [r.value.outcome for r in comparisons] == outcomes
     assert all(r.context in inputs for r in comparisons)
     assert len(inputs) == len(outcomes)
+    failures = [r for r in records if isinstance(r.value, Finding)]
+    assert len(failures) == outcomes.count("unusable")
+    assert all(
+        failure.value.attempt.fuzz_input_id == failure.context
+        and failure.value.attempt.encoding == b"\xc3"
+        for failure in failures
+    )
 
 
 def test_forced_au_failure_preserves_real_direct_models():
     code, source = bytes.fromhex("4801d8"), 4096
     retained = []
-    with patch(
-        "antiunification.many.antiunify_many",
-        side_effect=AlgebraError("sparse state update has duplicate keys"),
+    with (
+        patch(
+            "antiunification.many.antiunify_many",
+            side_effect=AlgebraError("sparse state update has duplicate keys"),
+        ),
+        pytest.raises(OperandDecodeError, match="AU algebra.*duplicate keys"),
     ):
-        with pytest.raises(OperandDecodeError, match="AU algebra.*duplicate keys"):
-            extract(
-                load_shellcode(code, source),
-                source,
-                on_model=lambda encoding, model, route: retained.append(
-                    (encoding, model, route)
-                ),
-            )
+        extract(
+            load_shellcode(code, source),
+            source,
+            on_model=lambda encoding, model, route: retained.append(
+                (encoding, model, route)
+            ),
+        )
     direct = [
         (encoding, model) for encoding, model, route in retained if route == "direct"
     ]
@@ -215,33 +226,54 @@ def test_preparation_failure_is_retained_without_retrying_in_samples(operation, 
 @pytest.mark.parametrize("fallback", [False, True])
 def test_frozen_campaign_has_no_acquisition_in_sampling(recording, fallback):
     from contextlib import ExitStack
-    from extractor import xed
-    from extractor.extractor import _extract_concrete
-    import antiunification.many as au
 
-    codes = [
-        bytes.fromhex(h) for h in (["4801d8", "4801c8"] if fallback else ["4801d8"])
-    ]
-    models = [
-        _extract_concrete(load_shellcode(code, 0x400000), 0x400000) for code in codes
-    ]
-    acquisition = dict(
-        schema="ixyk.instruction_acquisition.v1",
-        instruction_hex=codes[0].hex(),
-        status="acquisition_error" if fallback else "pass",
-        model_route="direct" if fallback else "generalized",
-        retained_models=[
-            dict(instruction_hex=c.hex(), model=m.to_data())
-            for c, m in zip(codes, models)
-        ],
-        findings=[],
+    from extractor import prepared_cases, xed
+    from extractor.constructor_inputs import ArgumentCase, Domain
+    from extractor.evidence_events import GeneralizationInputs, ModelInstantiation
+    from extractor.extractor import _extract_concrete
+    from extractor.prepared_cases import PreparedCase, generalize
+
+    form = next(
+        f
+        for f in xed._invoke("forms", "ADD")
+        if "_APX" not in f["form"]
+        and [a["kind"] for a in f["args"]] == ["gpr64", "gpr64"]
+        and all(a["name"].startswith("reg") for a in f["args"])
     )
+    bank = {r["name"]: r["value"] for r in xed.registers()}
+    domain = Domain(
+        tuple(bank[r] for r in ["RAX", "RBX", "RCX", "RDX", "R8", "R9"]), register=True
+    )
+    arguments = ArgumentCase(form, (domain, domain), ((0,), (1,)))
+    requests = [
+        ((bank["RAX"], bank["RBX"]), 0x400000),
+        ((bank["RCX"], bank["RBX"]), 0x400000),
+    ]
+    if not fallback:
+        requests += [
+            ((bank["RAX"], bank["RDX"]), 0x400000),
+            ((bank["RAX"], bank["RBX"]), 0xFFFFFEDCBA987654),
+        ]
+    observations = []
+    for values, source in requests:
+        decoded = xed.encode_constructor(form["id"], values)
+        code = bytes.fromhex(decoded["hex"])
+        observations.append(
+            (code, decoded, _extract_concrete(load_shellcode(code, source), source))
+        )
+    case = PreparedCase(
+        arguments,
+        tuple(observations),
+        None if fallback else generalize(observations),
+        (True,) * len(observations),
+    )
+    acquisition = {"prepared_cases": [case.to_data()], "findings": []}
     stream = BytesIO()
     recorder = (
         BackgroundRecorder(
             backend=ReferenceJSONBackend(),
             types=evidence_types(),
-            run=RunContext("a" * 40, "frozen-test"),
+            run=RunContext("a" * 40, "prepared-test"),
             output=stream,
         )
         if recording
@@ -262,16 +294,15 @@ def test_frozen_campaign_has_no_acquisition_in_sampling(recording, fallback):
             for target, name in [
                 (xed, "_invoke"),
                 (campaign_module, "extract"),
-                (campaign_module, "load_shellcode"),
                 (runtime, "load_shellcode"),
-                (CompiledModel, "__init__"),
-                (au, "antiunify_many"),
+                (prepared_cases, "_extract_concrete"),
+                (prepared_cases, "antiunify_many"),
             ]:
                 stack.enter_context(
                     patch.object(
                         target,
                         name,
-                        side_effect=AssertionError("forbidden hot-loop call"),
+                        side_effect=AssertionError("forbidden hot-loop acquisition"),
                     )
                 )
 
@@ -279,8 +310,8 @@ def test_frozen_campaign_has_no_acquisition_in_sampling(recording, fallback):
         stack.enter_context(patch.object(campaign_module, "emulate", emulate_checked))
         try:
             report = fuzz(
-                models[0],
-                codes[0],
+                observations[0][2],
+                observations[0][0],
                 17,
                 max_executions=17,
                 vary_inputs=True,
@@ -292,14 +323,21 @@ def test_frozen_campaign_has_no_acquisition_in_sampling(recording, fallback):
             if recorder:
                 recorder.close()
     assert report["executions"] == len(observed) == 17
-    assert [code for code, _ in observed] == [codes[i % len(codes)] for i in range(17)]
-    assert {state.scalars["rip"] for _, state in observed} == {0x400000}
+    if fallback:
+        assert Counter(code for code, _ in observed) == {
+            observations[0][0]: 9,
+            observations[1][0]: 8,
+        }
+        assert report["fallback_allocations"] == {
+            f"{observations[0][0].hex()}@400000": 9,
+            f"{observations[1][0].hex()}@400000": 8,
+        }
+    else:
+        assert len({code for code, _ in observed}) > 1
+        assert len({state.scalars["rip"] for _, state in observed}) > 1
+        assert report["fallback_allocations"] == {}
     assert len({tuple(state.scalars.items()) for _, state in observed}) > 1
     assert len({tuple(state.memory.items()) for _, state in observed}) > 1
-    if fallback:
-        assert report["fallback_allocations"] == {codes[0].hex(): 9, codes[1].hex(): 8}
-    else:
-        assert report["fallback_allocations"] == {}
     assert report["agreements"] + report["disagreements"] + report["unusable"] == 17
     if recorder:
         records = list(
@@ -311,13 +349,28 @@ def test_frozen_campaign_has_no_acquisition_in_sampling(recording, fallback):
         )
         assert sum(isinstance(r.value, FuzzInput) for r in records) == 17
         assert sum(isinstance(r.value, Comparison) for r in records) == 17
-        assert sum(isinstance(r.value, InstructionModel) for r in records) == len(
-            models
-        )
+        if not fallback:
+            templates = {
+                r.id for r in records if isinstance(r.value, GeneralizationInputs)
+            }
+            bindings = {
+                r.id: r.value
+                for r in records
+                if isinstance(r.value, ModelInstantiation)
+            }
+            assert all(
+                value.generalization_id in templates for value in bindings.values()
+            )
+            assert all(
+                r.value.model_id in bindings
+                for r in records
+                if isinstance(r.value, FuzzInput)
+            )
 
 
 def test_unavailable_acquisition_is_reported_without_new_discovery():
     acquisition = dict(
+        prepared_cases=[],
         schema="ixyk.instruction_acquisition.v1",
         instruction_hex="90",
         status="unsupported",

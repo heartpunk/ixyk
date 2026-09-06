@@ -9,6 +9,7 @@ from collections.abc import Callable, Iterable, Mapping, Sequence
 from dataclasses import dataclass
 from typing import Literal, NotRequired, TypedDict
 import hashlib
+import json
 from time import perf_counter
 
 import hypothesis
@@ -101,6 +102,12 @@ def emulate(instruction: bytes, before: ConcreteState) -> ConcreteState:
     emulator, memory, mapped = amd64_emulator(), dict(before.memory), set[int]()
 
     def map_range(address: int, size: int) -> None:
+        address %= 1 << 64
+        if address + size > 1 << 64:
+            first_size = (1 << 64) - address
+            map_range(address, first_size)
+            map_range(0, size - first_size)
+            return
         first = address & -_PAGE_SIZE
         last = (address + size - 1) & -_PAGE_SIZE
         for page in range(first, last + _PAGE_SIZE, _PAGE_SIZE):
@@ -134,10 +141,11 @@ def emulate(instruction: bytes, before: ConcreteState) -> ConcreteState:
     ) -> None:
         for offset in range(size):
             byte = value >> (8 * offset) & 0xFF
+            target = (address + offset) % (1 << 64)
             if byte:
-                memory[address + offset] = byte
+                memory[target] = byte
             else:
-                _ = memory.pop(address + offset, None)
+                _ = memory.pop(target, None)
 
     _ = emulator.hook_add(
         unicorn_constant("UC_HOOK_MEM_READ_UNMAPPED")
@@ -230,7 +238,10 @@ class InputLayout:
     def prepare(cls, code):
         from extractor.xed import decode
 
-        decoded = decode(code)
+        return cls.from_decoded(decode(code))
+
+    @classmethod
+    def from_decoded(cls, decoded):
         return cls(
             decoded["base"]["name"].lower(),
             decoded["index"]["name"].lower(),
@@ -257,7 +268,13 @@ def _input_state(
             layout = InputLayout.prepare(code)
         for address in registers[: len(GPR64)]:
             memory[address] = data
-        base = scalars.get(layout.base, 0)
+        base = (
+            (source + len(code))
+            if layout.base in {"rip", "eip"}
+            else scalars.get(layout.base, 0)
+        )
+        if layout.base == "eip":
+            base &= (1 << 32) - 1
         index = scalars.get(layout.index, 0)
         address = (base + index * layout.scale + layout.displacement) % (1 << 64)
         memory[address] = data
@@ -303,10 +320,10 @@ def fuzz(
     elif evidence is not None:
         raise ValueError("evidence recording requires cumulative fuzzing")
     if campaign is not None:
-        campaign.prepare(acquisition=acquisition)
+        campaign.prepare(acquisition=acquisition, vary_encodings=vary_inputs)
     elif artifact is None:
         raise ValueError("fuzzing requires a prepared model")
-    codes = st.just(instruction)
+    codes = st.data() if campaign is not None and vary_inputs else st.just(instruction)
     source = artifact.source if artifact is not None else 0x400000
     layout = (
         InputLayout.prepare(instruction) if vary_inputs and campaign is None else None
@@ -318,7 +335,7 @@ def fuzz(
     }
     identity = {
         "hypothesis": hypothesis.__version__,
-        "strategy": "ixyk.prepared-state-memory.v1"
+        "strategy": "ixyk.prepared-constructors-source-memory.v2"
         if vary_inputs
         else "ixyk.amd64-registers-flags.v1",
         "model_sha256": hashlib.sha256(artifact.to_json().encode()).hexdigest()
@@ -332,6 +349,11 @@ def fuzz(
                 "instruction_hex": item.code.hex(),
                 "source": item.source,
                 "route": item.route,
+                "case_sha256": hashlib.sha256(
+                    json.dumps(item.case.to_data(), sort_keys=True).encode()
+                ).hexdigest()
+                if item.case is not None
+                else None,
                 "model_sha256": hashlib.sha256(
                     item.compiled.artifact.to_json().encode()
                 ).hexdigest(),
@@ -392,7 +414,7 @@ def fuzz(
             min(examples, max_executions) if max_executions is not None else examples
         )
         report["planned_fallback_allocations"] = {
-            item.code.hex(): (
+            f"{item.code.hex()}@{item.source:x}": (
                 budget // len(campaign.models) + (index < budget % len(campaign.models))
             )
             for index, item in enumerate(campaign.models)
@@ -410,106 +432,120 @@ def fuzz(
             return report
     sample_input = {}
 
-    # settings must wrap seed: seed itself disables the database. Keep a fixed
-    # seed while explicitly restoring our declared, action-local replay input.
-    @settings(
-        max_examples=min(examples, max_executions)
-        if max_executions is not None
-        else examples,
-        deadline=None,
-        database=database,
-        phases=phases[stage],
-        report_multiple_bugs=False,
-    )
-    @seed(0)
-    @given(
-        code=codes,
-        source=st.just(source),
-        memory=MEMORY if vary_inputs else st.just({}),
-        data=st.binary(min_size=32, max_size=32) if vary_inputs else st.just(b""),
-        registers=st.tuples(
-            *(_U256 if name in YMM256 else _U64 for name in _FUZZED_REGISTERS)
+    def run_case(case_index, case_budget):
+        # Keep one structural strategy fixed for each Hypothesis engine. The
+        # campaign budget is divided evenly, without changing draws on replay.
+        # settings must wrap seed: seed itself disables the database. Keep a fixed
+        # seed while explicitly restoring our declared, action-local replay input.
+        @settings(
+            max_examples=case_budget,
+            deadline=None,
+            database=database,
+            phases=phases[stage],
+            report_multiple_bugs=False,
         )
-        if vary_inputs
-        else _REGISTERS,
-        flags=st.lists(
-            st.booleans(), min_size=len(FLAG_NAMES), max_size=len(FLAG_NAMES)
-        ),
-    )
-    def agrees(
-        code: bytes,
-        source: int,
-        memory: dict[int, bytes],
-        data: bytes,
-        registers: tuple[int, ...],
-        flags: list[bool],
-    ) -> None:
-        nonlocal executions, reproduced, sample_input
-        if max_executions is not None and executions >= max_executions:
-            raise _ExecutionBudget()
-        executions += 1
-        selected = campaign.select(executions) if campaign is not None else None
-        if selected is not None:
-            code, source = selected.code, selected.source
-        before = _input_state(
-            code,
-            source,
-            memory,
-            data,
-            registers,
-            flags,
-            vary_inputs,
-            layout=selected.layout if selected is not None else layout,
+        @seed(0)
+        @given(
+            code=codes,
+            source=st.integers(0, (1 << 64) - 16)
+            if campaign is not None and vary_inputs
+            else st.just(source),
+            memory=MEMORY if vary_inputs else st.just({}),
+            data=st.binary(min_size=32, max_size=32) if vary_inputs else st.just(b""),
+            registers=st.tuples(
+                *(_U256 if name in YMM256 else _U64 for name in _FUZZED_REGISTERS)
+            )
+            if vary_inputs
+            else _REGISTERS,
+            flags=st.lists(
+                st.booleans(), min_size=len(FLAG_NAMES), max_size=len(FLAG_NAMES)
+            ),
         )
-        if campaign is not None:
-            report["active_input"] = {
+        def agrees(
+            code: bytes,
+            source: int,
+            memory: dict[int, bytes],
+            data: bytes,
+            registers: tuple[int, ...],
+            flags: list[bool],
+        ) -> None:
+            nonlocal executions, reproduced, sample_input
+            if max_executions is not None and executions >= max_executions:
+                raise _ExecutionBudget()
+            selected = campaign.select(case_index + 1) if campaign is not None else None
+            if selected is not None:
+                if vary_inputs:
+                    selected = campaign.bind(selected, code, source)
+                code, source = selected.code, selected.source
+            executions += 1
+            before = _input_state(
+                code,
+                source,
+                memory,
+                data,
+                registers,
+                flags,
+                vary_inputs,
+                layout=selected.layout if selected is not None else layout,
+            )
+            if campaign is not None:
+                report["active_input"] = {
+                    "instruction_hex": code.hex(),
+                    "source": source,
+                    "scalars": dict(before.scalars),
+                    "memory": {str(k): v for k, v in sorted(before.memory.items())},
+                }
+            publish()
+            if campaign is not None:
+                assert selected is not None
+                campaign.compare(selected.compiled, code, before, executions)
+                report.pop("active_input", None)
+                report.update(campaign.summary())
+                publish()
+                return
+            scalars, initial = before.scalars, before.memory
+            sample_input = {
                 "instruction_hex": code.hex(),
-                "source": source,
-                "scalars": dict(before.scalars),
-                "memory": {str(k): v for k, v in sorted(before.memory.items())},
+                "scalars": dict(scalars),
+                "memory": {str(k): v for k, v in sorted(initial.items())},
             }
-        publish()
-        if campaign is not None:
-            assert selected is not None
-            campaign.compare(selected.compiled, code, before, executions)
-            report.pop("active_input", None)
-            report.update(campaign.summary())
-            publish()
-            return
-        scalars, initial = before.scalars, before.memory
-        sample_input = {
-            "instruction_hex": code.hex(),
-            "scalars": dict(scalars),
-            "memory": {str(k): v for k, v in sorted(initial.items())},
-        }
-        current = compiled
-        assert current is not None
-        try:
-            after = emulate(code, before)
-        except Exception as error:
-            if not is_cpu_exception(error):
-                differences = (f"emulator {type(error).__name__}: {error}",)
+            current = compiled
+            assert current is not None
+            try:
+                after = emulate(code, before)
+            except Exception as error:
+                if not is_cpu_exception(error):
+                    differences = (f"emulator {type(error).__name__}: {error}",)
+                else:
+                    differences = current.differences(before, "error")
             else:
-                differences = current.differences(before, "error")
-        else:
-            differences = current.differences(before, after)
-        if differences:
-            report["input"] = sample_input
-            reproduced = True
-            report["status"] = "mismatch"
-            # Preserve the simplest observed witness if processing is interrupted;
-            # explanation probes can otherwise overwrite it with large values.
-            incumbent = report.get("witness")
-            if incumbent is None or tuple(scalars.values()) < tuple(
-                incumbent[name] for name in scalars
-            ):
-                report["differences"] = list(differences)
-                report["witness"] = dict(scalars)
-            publish()
-            raise _Mismatch(before, differences)
+                differences = current.differences(before, after)
+            if differences:
+                report["input"] = sample_input
+                reproduced = True
+                report["status"] = "mismatch"
+                # Preserve the simplest observed witness if processing is interrupted;
+                # explanation probes can otherwise overwrite it with large values.
+                incumbent = report.get("witness")
+                if incumbent is None or tuple(scalars.values()) < tuple(
+                    incumbent[name] for name in scalars
+                ):
+                    report["differences"] = list(differences)
+                    report["witness"] = dict(scalars)
+                publish()
+                raise _Mismatch(before, differences)
+
+        agrees()
 
     try:
-        agrees()
+        total_budget = (
+            min(examples, max_executions) if max_executions is not None else examples
+        )
+        count = len(campaign.models) if campaign is not None else 1
+        for index in range(count):
+            case_budget = total_budget // count + (index < total_budget % count)
+            if case_budget:
+                run_case(index, case_budget)
     except _InputAcquisitionError:
         pass
     except _Mismatch as mismatch:
@@ -526,9 +562,9 @@ def fuzz(
             report["status"] = "pass"
             report["processing"] = "complete"
         elif not reproduced:
-            report["reason"] = (
-                "saved failure did not reproduce; discovery was not rerun"
-            )
+            report[
+                "reason"
+            ] = "saved failure did not reproduce; discovery was not rerun"
     if campaign is not None:
         report.update(campaign.summary())
         report["status"] = (

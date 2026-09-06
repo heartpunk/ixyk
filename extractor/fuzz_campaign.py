@@ -9,7 +9,13 @@ from time import perf_counter_ns
 from typing import Literal
 
 from extractor.acquisition_errors import EXPECTED_ACQUISITION
-from extractor.evidence_events import Comparison, FuzzInput, StateSnapshot
+from extractor.evidence_events import (
+    AttemptContext,
+    Comparison,
+    Finding,
+    FuzzInput,
+    StateSnapshot,
+)
 from extractor.extractor import extract
 from extractor.fuzzer import ComparisonUnavailable, CompiledModel, InputLayout, emulate
 from extractor.runtime import load_shellcode
@@ -24,6 +30,8 @@ class PreparedModel:
     layout: InputLayout
     route: Literal["generalized", "fallback"]
     model_id: str | None
+    case: object | None = None
+    values_strategy: object | None = None
 
 
 class Campaign:
@@ -43,11 +51,21 @@ class Campaign:
     def form_unavailable(self, form, error):
         self.generation_findings += 1
         if self.evidence is not None:
-            self.evidence.finding(f"generation:form:{form}", self.instruction, error)
+            self.evidence.finding(
+                f"generation:form:{form}",
+                self.instruction,
+                error,
+                attempt=AttemptContext(
+                    operation="form-generation", encoding=self.instruction
+                ),
+            )
 
-    def prepare(self, *, source=0x400000, acquisition=None):
+    def prepare(self, *, source=0x400000, acquisition=None, vary_encodings=False):
         if self.prepared:
             raise RuntimeError("campaign models are already frozen")
+        if vary_encodings:
+            self._prepare_cases(source, acquisition)
+            return
         retained = []
         stage = ["acquisition", self.instruction]
         identifiers = {}
@@ -66,7 +84,18 @@ class Campaign:
         def on_finding(name, code, error):
             self.acquisition_findings += 1
             if self.evidence is not None:
-                self.evidence.finding(name, code, error, context="preparation")
+                self.evidence.finding(
+                    name,
+                    code,
+                    error,
+                    context="preparation",
+                    attempt=AttemptContext(
+                        operation=name,
+                        source=source,
+                        encoding=code,
+                        model_ids=tuple(identifiers.values()),
+                    ),
+                )
 
         model = self.fixed_model
         if acquisition is not None:
@@ -81,14 +110,13 @@ class Campaign:
             for finding in acquisition.get("findings", ()):
                 self.acquisition_findings += 1
                 if self.evidence is not None:
-                    from extractor.evidence_events import Finding
-
                     self.evidence.recorder.emit(
                         Finding(
                             finding["stage"],
                             bytes.fromhex(finding["instruction_hex"]),
                             finding["error_kind"],
                             finding["message"],
+                            AttemptContext.from_data(finding.get("attempt")),
                         ),
                         context="preparation",
                     )
@@ -142,6 +170,152 @@ class Campaign:
         self.models = tuple(prepared)
         self.prepared = True
 
+    def _prepare_cases(self, source, acquisition):
+        from extractor.evidence_events import GeneralizationInputs
+        from extractor.prepared_cases import PreparedCase, prepare_catalog
+
+        def on_model(code, model, route):
+            if self.evidence is not None:
+                return self.evidence.model(code, model, route, context="preparation")
+            return None
+
+        def on_finding(stage, code, error, attempt=None):
+            self.acquisition_findings += 1
+            if self.evidence is not None:
+                self.evidence.finding(
+                    stage,
+                    code,
+                    error,
+                    context="preparation",
+                    attempt=attempt,
+                )
+
+        if acquisition is not None and "prepared_cases" in acquisition:
+            cases = [PreparedCase.from_data(c) for c in acquisition["prepared_cases"]]
+            for finding in acquisition.get("findings", ()):
+                self.acquisition_findings += 1
+                if self.evidence is not None:
+                    self.evidence.recorder.emit(
+                        Finding(
+                            finding["stage"],
+                            bytes.fromhex(finding["instruction_hex"]),
+                            finding["error_kind"],
+                            finding["message"],
+                            AttemptContext.from_data(finding.get("attempt")),
+                        ),
+                        context="preparation",
+                    )
+        else:
+            cases = prepare_catalog(
+                self.instruction, source, on_model=on_model, on_finding=on_finding
+            )
+        prepared = []
+        seen_fallback = set()
+        for case in cases:
+            identifiers = []
+            for code, decoded, model in case.observations:
+                identifier = (
+                    self.evidence.model(code, model, "direct", context="preparation")
+                    if self.evidence
+                    else None
+                )
+                identifiers.append((code, model.source, identifier))
+            if case.template is not None and all(case.comparable):
+                code, decoded, model = case.observations[0]
+                identifier = (
+                    self.evidence.recorder.emit(
+                        GeneralizationInputs(
+                            case.arguments.form["id"], tuple(identifiers)
+                        ),
+                        context="preparation",
+                    )
+                    if self.evidence
+                    else None
+                )
+                prepared.append(
+                    PreparedModel(
+                        code,
+                        model.source,
+                        CompiledModel(model),
+                        InputLayout.from_decoded(decoded),
+                        "generalized",
+                        identifier,
+                        case,
+                        case.arguments.strategy(),
+                    )
+                )
+            else:
+                for (code, decoded, model), (_, _, identifier), comparable in zip(
+                    case.observations, identifiers, case.comparable, strict=True
+                ):
+                    if not comparable or (code, model.source) in seen_fallback:
+                        continue
+                    seen_fallback.add((code, model.source))
+                    prepared.append(
+                        PreparedModel(
+                            code,
+                            model.source,
+                            CompiledModel(model),
+                            InputLayout.from_decoded(decoded),
+                            "fallback",
+                            identifier,
+                        )
+                    )
+        self.models = tuple(prepared)
+        self.prepared = True
+
+    def bind(self, selected, data, source):
+        from hypothesis import assume
+
+        from extractor.evidence_events import ModelInstantiation
+        from extractor.xed import EncodingError
+
+        if selected.case is None:
+            return selected
+        values = data.draw(selected.values_strategy)
+        try:
+            code, decoded, model = selected.case.instantiate(values, source)
+        except EncodingError as error:
+            self.generation_findings += 1
+            if self.evidence is not None:
+                arguments = selected.case.arguments
+                self.evidence.finding(
+                    "generation:sample",
+                    selected.code,
+                    error,
+                    context=selected.model_id,
+                    attempt=AttemptContext(
+                        operation="fuzz-generation",
+                        constructor_id=arguments.form["id"],
+                        domains=tuple(
+                            (d.choices, d.low, d.high, d.register)
+                            for d in arguments.domains
+                        ),
+                        alias_groups=arguments.groups,
+                        arguments=values,
+                        source=source,
+                        model_ids=(selected.model_id,) if selected.model_id else (),
+                    ),
+                )
+            assume(False)
+        identifier = (
+            self.evidence.recorder.emit(
+                ModelInstantiation(selected.model_id, values, source),
+                context=selected.model_id,
+            )
+            if self.evidence
+            else None
+        )
+        self.model_id = identifier
+        return PreparedModel(
+            code,
+            source,
+            CompiledModel(model),
+            InputLayout.from_decoded(decoded),
+            "generalized",
+            identifier,
+        )
+
     def select(self, sample):
         if not self.prepared:
             raise RuntimeError("campaign must be prepared before sampling")
@@ -150,7 +324,7 @@ class Campaign:
         selected = self.models[(sample - 1) % len(self.models)]
         self.model_id, self.route = selected.model_id, selected.route
         if selected.route == "fallback":
-            key = selected.code.hex()
+            key = f"{selected.code.hex()}@{selected.source:x}"
             self.allocations[key] = self.allocations.get(key, 0) + 1
         return selected
 
@@ -192,7 +366,17 @@ class Campaign:
             reference_outcome = "error" if is_cpu_exception(error) else "unusable"
             if self.evidence is not None:
                 self.evidence.finding(
-                    "reference_execution", code, error, context=context
+                    "reference_execution",
+                    code,
+                    error,
+                    context=context,
+                    attempt=AttemptContext(
+                        "reference-execution",
+                        source=before.scalars.get("rip"),
+                        encoding=code,
+                        model_ids=(self.model_id,) if self.model_id else (),
+                        fuzz_input_id=context,
+                    ),
                 )
         if current is not None:
             observed = "error" if reference_outcome == "error" else after
@@ -200,14 +384,26 @@ class Campaign:
                 differences = current.differences(
                     before,
                     observed,
-                    on_prediction=capture_prediction
-                    if self.evidence is not None
-                    else None,
+                    on_prediction=(
+                        capture_prediction if self.evidence is not None else None
+                    ),
                     require_outcome=True,
                 )
             except ComparisonUnavailable as error:
                 if self.evidence is not None:
-                    self.evidence.finding("comparison", code, error, context=context)
+                    self.evidence.finding(
+                        "comparison",
+                        code,
+                        error,
+                        context=context,
+                        attempt=AttemptContext(
+                            "comparison",
+                            source=before.scalars.get("rip"),
+                            encoding=code,
+                            model_ids=(self.model_id,) if self.model_id else (),
+                            fuzz_input_id=context,
+                        ),
+                    )
             else:
                 if reference_outcome != "unusable":
                     outcome = "disagreement" if differences else "agreement"
