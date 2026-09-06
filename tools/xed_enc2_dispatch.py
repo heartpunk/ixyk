@@ -60,6 +60,7 @@ def arguments(record, function):
 def emit(directory, env, records):
     if (env.mode, env.asz) != (64, 64):
         return
+    emit_fuzz(directory, records)
     forms = defaultdict(list)
     unsupported = []
     for record in records:
@@ -129,3 +130,51 @@ def emit(directory, env, records):
     (output / "ixyk-enc2-unmapped.json").write_text(
         json.dumps(unsupported, indent=2) + "\n"
     )
+
+
+def emit_fuzz(directory, records):
+    """Expose every ENC2 constructor and its typed inputs, grouped by ICLASS."""
+    functions = {}
+    for record in records:
+        for function in record.encoder_functions:
+            functions[function.get_function_name()] = (record, function)
+    lines = ["/* Generated from XED encoder argument metadata. */"]
+    metadata = []
+    for index, (record, function) in enumerate(functions.values()):
+        args, values = [], []
+        for declaration, kind in function.get_args():
+            ctype, name = declaration.rsplit(" ", 1)
+            if kind == "req":
+                values.append("&request")
+            else:
+                values.append(f"({ctype})values[{len(args)}]")
+                args.append(dict(name=name, kind=kind, ctype=ctype))
+        metadata.append(
+            dict(id=index, iclass=record.iclass, form=record.iform, args=args)
+        )
+        lines.extend(
+            [
+                f"static unsigned ixyk_fuzz_{index}(const uint64_t *values, unsigned char *bytes) {{",
+                "xed_enc2_req_t request; xed_enc2_req_t_init(&request, bytes);",
+                f"{function.get_function_name()}({', '.join(values)});",
+                "return xed_enc2_encoded_length(&request);",
+                "}",
+            ]
+        )
+    lines.append(
+        "static unsigned (*const ixyk_fuzz_encoders[])(const uint64_t *, unsigned char *) = {"
+    )
+    lines.extend(f"ixyk_fuzz_{i}," for i in range(len(metadata)))
+    lines.append("};")
+    lines.append("static const char *const ixyk_fuzz_metadata[] = {")
+    lines.extend(
+        json.dumps(json.dumps(m, separators=(",", ":"))) + "," for m in metadata
+    )
+    lines.append("};")
+    lines.append("static const char *const ixyk_fuzz_classes[] = {")
+    lines.extend(json.dumps(m["iclass"]) + "," for m in metadata)
+    lines.append("};")
+    lines.append("static const unsigned ixyk_fuzz_argc[] = {")
+    lines.extend(str(len(m["args"])) + "," for m in metadata)
+    lines.append("};")
+    Path(directory, "ixyk-enc2-fuzz.h").write_text("\n".join(lines) + "\n")

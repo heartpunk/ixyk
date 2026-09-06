@@ -14,7 +14,7 @@ from extractor.artifact import (
     TypedExpr as E,
     TermSort,
 )
-from extractor.fuzzer import CompiledModel, ConcreteState
+from extractor.fuzzer import ComparisonUnavailable, CompiledModel, ConcreteState
 from extractor.typed_z3 import expr_to_z3
 from tools.lean_differential import OPS, cases
 from hypothesis import given, settings, Phase, strategies as st
@@ -148,7 +148,7 @@ def test_outcomes_and_missing_inputs():
     ):
         compiled = CompiledModel(artifact)
         assert compiled.differences(state, state)[0].startswith("enabled edges:")
-    with pytest.raises(ValueError):
+    with pytest.raises(ComparisonUnavailable):
         regular.differences(ConcreteState({"rip": 0}, {}), state)
 
 

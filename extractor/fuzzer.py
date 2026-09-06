@@ -13,7 +13,7 @@ import hashlib
 import hypothesis
 from hypothesis.database import ExampleDatabase
 
-from hypothesis import Phase, given, seed, settings, strategies as st
+from hypothesis import HealthCheck, Phase, given, seed, settings, strategies as st
 
 from extractor.amd64_state import (
     AMD64_FLAG_BIT,
@@ -41,7 +41,9 @@ class ConcreteState:
 
 class FuzzReport(TypedDict):
     schema: str
-    status: Literal["pass", "mismatch", "incomplete"]
+    status: Literal["pass", "mismatch", "incomplete", "acquisition_error"]
+    error: NotRequired[str]
+    input: NotRequired[dict]
     instruction_hex: str
     examples_requested: int
     executions: int
@@ -52,6 +54,13 @@ class FuzzReport(TypedDict):
     reason: NotRequired[str]
     checkpoint: NotRequired[dict]
     explanation: NotRequired[list[str]]
+    agreements: NotRequired[int]
+    disagreements: NotRequired[int]
+    unusable: NotRequired[int]
+    acquisition_findings: NotRequired[int]
+    generation_findings: NotRequired[int]
+    fallback_allocations: NotRequired[dict[str, int]]
+    input_sha256: NotRequired[str]
 
 
 _PAGE_SIZE = 0x1000
@@ -150,6 +159,14 @@ def emulate(instruction: bytes, before: ConcreteState) -> ConcreteState:
     return ConcreteState(scalars, memory)
 
 
+class ComparisonUnavailable(Exception):
+    """The current model cannot establish a unique comparison outcome."""
+
+
+class _InputAcquisitionError(Exception):
+    pass
+
+
 class _ExecutionBudget(BaseException):
     """Stop Hypothesis without turning resource exhaustion into a test failure."""
 
@@ -193,8 +210,40 @@ class _ReplayDatabase(ExampleDatabase):
         }
 
 
+def _input_state(code, source, memory, data, registers, flags, vary_inputs):
+    scalars = (
+        dict(zip(_FUZZED_REGISTERS, registers, strict=True))
+        | {"rip": source}
+        | {
+            f"rflags_{name}": int(value)
+            for name, value in zip(FLAG_NAMES, flags, strict=True)
+        }
+    )
+    memory = dict(memory)
+    if vary_inputs:
+        # Exercise loads from generated register addresses, including RSP.
+        from extractor.xed import decode
+
+        decoded = decode(code)
+        for address in registers[: len(GPR64)]:
+            memory[address] = data
+        base = scalars.get(decoded["base"]["name"].lower(), 0)
+        index = scalars.get(decoded["index"]["name"].lower(), 0)
+        address = (base + index * decoded["scale"] + decoded["displacement"]) % (
+            1 << 64
+        )
+        memory[address] = data
+    initial = {
+        (address + i) % (1 << 64): byte
+        for address, block in memory.items()
+        for i, byte in enumerate(block)
+    }
+    initial.update({(source + i) % (1 << 64): byte for i, byte in enumerate(code)})
+    return ConcreteState(scalars, initial)
+
+
 def fuzz(
-    artifact: InstructionModel,
+    artifact: InstructionModel | None,
     instruction: bytes,
     examples: int,
     *,
@@ -202,10 +251,42 @@ def fuzz(
     previous: dict | None = None,
     max_executions: int | None = None,
     progress: Callable[[dict], None] | None = None,
+    vary_inputs: bool = False,
+    continue_on_findings: bool = False,
+    evidence=None,
 ) -> FuzzReport:
     """Discover or resume a failure, exporting an action-local replay database."""
     if examples <= 0 or (max_executions is not None and max_executions <= 0):
         raise ValueError("example and execution budgets must be positive")
+    from extractor.fuzz_inputs import MEMORY, instruction_strategy
+    from extractor.xed import EncodingError
+
+    if artifact is None and not vary_inputs:
+        raise ValueError("fixed-input fuzzing requires an available model")
+    campaign = None
+    if continue_on_findings:
+        if stage != "discover":
+            raise ValueError("cumulative fuzzing requires discovery")
+        from extractor.fuzz_campaign import Campaign
+
+        campaign = Campaign(
+            instruction, evidence, fixed_model=artifact if not vary_inputs else None
+        )
+    elif evidence is not None:
+        raise ValueError("evidence recording requires cumulative fuzzing")
+    try:
+        codes = (
+            instruction_strategy(instruction, on_unavailable=campaign.form_unavailable)
+            if vary_inputs and campaign is not None
+            else instruction_strategy(instruction)
+            if vary_inputs
+            else st.just(instruction)
+        )
+    except EncodingError as error:
+        if campaign is None:
+            raise
+        campaign.form_unavailable("all", error)
+        codes = st.just(instruction)
     phases = {
         "discover": (Phase.generate,),
         "shrink": (Phase.reuse, Phase.shrink),
@@ -213,8 +294,12 @@ def fuzz(
     }
     identity = {
         "hypothesis": hypothesis.__version__,
-        "strategy": "ixyk.amd64-registers-flags.v1",
-        "model_sha256": hashlib.sha256(artifact.to_json().encode()).hexdigest(),
+        "strategy": "ixyk.xed-state-memory.v1"
+        if vary_inputs
+        else "ixyk.amd64-registers-flags.v1",
+        "model_sha256": hashlib.sha256(artifact.to_json().encode()).hexdigest()
+        if artifact
+        else None,
         "instruction_hex": instruction.hex(),
     }
     entries = {}
@@ -255,8 +340,8 @@ def fuzz(
 
     database.changed = publish
     publish()
-    compiled = CompiledModel(artifact)
-    code_memory = dict(enumerate(instruction, artifact.source))
+    compiled = CompiledModel(artifact) if artifact else None
+    sample_input = {}
 
     # settings must wrap seed: seed itself disables the database. Keep a fixed
     # seed while explicitly restoring our declared, action-local replay input.
@@ -266,39 +351,77 @@ def fuzz(
         database=database,
         phases=phases[stage],
         report_multiple_bugs=False,
+        suppress_health_check=[HealthCheck.filter_too_much] if vary_inputs else [],
     )
     @seed(0)
     @given(
-        registers=_REGISTERS,
+        code=codes,
+        source=_U64 if vary_inputs else st.just(artifact.source if artifact else 0),
+        memory=MEMORY if vary_inputs else st.just({}),
+        data=st.binary(min_size=32, max_size=32) if vary_inputs else st.just(b""),
+        registers=st.tuples(
+            *(_U256 if name in YMM256 else _U64 for name in _FUZZED_REGISTERS)
+        )
+        if vary_inputs
+        else _REGISTERS,
         flags=st.lists(
             st.booleans(), min_size=len(FLAG_NAMES), max_size=len(FLAG_NAMES)
         ),
     )
-    def agrees(registers: tuple[int, ...], flags: list[bool]) -> None:
-        nonlocal executions, reproduced
+    def agrees(
+        code: bytes,
+        source: int,
+        memory: dict[int, bytes],
+        data: bytes,
+        registers: tuple[int, ...],
+        flags: list[bool],
+    ) -> None:
+        nonlocal executions, reproduced, sample_input
         if max_executions is not None and executions >= max_executions:
             raise _ExecutionBudget()
         executions += 1
         publish()
-        scalars = (
-            dict(zip(_FUZZED_REGISTERS, registers, strict=True))
-            | {"rip": artifact.source}
-            | {
-                f"rflags_{name}": int(value)
-                for name, value in zip(FLAG_NAMES, flags, strict=True)
-            }
-        )
-        before = ConcreteState(scalars, code_memory)
+        if campaign is not None:
+            code, source, selected = campaign.select(code, source, executions)
+        before = _input_state(code, source, memory, data, registers, flags, vary_inputs)
+        if campaign is not None:
+            campaign.compare(selected, code, before, executions)
+            report.update(campaign.summary())
+            publish()
+            return
+        scalars, initial = before.scalars, before.memory
+        sample_input = {
+            "instruction_hex": code.hex(),
+            "scalars": dict(scalars),
+            "memory": {str(k): v for k, v in sorted(initial.items())},
+        }
+        current = compiled
+        if vary_inputs:
+            from extractor.extractor import extract
+            from extractor.runtime import load_shellcode
+
+            try:
+                current = CompiledModel(extract(load_shellcode(code, source), source))
+            except Exception as error:
+                report.update(
+                    status="acquisition_error",
+                    error=f"{type(error).__name__}: {error}",
+                    input=sample_input,
+                    processing="complete",
+                )
+                raise _InputAcquisitionError()
+        assert current is not None
         try:
-            after = emulate(instruction, before)
+            after = emulate(code, before)
         except Exception as error:
             if not is_cpu_exception(error):
                 differences = (f"emulator {type(error).__name__}: {error}",)
             else:
-                differences = compiled.differences(before, "error")
+                differences = current.differences(before, "error")
         else:
-            differences = compiled.differences(before, after)
+            differences = current.differences(before, after)
         if differences:
+            report["input"] = sample_input
             reproduced = True
             report["status"] = "mismatch"
             # Preserve the simplest observed witness if processing is interrupted;
@@ -314,6 +437,8 @@ def fuzz(
 
     try:
         agrees()
+    except _InputAcquisitionError:
+        pass
     except _Mismatch as mismatch:
         report["status"] = "mismatch"
         report["differences"] = list(mismatch.differences)
@@ -331,6 +456,15 @@ def fuzz(
             report["reason"] = (
                 "saved failure did not reproduce; discovery was not rerun"
             )
+    if campaign is not None:
+        report.update(campaign.summary())
+        report["status"] = (
+            "mismatch"
+            if campaign.disagreements
+            else "incomplete"
+            if campaign.unusable
+            else "pass"
+        )
     publish()
     return report
 
@@ -353,11 +487,14 @@ class CompiledModel:
     def differences(
         self,
         before: ConcreteState,
-        after: ConcreteState | Literal["error"],
+        after: ConcreteState | Literal["error"] | None,
+        *,
+        on_prediction=None,
+        require_outcome=False,
     ) -> tuple[str, ...]:
         missing = self.scalar_widths.keys() - before.scalars.keys()
         if missing:
-            raise ValueError(f"missing concrete inputs: {sorted(missing)}")
+            raise ComparisonUnavailable(f"missing concrete inputs: {sorted(missing)}")
         environment = {
             name: value & ((1 << self.scalar_widths[name]) - 1)
             for name, value in before.scalars.items()
@@ -366,9 +503,31 @@ class CompiledModel:
         evaluate = evaluator(environment)
         enabled = tuple(step for step in self.steps if evaluate(step.guard))
         if len(enabled) != 1:
+            if require_outcome:
+                raise ComparisonUnavailable(
+                    f"enabled edges: {len(enabled)}; expected exactly one"
+                )
             return (f"enabled edges: {len(enabled)}; expected exactly one",)
         step = enabled[0]
         updates = {a.name: a.value for a in step.simultaneous_update}
+        if on_prediction is not None:
+            from extractor.evidence_events import ModelPrediction
+
+            def prediction():
+                return ModelPrediction(
+                    tuple(
+                        (name, evaluate(value))
+                        for name, value in updates.items()
+                        if name != MEMORY_NAME
+                    ),
+                    evaluate(updates[MEMORY_NAME]).to_expression(8),
+                    step.target.kind,
+                    evaluate(step.mirrored_pc),
+                )
+
+            on_prediction(prediction)
+        if after is None:
+            return ()
         if after == "error":
             return (
                 ()

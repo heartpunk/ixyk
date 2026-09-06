@@ -3,6 +3,7 @@
 """Concrete evaluation of the admitted typed QF_ABV operations."""
 
 from dataclasses import dataclass, replace
+from extractor.artifact import TypedExpr, TermSort
 
 
 @dataclass(eq=False)
@@ -41,6 +42,23 @@ class ConcreteArray:
             if value:
                 result[address] = value
         return cls(64, 0, result)
+
+    def to_expression(self, value_width):
+        sort = TermSort.array(self.width, value_width)
+        result = TypedExpr(
+            "const_array", sort, (TypedExpr.bv_lit(value_width, self.default),)
+        )
+        for address, value in sorted(self.values.items()):
+            result = TypedExpr(
+                "store",
+                sort,
+                (
+                    result,
+                    TypedExpr.bv_lit(self.width, address),
+                    TypedExpr.bv_lit(value_width, value),
+                ),
+            )
+        return result
 
 
 def signed(value, width):

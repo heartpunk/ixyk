@@ -13,12 +13,14 @@ exports_files([
 
 validation_lanes(
     name = "x86_64_top_100_fuzz",
+    discovery_seconds = 1800,
     examples = 100,
     probes = X86_64_PROBES,
 )
 
 validation_tier(
     name = "x86_64_top_100_fuzz_10000",
+    discovery_seconds = 1800,
     examples = 10000,
     probes = X86_64_PROBES,
 )

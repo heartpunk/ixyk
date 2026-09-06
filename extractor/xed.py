@@ -18,7 +18,8 @@ class EncodingError(ValueError):
 
 # "class" is the field name in XED's process protocol.
 RegisterInfo = TypedDict(
-    "RegisterInfo", {"name": str, "parent": str, "width": int, "class": str}
+    "RegisterInfo",
+    {"name": str, "parent": str, "width": int, "class": str, "value": int},
 )
 
 

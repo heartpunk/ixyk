@@ -26,6 +26,10 @@ from antiunification.algebra import (
 )
 
 
+class IncompatibleShapes(AlgebraError):
+    """These observations do not share a sort-compatible generalization."""
+
+
 def separating_inputs(
     baseline: Mapping[str, Value], alternatives: Mapping[str, Value]
 ) -> tuple[dict[str, Value], ...]:
@@ -108,7 +112,7 @@ def antiunify_many(
         layers = tuple(syntax.expose(value) for value in column)
         first = layers[0]
         if any(layer.sort != first.sort for layer in layers):
-            raise AlgebraError("cannot generalize unequal sorts")
+            raise IncompatibleShapes("cannot generalize unequal sorts")
         applications = tuple(
             layer for layer in layers if isinstance(layer, Application)
         )

@@ -9,6 +9,7 @@ from multiprocessing import Pipe
 from multiprocessing.connection import Connection
 from subprocess import Popen, TimeoutExpired
 import sys
+import signal
 from tempfile import TemporaryFile
 from time import monotonic
 import traceback
@@ -21,13 +22,31 @@ from extractor.fuzzer import fuzz
 def _worker(
     connection: Connection, model: str, instruction: bytes, options: dict
 ) -> None:
+    from extractor.evidence_session import recording_session
+
+    def interrupted(signum, frame):
+        # Ctrl-C can reach both parent and child; the parent then sends SIGTERM.
+        # A second signal must not interrupt the evidence drain already underway.
+        signal.signal(signal.SIGINT, signal.SIG_IGN)
+        signal.signal(signal.SIGTERM, signal.SIG_IGN)
+        raise KeyboardInterrupt("fuzz worker interrupted")
+
+    recording = options.pop("recording", None)
+    if recording is not None:
+        signal.signal(signal.SIGTERM, interrupted)
+        signal.signal(signal.SIGINT, interrupted)
     try:
-        report = fuzz(
-            InstructionModel.from_json(model),
-            instruction,
-            progress=lambda value: connection.send(("progress", value)),
-            **options,
-        )
+        with recording_session(recording) as evidence:
+            report = fuzz(
+                None
+                if (options.get("vary_inputs") or options.get("continue_on_findings"))
+                and json.loads(model).get("schema") != InstructionModel.schema
+                else InstructionModel.from_json(model),
+                instruction,
+                progress=lambda value: connection.send(("progress", value)),
+                evidence=evidence,
+                **options,
+            )
         connection.send(("complete", report))
     except BaseException:
         connection.send(("error", traceback.format_exc()))

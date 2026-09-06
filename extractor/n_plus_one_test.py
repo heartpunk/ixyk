@@ -84,7 +84,9 @@ def test_extraction_rejects_inconsistent_au_inputs(monkeypatch, failure, message
         ),
     )
     models = iter((raw, alternate if failure == "declarations" else raw))
-    monkeypatch.setattr(inputs, "instruction_inputs", lambda code: (code, code))
+    monkeypatch.setattr(
+        inputs, "instruction_inputs", lambda code: (code, bytes.fromhex("4801c8"))
+    )
     monkeypatch.setattr(implementation, "_extract_concrete", lambda *args: next(models))
     x = CanonicalVariable("rax", TermSort.bv(64))
     y = CanonicalVariable("rbx", TermSort.bv(64))

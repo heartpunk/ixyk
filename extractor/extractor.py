@@ -201,7 +201,9 @@ def _vex_stack_scratch_writes(raw_project: object, block: object) -> frozenset[i
     return frozenset(scratch)
 
 
-def extract(raw_project: object, source: int) -> InstructionModel:
+def extract(
+    raw_project: object, source: int, *, on_model=None, on_stage=None, on_finding=None
+) -> InstructionModel:
     """Extract separating inputs, anti-unify them, and instantiate this request."""
     from antiunification.many import antiunify_many
     from extractor.au_inputs import instruction_inputs
@@ -218,10 +220,53 @@ def extract(raw_project: object, source: int) -> InstructionModel:
     project = expect_project(raw_project)
     source = require_u64(source, "source")
     code = bytes(project.factory.block(source, num_inst=1).bytes)
-    codes = instruction_inputs(code)
-    models = tuple(
-        _extract_concrete(load_shellcode(item, source), source) for item in codes
-    )
+    from extractor.acquisition_errors import EXPECTED_ACQUISITION
+
+    direct = {}
+    failed = {}
+
+    def acquire(item):
+        if item in direct:
+            return direct[item]
+        if item in failed:
+            return None
+        if on_stage is not None:
+            on_stage("extraction", item)
+        try:
+            model = _extract_concrete(load_shellcode(item, source), source)
+        except EXPECTED_ACQUISITION as error:
+            if on_finding is None:
+                raise
+            on_finding("extraction", item, error)
+            failed[item] = error
+            return None
+        direct[item] = model
+        if on_model is not None:
+            on_model(item, model, "direct")
+        return model
+
+    # Preserve the requested encoding before candidate generation or AU can fail.
+    if on_model is not None:
+        acquire(code)
+    if on_stage is not None:
+        on_stage("generation", code)
+    codes, acquired = [], []
+    for item in instruction_inputs(code):
+        model = acquire(item)
+        if model is not None:
+            codes.append(item)
+            acquired.append(model)
+    if not acquired:
+        if failed:
+            raise next(iter(failed.values()))
+        raise OperandDecodeError("no AU candidates could be extracted")
+    if failed:
+        raise OperandDecodeError(
+            "AU candidate set is incomplete; concrete acquisitions retained"
+        )
+    models = tuple(acquired)
+    if on_stage is not None:
+        on_stage("generalization", code)
     declarations = models[0].declarations
     if any(model.declarations != declarations for model in models):
         raise OperandDecodeError("AU input declarations disagree")
@@ -234,6 +279,9 @@ def extract(raw_project: object, source: int) -> InstructionModel:
         normalize_model(model, normalization_labels(row))
         for model, row in zip(models, rows, strict=True)
     )
+    if on_model is not None:
+        for item, model in zip(codes, models, strict=True):
+            on_model(item, model, "normalized")
     columns = {name: tuple(row[name] for row in rows) for name in rows[0]}
     if any(all(value == column[0] for value in column) for column in columns.values()):
         raise OperandDecodeError("an AU parameter did not vary")
@@ -249,7 +297,10 @@ def extract(raw_project: object, source: int) -> InstructionModel:
     )
     if not isinstance(value, InstructionModel):
         raise OperandDecodeError("AU did not reconstruct an instruction model")
-    return normalize_model(value, normalization_labels(requested))
+    model = normalize_model(value, normalization_labels(requested))
+    if on_model is not None:
+        on_model(code, model, "generalized")
+    return model
 
 
 def _extract_concrete(raw_project: object, source: int) -> InstructionModel:

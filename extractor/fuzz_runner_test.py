@@ -88,5 +88,42 @@ def test_worker_reports_bootstrap_payload_errors():
     connection.close.assert_called_once()
 
 
+def test_recorded_worker_ignores_followup_signals_while_draining(monkeypatch):
+    from contextlib import contextmanager
+    from extractor import evidence_session
+
+    handlers, drained = {}, []
+    monkeypatch.setattr(
+        runner.signal,
+        "signal",
+        lambda number, handler: handlers.__setitem__(number, handler),
+    )
+
+    @contextmanager
+    def recording(options):
+        try:
+            yield None
+        finally:
+            assert handlers[runner.signal.SIGINT] == runner.signal.SIG_IGN
+            assert handlers[runner.signal.SIGTERM] == runner.signal.SIG_IGN
+            drained.append(True)
+
+    monkeypatch.setattr(evidence_session, "recording_session", recording)
+
+    def interrupted_fuzz(*args, **kwargs):
+        handlers[runner.signal.SIGINT](runner.signal.SIGINT, None)
+
+    monkeypatch.setattr(runner, "fuzz", interrupted_fuzz)
+    connection = Mock()
+    runner._worker(
+        connection,
+        '{"schema":"unavailable"}',
+        b"\x90",
+        {"recording": {}, "vary_inputs": True},
+    )
+    assert drained == [True]
+    connection.close.assert_called_once()
+
+
 if __name__ == "__main__":
     raise SystemExit(pytest.main([__file__, "-v"]))

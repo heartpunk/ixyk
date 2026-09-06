@@ -130,6 +130,7 @@ def main() -> None:
         model_path.write_text(model.to_json())
         prior.write_text(json.dumps(saved))
         arguments = [
+            "--fixed-inputs",
             "--acquisition",
             str(acquisition),
             "--model",

@@ -1,1 +1,2 @@
 angr[unicorn]==9.2.214
+zstandard==0.25.0

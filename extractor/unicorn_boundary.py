@@ -66,7 +66,10 @@ def unicorn_constant(name: str) -> int:
 
 
 def is_cpu_exception(error: BaseException) -> bool:
-    return (
-        isinstance(error, _error)
-        and getattr(error, "errno", None) == unicorn_constant("UC_ERR_EXCEPTION")
-    )
+    return isinstance(error, _error) and getattr(
+        error, "errno", None
+    ) == unicorn_constant("UC_ERR_EXCEPTION")
+
+
+def is_emulator_error(error: BaseException) -> bool:
+    return isinstance(error, _error)

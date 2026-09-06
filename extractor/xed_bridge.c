@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <xed/ixyk-enc2-dispatch.h>
+#include <xed/ixyk-enc2-fuzz.h>
 
 static void fail(const char *message) {
     fprintf(stderr, "%s\n", message);
@@ -24,9 +25,9 @@ static int64_t integer(const char *text) {
 }
 
 static void register_json(xed_reg_enum_t reg) {
-    printf("{\"name\":\"%s\",\"class\":\"%s\",\"width\":%u,"
+    printf("{\"value\":%u,\"name\":\"%s\",\"class\":\"%s\",\"width\":%u,"
            "\"parent\":\"%s\"}",
-           xed_reg_enum_t2str(reg),
+           (unsigned)reg, xed_reg_enum_t2str(reg),
            xed_reg_class_enum_t2str(xed_reg_class(reg)),
            xed_get_register_width_bits64(reg),
            xed_reg_enum_t2str(xed_get_largest_enclosing_register(reg)));
@@ -138,6 +139,39 @@ static void describe(xed_decoded_inst_t *inst, const unsigned char *bytes,
 
 int main(int argc, char **argv) {
     xed_tables_init();
+    const unsigned count = sizeof(ixyk_fuzz_argc) / sizeof(ixyk_fuzz_argc[0]);
+    if (argc == 3 && strcmp(argv[1], "forms") == 0) {
+        unsigned found = 0;
+        printf("[");
+        for (unsigned i = 0; i < count; ++i) {
+            if (strcmp(argv[2], ixyk_fuzz_classes[i])) continue;
+            printf("%s%s", found++ ? "," : "", ixyk_fuzz_metadata[i]);
+        }
+        printf("]\n");
+        return 0;
+    }
+    if (argc >= 3 && strcmp(argv[1], "fuzz") == 0) {
+        int64_t index = integer(argv[2]);
+        if (index < 0 || index >= count || argc - 3 != ixyk_fuzz_argc[index])
+            fail("invalid encoder argument count");
+        uint64_t values[32];
+        if (argc - 3 > 32) fail("too many encoder arguments");
+        for (int i = 3; i < argc; ++i) {
+            char *end; errno = 0;
+            values[i-3] = strtoull(argv[i], &end, 0);
+            if (errno || end == argv[i] || *end) fail("invalid encoder argument");
+        }
+        unsigned char bytes[64];
+        unsigned length = ixyk_fuzz_encoders[index](values, bytes);
+        if (!length || length > XED_MAX_INSTRUCTION_BYTES) fail("invalid encoding length");
+        xed_decoded_inst_t inst;
+        decode(&inst, bytes, length);
+        if (strcmp(xed_iclass_enum_t2str(xed_decoded_inst_get_iclass(&inst)),
+                   ixyk_fuzz_classes[index])) fail("encoding changed instruction class");
+        describe(&inst, bytes, length);
+        return 0;
+    }
+
     if (argc == 2 && !strcmp(argv[1], "registers")) {
         printf("[");
         for (int r = XED_REG_INVALID + 1; r < XED_REG_LAST; ++r) {
