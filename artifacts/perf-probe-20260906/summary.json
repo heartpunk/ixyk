@@ -1,0 +1,229 @@
+{
+  "completed": 40,
+  "rows": [
+    {
+      "opcode": "ADD",
+      "mode": "off",
+      "baseline_s": 1.1004404330160469,
+      "cache_s": 1.0560241914354265,
+      "speedup": 1.0420598712992044,
+      "baseline_xed": 35,
+      "cached_xed": 20,
+      "generated_sha256": "cb3f4534aaee4f21047a092c4ebe3cf8bfb5fb39a027a32295b0afd4e4fdbd26",
+      "routes": [
+        "fallback",
+        "fallback",
+        "fallback",
+        "fallback",
+        "fallback"
+      ],
+      "executions": 5
+    },
+    {
+      "opcode": "ADD",
+      "mode": "json",
+      "baseline_s": 1.2469965885393322,
+      "cache_s": 1.1609159877989441,
+      "speedup": 1.074148863177941,
+      "baseline_xed": 35,
+      "cached_xed": 20,
+      "generated_sha256": "cb3f4534aaee4f21047a092c4ebe3cf8bfb5fb39a027a32295b0afd4e4fdbd26",
+      "routes": [
+        "fallback",
+        "fallback",
+        "fallback",
+        "fallback",
+        "fallback"
+      ],
+      "executions": 5
+    },
+    {
+      "opcode": "JE",
+      "mode": "off",
+      "baseline_s": 1.5212824381887913,
+      "cache_s": 1.36075603030622,
+      "speedup": 1.1179685441823446,
+      "baseline_xed": 73,
+      "cached_xed": 26,
+      "generated_sha256": "98b2e2e8d4a2d7e573548abad101b4cbcb08abec2906a3228dce114d6020bb43",
+      "routes": [
+        "generalized",
+        "generalized",
+        "generalized",
+        "generalized",
+        "generalized"
+      ],
+      "executions": 5
+    },
+    {
+      "opcode": "JE",
+      "mode": "json",
+      "baseline_s": 1.6204372223000973,
+      "cache_s": 1.4847721820697188,
+      "speedup": 1.0913709469160895,
+      "baseline_xed": 73,
+      "cached_xed": 26,
+      "generated_sha256": "98b2e2e8d4a2d7e573548abad101b4cbcb08abec2906a3228dce114d6020bb43",
+      "routes": [
+        "generalized",
+        "generalized",
+        "generalized",
+        "generalized",
+        "generalized"
+      ],
+      "executions": 5
+    },
+    {
+      "opcode": "LEA",
+      "mode": "off",
+      "baseline_s": 0.6672284994274378,
+      "cache_s": 0.5335332560352981,
+      "speedup": 1.250584648435288,
+      "baseline_xed": 90,
+      "cached_xed": 50,
+      "generated_sha256": "aa682de5608ee4323438ddca92e18771782df4df90f8fad420a65d9773cccf98",
+      "routes": [
+        "unavailable",
+        "fallback",
+        "fallback",
+        "fallback",
+        "fallback"
+      ],
+      "executions": 5
+    },
+    {
+      "opcode": "LEA",
+      "mode": "json",
+      "baseline_s": 0.7636487649288028,
+      "cache_s": 0.6140471324324608,
+      "speedup": 1.243632165341635,
+      "baseline_xed": 90,
+      "cached_xed": 50,
+      "generated_sha256": "aa682de5608ee4323438ddca92e18771782df4df90f8fad420a65d9773cccf98",
+      "routes": [
+        "unavailable",
+        "fallback",
+        "fallback",
+        "fallback",
+        "fallback"
+      ],
+      "executions": 5
+    },
+    {
+      "opcode": "MOVSD",
+      "mode": "off",
+      "baseline_s": 2.34948190767318,
+      "cache_s": 2.1988681063521653,
+      "speedup": 1.0684960598072784,
+      "baseline_xed": 102,
+      "cached_xed": 50,
+      "generated_sha256": "b963e396e1035dbf802861ca72a0e0c9181a13d30ac42dd9b4b816dffececcab",
+      "routes": [
+        "generalized",
+        "fallback",
+        "fallback",
+        "fallback",
+        "fallback"
+      ],
+      "executions": 5
+    },
+    {
+      "opcode": "MOVSD",
+      "mode": "json",
+      "baseline_s": 2.5030284775421023,
+      "cache_s": 2.601035733241588,
+      "speedup": 0.962319911853982,
+      "baseline_xed": 102,
+      "cached_xed": 50,
+      "generated_sha256": "b963e396e1035dbf802861ca72a0e0c9181a13d30ac42dd9b4b816dffececcab",
+      "routes": [
+        "generalized",
+        "fallback",
+        "fallback",
+        "fallback",
+        "fallback"
+      ],
+      "executions": 5
+    }
+  ],
+  "checks": [
+    {
+      "opcode": "ADD",
+      "mode": "off",
+      "semantic_equal": true
+    },
+    {
+      "opcode": "ADD",
+      "mode": "json",
+      "semantic_equal": true,
+      "evidence_sha256": "5efb5fd1a5899f6ec280ee07bc7e3f6f1fd78e31380a29ea6057c9d18e6f9edb",
+      "records": 30
+    },
+    {
+      "opcode": "JE",
+      "mode": "off",
+      "semantic_equal": true
+    },
+    {
+      "opcode": "JE",
+      "mode": "json",
+      "semantic_equal": true,
+      "evidence_sha256": "8fc71b2d4760ec11817c99b6d24ca69499d84935b4b2f726267eb27a0a601d7e",
+      "records": 55
+    },
+    {
+      "opcode": "LEA",
+      "mode": "off",
+      "semantic_equal": true
+    },
+    {
+      "opcode": "LEA",
+      "mode": "json",
+      "semantic_equal": true,
+      "evidence_sha256": "0347282cd11bf281c2007a1fb529e6919783cdb4eb22e7588f358a1404cbd7d8",
+      "records": 19
+    },
+    {
+      "opcode": "MOVSD",
+      "mode": "off",
+      "semantic_equal": true
+    },
+    {
+      "opcode": "MOVSD",
+      "mode": "json",
+      "semantic_equal": true,
+      "evidence_sha256": "d88c8e536edc4cc6c0f9c2db1036137821b65707e3d788d0c3fa7a6099d17892",
+      "records": 57
+    }
+  ],
+  "peak_rss_mib": 244.45703125,
+  "resources": {
+    "host": "shire",
+    "timing_unit": "ixyk-small-probe-20260906-timings.service",
+    "exit_status": 0,
+    "result": "success",
+    "cpu_seconds": 91.339,
+    "sampled_cgroup_peak_bytes": 225656832,
+    "sampled_memory_events": {
+      "low": 0,
+      "high": 0,
+      "max": 0,
+      "oom": 0,
+      "oom_kill": 0,
+      "oom_group_kill": 0
+    },
+    "memory_limit_bytes": 4294967296,
+    "swap_limit_bytes": 0,
+    "workers": 1,
+    "cpu_quota_percent": 200
+  },
+  "limitations": [
+    "Two timing repetitions per case; exploratory five-sample scope.",
+    "Harness uses standalone execution with existing Bazel-built bridge and dependencies, not a new REAPI benchmark action.",
+    "Evidence canonicalization removes timestamps and run/stream identity only.",
+    "Old-bridge smoke run excluded; unprofiled harness stats error corrected before valid timing runs.",
+    "Cache is probe-only, process-local, successful exact XED argument tuples; JSON roundtrip gives fresh return values.",
+    "Baseline completed before cache trials; MOVSD evidence timing has a wide cache-run spread."
+  ],
+  "aggregate_speedup": 1.0692638504712022
+}

@@ -17,7 +17,12 @@ from extractor.evidence_events import EvidenceHooks, evidence_types
 from extractor.evidence_recording import BackgroundRecorder
 
 
-CASES = (("ADD", "4801d8"), ("MOV", "488b03"), ("XCHG", "488703"), ("RET", "c21000"))
+CASES = (
+    ("ADD", "4801d8"),
+    ("JE", "7400"),
+    ("LEA", "488d444b08"),
+    ("MOVSD", "f20f10c1"),
+)
 
 
 def _fuzz(*args, **kwargs):

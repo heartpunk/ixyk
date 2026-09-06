@@ -1,0 +1,1014 @@
+[
+  {
+    "label": "baseline-p-JE-off",
+    "wall_s": 2.1798922452144325,
+    "recording": null,
+    "functions": [
+      {
+        "file": "/tmp/ixyk-small-probe-20260906/source/extractor/fuzzer.py",
+        "line": 500,
+        "function": "__init__",
+        "primitive": 5,
+        "calls": 5,
+        "self_s": 7.9917e-05,
+        "cumulative_s": 0.010985841000000001
+      },
+      {
+        "file": "/tmp/ixyk-small-probe-20260906/source/extractor/fuzzer.py",
+        "line": 92,
+        "function": "emulate",
+        "primitive": 5,
+        "calls": 5,
+        "self_s": 0.001841383,
+        "cumulative_s": 0.02112984
+      },
+      {
+        "file": "/tmp/ixyk-small-probe-20260906/source/extractor/fuzzer.py",
+        "line": 512,
+        "function": "differences",
+        "primitive": 5,
+        "calls": 5,
+        "self_s": 0.000256792,
+        "cumulative_s": 0.00140806
+      },
+      {
+        "file": "/tmp/ixyk-small-probe-20260906/source/antiunification/many.py",
+        "line": 62,
+        "function": "antiunify_many",
+        "primitive": 5,
+        "calls": 5,
+        "self_s": 0.00026506100000000003,
+        "cumulative_s": 0.07332569800000001
+      },
+      {
+        "file": "/tmp/ixyk-small-probe-20260906/source/extractor/au_inputs.py",
+        "line": 34,
+        "function": "instruction_inputs",
+        "primitive": 5,
+        "calls": 5,
+        "self_s": 0.00035339700000000003,
+        "cumulative_s": 0.162100701
+      },
+      {
+        "file": "/tmp/ixyk-small-probe-20260906/source/extractor/extractor.py",
+        "line": 323,
+        "function": "_extract_concrete",
+        "primitive": 15,
+        "calls": 15,
+        "self_s": 0.000660819,
+        "cumulative_s": 1.1634850860000001
+      },
+      {
+        "file": "/tmp/ixyk-small-probe-20260906/source/extractor/normalization.py",
+        "line": 141,
+        "function": "normalize_model",
+        "primitive": 15,
+        "calls": 15,
+        "self_s": 5.2895e-05,
+        "cumulative_s": 0.021486764000000002
+      },
+      {
+        "file": "/tmp/ixyk-small-probe-20260906/source/extractor/xed.py",
+        "line": 52,
+        "function": "_invoke",
+        "primitive": 73,
+        "calls": 73,
+        "self_s": 0.000942105,
+        "cumulative_s": 0.28707650500000004
+      },
+      {
+        "file": "/tmp/ixyk-small-probe-20260906/source/extractor/xed.py",
+        "line": 62,
+        "function": "decode",
+        "primitive": 46,
+        "calls": 46,
+        "self_s": 0.00011996100000000001,
+        "cumulative_s": 0.184216136
+      },
+      {
+        "file": "/tmp/ixyk-small-probe-20260906/source/extractor/angr_boundary.py",
+        "line": 170,
+        "function": "lift_block",
+        "primitive": 20,
+        "calls": 20,
+        "self_s": 3.6901000000000005e-05,
+        "cumulative_s": 0.010884107
+      },
+      {
+        "file": "/tmp/ixyk-small-probe-20260906/source/extractor/runtime.py",
+        "line": 145,
+        "function": "load_shellcode",
+        "primitive": 20,
+        "calls": 20,
+        "self_s": 7.259600000000001e-05,
+        "cumulative_s": 0.046121809
+      },
+      {
+        "file": "/tmp/ixyk-small-probe-20260906/source/extractor/fuzzer.py",
+        "line": 338,
+        "function": "publish",
+        "primitive": 12,
+        "calls": 12,
+        "self_s": 5.4723000000000004e-05,
+        "cumulative_s": 9.199300000000001e-05
+      },
+      {
+        "file": "/tmp/ixyk-small-probe-20260906/source/extractor/fuzzer.py",
+        "line": 178,
+        "function": "__init__",
+        "primitive": 1,
+        "calls": 1,
+        "self_s": 6.910000000000001e-06,
+        "cumulative_s": 7.888e-06
+      }
+    ]
+  },
+  {
+    "label": "baseline-p-MOVSD-off",
+    "wall_s": 3.1791156041435897,
+    "recording": null,
+    "functions": [
+      {
+        "file": "/tmp/ixyk-small-probe-20260906/source/extractor/fuzzer.py",
+        "line": 500,
+        "function": "__init__",
+        "primitive": 8,
+        "calls": 8,
+        "self_s": 0.000128545,
+        "cumulative_s": 0.016324625000000002
+      },
+      {
+        "file": "/tmp/ixyk-small-probe-20260906/source/extractor/fuzzer.py",
+        "line": 92,
+        "function": "emulate",
+        "primitive": 5,
+        "calls": 5,
+        "self_s": 0.0016882840000000002,
+        "cumulative_s": 0.016509926
+      },
+      {
+        "file": "/tmp/ixyk-small-probe-20260906/source/extractor/fuzzer.py",
+        "line": 512,
+        "function": "differences",
+        "primitive": 5,
+        "calls": 5,
+        "self_s": 0.00026270000000000004,
+        "cumulative_s": 0.0017604250000000001
+      },
+      {
+        "file": "/tmp/ixyk-small-probe-20260906/source/antiunification/many.py",
+        "line": 62,
+        "function": "antiunify_many",
+        "primitive": 2,
+        "calls": 2,
+        "self_s": 0.00017305,
+        "cumulative_s": 0.053126857000000006
+      },
+      {
+        "file": "/tmp/ixyk-small-probe-20260906/source/extractor/au_inputs.py",
+        "line": 34,
+        "function": "instruction_inputs",
+        "primitive": 2,
+        "calls": 2,
+        "self_s": 0.00021638600000000003,
+        "cumulative_s": 0.431496979
+      },
+      {
+        "file": "/tmp/ixyk-small-probe-20260906/source/extractor/extractor.py",
+        "line": 323,
+        "function": "_extract_concrete",
+        "primitive": 11,
+        "calls": 11,
+        "self_s": 0.000408558,
+        "cumulative_s": 1.967825036
+      },
+      {
+        "file": "/tmp/ixyk-small-probe-20260906/source/extractor/normalization.py",
+        "line": 141,
+        "function": "normalize_model",
+        "primitive": 10,
+        "calls": 10,
+        "self_s": 3.0533e-05,
+        "cumulative_s": 0.024783178000000003
+      },
+      {
+        "file": "/tmp/ixyk-small-probe-20260906/source/extractor/xed.py",
+        "line": 52,
+        "function": "_invoke",
+        "primitive": 102,
+        "calls": 102,
+        "self_s": 0.001241838,
+        "cumulative_s": 0.5289235760000001
+      },
+      {
+        "file": "/tmp/ixyk-small-probe-20260906/source/extractor/xed.py",
+        "line": 62,
+        "function": "decode",
+        "primitive": 58,
+        "calls": 58,
+        "self_s": 0.00013046300000000001,
+        "cumulative_s": 0.206171455
+      },
+      {
+        "file": "/tmp/ixyk-small-probe-20260906/source/extractor/angr_boundary.py",
+        "line": 170,
+        "function": "lift_block",
+        "primitive": 13,
+        "calls": 13,
+        "self_s": 2.5758000000000003e-05,
+        "cumulative_s": 0.007028895
+      },
+      {
+        "file": "/tmp/ixyk-small-probe-20260906/source/extractor/runtime.py",
+        "line": 145,
+        "function": "load_shellcode",
+        "primitive": 13,
+        "calls": 13,
+        "self_s": 4.4308e-05,
+        "cumulative_s": 0.029332908
+      },
+      {
+        "file": "/tmp/ixyk-small-probe-20260906/source/extractor/fuzzer.py",
+        "line": 338,
+        "function": "publish",
+        "primitive": 15,
+        "calls": 15,
+        "self_s": 6.6017e-05,
+        "cumulative_s": 0.000110563
+      },
+      {
+        "file": "/tmp/ixyk-small-probe-20260906/source/extractor/fuzzer.py",
+        "line": 178,
+        "function": "__init__",
+        "primitive": 1,
+        "calls": 1,
+        "self_s": 3.293e-06,
+        "cumulative_s": 4.176e-06
+      }
+    ]
+  },
+  {
+    "label": "baseline-p-LEA-json",
+    "wall_s": 1.075459481216967,
+    "recording": {
+      "capture_ns": 62856380,
+      "submit_ns": 367245,
+      "blocked_ns": 0,
+      "encode_ns": 104928300,
+      "write_ns": 10655563,
+      "flush_ns": 356522,
+      "worker_cpu_ns": 92194762,
+      "drain_ns": 12917455,
+      "records": 19,
+      "flushes": 5,
+      "payload_bytes": 1135079,
+      "framed_bytes": 1137059,
+      "queue_high_water": 3
+    },
+    "functions": [
+      {
+        "file": "/tmp/ixyk-small-probe-20260906/source/extractor/fuzzer.py",
+        "line": 500,
+        "function": "__init__",
+        "primitive": 1,
+        "calls": 1,
+        "self_s": 2.1167000000000002e-05,
+        "cumulative_s": 0.001158397
+      },
+      {
+        "file": "/tmp/ixyk-small-probe-20260906/source/extractor/fuzzer.py",
+        "line": 92,
+        "function": "emulate",
+        "primitive": 5,
+        "calls": 5,
+        "self_s": 0.00169307,
+        "cumulative_s": 0.014792809
+      },
+      {
+        "file": "/tmp/ixyk-small-probe-20260906/source/extractor/fuzzer.py",
+        "line": 512,
+        "function": "differences",
+        "primitive": 4,
+        "calls": 4,
+        "self_s": 0.000233345,
+        "cumulative_s": 0.063616148
+      },
+      {
+        "file": "/tmp/ixyk-small-probe-20260906/source/extractor/au_inputs.py",
+        "line": 34,
+        "function": "instruction_inputs",
+        "primitive": 2,
+        "calls": 2,
+        "self_s": 6.8495e-05,
+        "cumulative_s": 0.25830722100000003
+      },
+      {
+        "file": "/tmp/ixyk-small-probe-20260906/source/extractor/extractor.py",
+        "line": 323,
+        "function": "_extract_concrete",
+        "primitive": 2,
+        "calls": 2,
+        "self_s": 5.9985e-05,
+        "cumulative_s": 0.039441352000000006
+      },
+      {
+        "file": "/tmp/ixyk-small-probe-20260906/source/extractor/xed.py",
+        "line": 52,
+        "function": "_invoke",
+        "primitive": 90,
+        "calls": 90,
+        "self_s": 0.001475731,
+        "cumulative_s": 0.38207304200000003
+      },
+      {
+        "file": "/tmp/ixyk-small-probe-20260906/source/extractor/xed.py",
+        "line": 62,
+        "function": "decode",
+        "primitive": 47,
+        "calls": 47,
+        "self_s": 0.000136709,
+        "cumulative_s": 0.20332934800000002
+      },
+      {
+        "file": "/tmp/ixyk-small-probe-20260906/source/extractor/angr_boundary.py",
+        "line": 170,
+        "function": "lift_block",
+        "primitive": 4,
+        "calls": 4,
+        "self_s": 1.4641000000000001e-05,
+        "cumulative_s": 0.0048524250000000005
+      },
+      {
+        "file": "/tmp/ixyk-small-probe-20260906/source/extractor/runtime.py",
+        "line": 145,
+        "function": "load_shellcode",
+        "primitive": 4,
+        "calls": 4,
+        "self_s": 1.705e-05,
+        "cumulative_s": 0.01103776
+      },
+      {
+        "file": "/tmp/ixyk-small-probe-20260906/source/extractor/fuzzer.py",
+        "line": 338,
+        "function": "publish",
+        "primitive": 15,
+        "calls": 15,
+        "self_s": 6.614400000000001e-05,
+        "cumulative_s": 0.000115284
+      },
+      {
+        "file": "/tmp/ixyk-small-probe-20260906/source/extractor/fuzzer.py",
+        "line": 178,
+        "function": "__init__",
+        "primitive": 1,
+        "calls": 1,
+        "self_s": 3.469e-06,
+        "cumulative_s": 4.339e-06
+      }
+    ]
+  },
+  {
+    "label": "baseline-p-LEA-off",
+    "wall_s": 0.9321975694037974,
+    "recording": null,
+    "functions": [
+      {
+        "file": "/tmp/ixyk-small-probe-20260906/source/extractor/fuzzer.py",
+        "line": 500,
+        "function": "__init__",
+        "primitive": 1,
+        "calls": 1,
+        "self_s": 1.9519e-05,
+        "cumulative_s": 0.0011450260000000002
+      },
+      {
+        "file": "/tmp/ixyk-small-probe-20260906/source/extractor/fuzzer.py",
+        "line": 92,
+        "function": "emulate",
+        "primitive": 5,
+        "calls": 5,
+        "self_s": 0.001765725,
+        "cumulative_s": 0.026899171000000003
+      },
+      {
+        "file": "/tmp/ixyk-small-probe-20260906/source/extractor/fuzzer.py",
+        "line": 512,
+        "function": "differences",
+        "primitive": 4,
+        "calls": 4,
+        "self_s": 0.00019927100000000002,
+        "cumulative_s": 0.0009917600000000002
+      },
+      {
+        "file": "/tmp/ixyk-small-probe-20260906/source/extractor/au_inputs.py",
+        "line": 34,
+        "function": "instruction_inputs",
+        "primitive": 2,
+        "calls": 2,
+        "self_s": 6.721900000000001e-05,
+        "cumulative_s": 0.2555425
+      },
+      {
+        "file": "/tmp/ixyk-small-probe-20260906/source/extractor/extractor.py",
+        "line": 323,
+        "function": "_extract_concrete",
+        "primitive": 2,
+        "calls": 2,
+        "self_s": 5.8405e-05,
+        "cumulative_s": 0.039620242
+      },
+      {
+        "file": "/tmp/ixyk-small-probe-20260906/source/extractor/xed.py",
+        "line": 52,
+        "function": "_invoke",
+        "primitive": 90,
+        "calls": 90,
+        "self_s": 0.0011022030000000002,
+        "cumulative_s": 0.314974596
+      },
+      {
+        "file": "/tmp/ixyk-small-probe-20260906/source/extractor/xed.py",
+        "line": 62,
+        "function": "decode",
+        "primitive": 47,
+        "calls": 47,
+        "self_s": 0.00010414,
+        "cumulative_s": 0.165575833
+      },
+      {
+        "file": "/tmp/ixyk-small-probe-20260906/source/extractor/angr_boundary.py",
+        "line": 170,
+        "function": "lift_block",
+        "primitive": 4,
+        "calls": 4,
+        "self_s": 1.4123e-05,
+        "cumulative_s": 0.004872063
+      },
+      {
+        "file": "/tmp/ixyk-small-probe-20260906/source/extractor/runtime.py",
+        "line": 145,
+        "function": "load_shellcode",
+        "primitive": 4,
+        "calls": 4,
+        "self_s": 1.633e-05,
+        "cumulative_s": 0.011013079
+      },
+      {
+        "file": "/tmp/ixyk-small-probe-20260906/source/extractor/fuzzer.py",
+        "line": 338,
+        "function": "publish",
+        "primitive": 15,
+        "calls": 15,
+        "self_s": 6.3886e-05,
+        "cumulative_s": 0.000109655
+      },
+      {
+        "file": "/tmp/ixyk-small-probe-20260906/source/extractor/fuzzer.py",
+        "line": 178,
+        "function": "__init__",
+        "primitive": 1,
+        "calls": 1,
+        "self_s": 3.677e-06,
+        "cumulative_s": 4.427e-06
+      }
+    ]
+  },
+  {
+    "label": "baseline-p-ADD-json",
+    "wall_s": 1.8317078109830618,
+    "recording": {
+      "capture_ns": 61271439,
+      "submit_ns": 472923,
+      "blocked_ns": 0,
+      "encode_ns": 123755569,
+      "write_ns": 28176190,
+      "flush_ns": 333344,
+      "worker_cpu_ns": 109780335,
+      "drain_ns": 10299886,
+      "records": 30,
+      "flushes": 5,
+      "payload_bytes": 1327138,
+      "framed_bytes": 1329601,
+      "queue_high_water": 6
+    },
+    "functions": [
+      {
+        "file": "/tmp/ixyk-small-probe-20260906/source/extractor/fuzzer.py",
+        "line": 500,
+        "function": "__init__",
+        "primitive": 4,
+        "calls": 4,
+        "self_s": 5.8732000000000006e-05,
+        "cumulative_s": 0.00926632
+      },
+      {
+        "file": "/tmp/ixyk-small-probe-20260906/source/extractor/fuzzer.py",
+        "line": 92,
+        "function": "emulate",
+        "primitive": 5,
+        "calls": 5,
+        "self_s": 0.0016214040000000001,
+        "cumulative_s": 0.025107028
+      },
+      {
+        "file": "/tmp/ixyk-small-probe-20260906/source/extractor/fuzzer.py",
+        "line": 512,
+        "function": "differences",
+        "primitive": 5,
+        "calls": 5,
+        "self_s": 0.00027874400000000004,
+        "cumulative_s": 0.062087749000000005
+      },
+      {
+        "file": "/tmp/ixyk-small-probe-20260906/source/antiunification/many.py",
+        "line": 62,
+        "function": "antiunify_many",
+        "primitive": 1,
+        "calls": 1,
+        "self_s": 9.648600000000001e-05,
+        "cumulative_s": 0.038008197
+      },
+      {
+        "file": "/tmp/ixyk-small-probe-20260906/source/extractor/au_inputs.py",
+        "line": 34,
+        "function": "instruction_inputs",
+        "primitive": 1,
+        "calls": 1,
+        "self_s": 7.6488e-05,
+        "cumulative_s": 0.05164209
+      },
+      {
+        "file": "/tmp/ixyk-small-probe-20260906/source/extractor/extractor.py",
+        "line": 323,
+        "function": "_extract_concrete",
+        "primitive": 4,
+        "calls": 4,
+        "self_s": 0.000145629,
+        "cumulative_s": 0.744432579
+      },
+      {
+        "file": "/tmp/ixyk-small-probe-20260906/source/extractor/normalization.py",
+        "line": 141,
+        "function": "normalize_model",
+        "primitive": 3,
+        "calls": 3,
+        "self_s": 1.1200000000000001e-05,
+        "cumulative_s": 0.008305993000000001
+      },
+      {
+        "file": "/tmp/ixyk-small-probe-20260906/source/extractor/xed.py",
+        "line": 52,
+        "function": "_invoke",
+        "primitive": 35,
+        "calls": 35,
+        "self_s": 0.000460492,
+        "cumulative_s": 0.21014872
+      },
+      {
+        "file": "/tmp/ixyk-small-probe-20260906/source/extractor/xed.py",
+        "line": 62,
+        "function": "decode",
+        "primitive": 21,
+        "calls": 21,
+        "self_s": 8.188100000000001e-05,
+        "cumulative_s": 0.10836470200000001
+      },
+      {
+        "file": "/tmp/ixyk-small-probe-20260906/source/extractor/angr_boundary.py",
+        "line": 170,
+        "function": "lift_block",
+        "primitive": 5,
+        "calls": 5,
+        "self_s": 1.0793e-05,
+        "cumulative_s": 0.0042284390000000005
+      },
+      {
+        "file": "/tmp/ixyk-small-probe-20260906/source/extractor/runtime.py",
+        "line": 145,
+        "function": "load_shellcode",
+        "primitive": 5,
+        "calls": 5,
+        "self_s": 2.1011000000000003e-05,
+        "cumulative_s": 0.012989675000000001
+      },
+      {
+        "file": "/tmp/ixyk-small-probe-20260906/source/extractor/fuzzer.py",
+        "line": 338,
+        "function": "publish",
+        "primitive": 16,
+        "calls": 16,
+        "self_s": 9.2693e-05,
+        "cumulative_s": 0.000147147
+      },
+      {
+        "file": "/tmp/ixyk-small-probe-20260906/source/extractor/fuzzer.py",
+        "line": 178,
+        "function": "__init__",
+        "primitive": 1,
+        "calls": 1,
+        "self_s": 3.995e-06,
+        "cumulative_s": 5.0120000000000005e-06
+      }
+    ]
+  },
+  {
+    "label": "baseline-p-JE-json",
+    "wall_s": 2.558229453396052,
+    "recording": {
+      "capture_ns": 65920345,
+      "submit_ns": 850717,
+      "blocked_ns": 0,
+      "encode_ns": 272543192,
+      "write_ns": 23777271,
+      "flush_ns": 3936473,
+      "worker_cpu_ns": 238106271,
+      "drain_ns": 95124582,
+      "records": 55,
+      "flushes": 5,
+      "payload_bytes": 1562599,
+      "framed_bytes": 1566145,
+      "queue_high_water": 3
+    },
+    "functions": [
+      {
+        "file": "/tmp/ixyk-small-probe-20260906/source/extractor/fuzzer.py",
+        "line": 500,
+        "function": "__init__",
+        "primitive": 5,
+        "calls": 5,
+        "self_s": 8.5814e-05,
+        "cumulative_s": 0.011361313000000001
+      },
+      {
+        "file": "/tmp/ixyk-small-probe-20260906/source/extractor/fuzzer.py",
+        "line": 92,
+        "function": "emulate",
+        "primitive": 5,
+        "calls": 5,
+        "self_s": 0.0018843640000000001,
+        "cumulative_s": 0.021318459
+      },
+      {
+        "file": "/tmp/ixyk-small-probe-20260906/source/extractor/fuzzer.py",
+        "line": 512,
+        "function": "differences",
+        "primitive": 5,
+        "calls": 5,
+        "self_s": 0.000256659,
+        "cumulative_s": 0.067132325
+      },
+      {
+        "file": "/tmp/ixyk-small-probe-20260906/source/antiunification/many.py",
+        "line": 62,
+        "function": "antiunify_many",
+        "primitive": 5,
+        "calls": 5,
+        "self_s": 0.000246536,
+        "cumulative_s": 0.080587824
+      },
+      {
+        "file": "/tmp/ixyk-small-probe-20260906/source/extractor/au_inputs.py",
+        "line": 34,
+        "function": "instruction_inputs",
+        "primitive": 5,
+        "calls": 5,
+        "self_s": 0.000350252,
+        "cumulative_s": 0.16363058300000002
+      },
+      {
+        "file": "/tmp/ixyk-small-probe-20260906/source/extractor/extractor.py",
+        "line": 323,
+        "function": "_extract_concrete",
+        "primitive": 15,
+        "calls": 15,
+        "self_s": 0.000669375,
+        "cumulative_s": 1.1879034560000001
+      },
+      {
+        "file": "/tmp/ixyk-small-probe-20260906/source/extractor/normalization.py",
+        "line": 141,
+        "function": "normalize_model",
+        "primitive": 15,
+        "calls": 15,
+        "self_s": 5.4805e-05,
+        "cumulative_s": 0.032847720000000004
+      },
+      {
+        "file": "/tmp/ixyk-small-probe-20260906/source/extractor/xed.py",
+        "line": 52,
+        "function": "_invoke",
+        "primitive": 73,
+        "calls": 73,
+        "self_s": 0.001493757,
+        "cumulative_s": 0.341042196
+      },
+      {
+        "file": "/tmp/ixyk-small-probe-20260906/source/extractor/xed.py",
+        "line": 62,
+        "function": "decode",
+        "primitive": 46,
+        "calls": 46,
+        "self_s": 0.000156395,
+        "cumulative_s": 0.209939224
+      },
+      {
+        "file": "/tmp/ixyk-small-probe-20260906/source/extractor/angr_boundary.py",
+        "line": 170,
+        "function": "lift_block",
+        "primitive": 20,
+        "calls": 20,
+        "self_s": 3.3855e-05,
+        "cumulative_s": 0.010983264000000001
+      },
+      {
+        "file": "/tmp/ixyk-small-probe-20260906/source/extractor/runtime.py",
+        "line": 145,
+        "function": "load_shellcode",
+        "primitive": 20,
+        "calls": 20,
+        "self_s": 7.3349e-05,
+        "cumulative_s": 0.046155779
+      },
+      {
+        "file": "/tmp/ixyk-small-probe-20260906/source/extractor/fuzzer.py",
+        "line": 338,
+        "function": "publish",
+        "primitive": 12,
+        "calls": 12,
+        "self_s": 7.5509e-05,
+        "cumulative_s": 0.00011855700000000001
+      },
+      {
+        "file": "/tmp/ixyk-small-probe-20260906/source/extractor/fuzzer.py",
+        "line": 178,
+        "function": "__init__",
+        "primitive": 1,
+        "calls": 1,
+        "self_s": 3.8140000000000002e-06,
+        "cumulative_s": 4.648e-06
+      }
+    ]
+  },
+  {
+    "label": "baseline-p-ADD-off",
+    "wall_s": 1.76347695896402,
+    "recording": null,
+    "functions": [
+      {
+        "file": "/tmp/ixyk-small-probe-20260906/source/extractor/fuzzer.py",
+        "line": 500,
+        "function": "__init__",
+        "primitive": 4,
+        "calls": 4,
+        "self_s": 6.131100000000001e-05,
+        "cumulative_s": 0.009371526
+      },
+      {
+        "file": "/tmp/ixyk-small-probe-20260906/source/extractor/fuzzer.py",
+        "line": 92,
+        "function": "emulate",
+        "primitive": 5,
+        "calls": 5,
+        "self_s": 0.001758409,
+        "cumulative_s": 0.020905895
+      },
+      {
+        "file": "/tmp/ixyk-small-probe-20260906/source/extractor/fuzzer.py",
+        "line": 512,
+        "function": "differences",
+        "primitive": 5,
+        "calls": 5,
+        "self_s": 0.00031565200000000003,
+        "cumulative_s": 0.001738039
+      },
+      {
+        "file": "/tmp/ixyk-small-probe-20260906/source/antiunification/many.py",
+        "line": 62,
+        "function": "antiunify_many",
+        "primitive": 1,
+        "calls": 1,
+        "self_s": 8.774500000000001e-05,
+        "cumulative_s": 0.034597054
+      },
+      {
+        "file": "/tmp/ixyk-small-probe-20260906/source/extractor/au_inputs.py",
+        "line": 34,
+        "function": "instruction_inputs",
+        "primitive": 1,
+        "calls": 1,
+        "self_s": 7.5216e-05,
+        "cumulative_s": 0.052166933000000006
+      },
+      {
+        "file": "/tmp/ixyk-small-probe-20260906/source/extractor/extractor.py",
+        "line": 323,
+        "function": "_extract_concrete",
+        "primitive": 4,
+        "calls": 4,
+        "self_s": 0.000162895,
+        "cumulative_s": 0.745183883
+      },
+      {
+        "file": "/tmp/ixyk-small-probe-20260906/source/extractor/normalization.py",
+        "line": 141,
+        "function": "normalize_model",
+        "primitive": 3,
+        "calls": 3,
+        "self_s": 1.0912e-05,
+        "cumulative_s": 0.008370956
+      },
+      {
+        "file": "/tmp/ixyk-small-probe-20260906/source/extractor/xed.py",
+        "line": 52,
+        "function": "_invoke",
+        "primitive": 35,
+        "calls": 35,
+        "self_s": 0.00045971300000000005,
+        "cumulative_s": 0.162784956
+      },
+      {
+        "file": "/tmp/ixyk-small-probe-20260906/source/extractor/xed.py",
+        "line": 62,
+        "function": "decode",
+        "primitive": 21,
+        "calls": 21,
+        "self_s": 4.8129000000000006e-05,
+        "cumulative_s": 0.091533868
+      },
+      {
+        "file": "/tmp/ixyk-small-probe-20260906/source/extractor/angr_boundary.py",
+        "line": 170,
+        "function": "lift_block",
+        "primitive": 5,
+        "calls": 5,
+        "self_s": 1.0949000000000001e-05,
+        "cumulative_s": 0.0038086540000000003
+      },
+      {
+        "file": "/tmp/ixyk-small-probe-20260906/source/extractor/runtime.py",
+        "line": 145,
+        "function": "load_shellcode",
+        "primitive": 5,
+        "calls": 5,
+        "self_s": 2.1911e-05,
+        "cumulative_s": 0.013084461
+      },
+      {
+        "file": "/tmp/ixyk-small-probe-20260906/source/extractor/fuzzer.py",
+        "line": 338,
+        "function": "publish",
+        "primitive": 16,
+        "calls": 16,
+        "self_s": 6.9689e-05,
+        "cumulative_s": 0.00012267500000000001
+      },
+      {
+        "file": "/tmp/ixyk-small-probe-20260906/source/extractor/fuzzer.py",
+        "line": 178,
+        "function": "__init__",
+        "primitive": 1,
+        "calls": 1,
+        "self_s": 4.755e-06,
+        "cumulative_s": 5.6390000000000006e-06
+      }
+    ]
+  },
+  {
+    "label": "baseline-p-MOVSD-json",
+    "wall_s": 3.4091723379679024,
+    "recording": {
+      "capture_ns": 60859914,
+      "submit_ns": 775342,
+      "blocked_ns": 0,
+      "encode_ns": 127994787,
+      "write_ns": 26552828,
+      "flush_ns": 299137,
+      "worker_cpu_ns": 124412686,
+      "drain_ns": 11557962,
+      "records": 57,
+      "flushes": 5,
+      "payload_bytes": 1601995,
+      "framed_bytes": 1605823,
+      "queue_high_water": 12
+    },
+    "functions": [
+      {
+        "file": "/tmp/ixyk-small-probe-20260906/source/extractor/fuzzer.py",
+        "line": 500,
+        "function": "__init__",
+        "primitive": 8,
+        "calls": 8,
+        "self_s": 0.00010929200000000001,
+        "cumulative_s": 0.016359580000000002
+      },
+      {
+        "file": "/tmp/ixyk-small-probe-20260906/source/extractor/fuzzer.py",
+        "line": 92,
+        "function": "emulate",
+        "primitive": 5,
+        "calls": 5,
+        "self_s": 0.0016314970000000002,
+        "cumulative_s": 0.016046417
+      },
+      {
+        "file": "/tmp/ixyk-small-probe-20260906/source/extractor/fuzzer.py",
+        "line": 512,
+        "function": "differences",
+        "primitive": 5,
+        "calls": 5,
+        "self_s": 0.00026067900000000004,
+        "cumulative_s": 0.061703987
+      },
+      {
+        "file": "/tmp/ixyk-small-probe-20260906/source/antiunification/many.py",
+        "line": 62,
+        "function": "antiunify_many",
+        "primitive": 2,
+        "calls": 2,
+        "self_s": 0.000177324,
+        "cumulative_s": 0.06895757000000001
+      },
+      {
+        "file": "/tmp/ixyk-small-probe-20260906/source/extractor/au_inputs.py",
+        "line": 34,
+        "function": "instruction_inputs",
+        "primitive": 2,
+        "calls": 2,
+        "self_s": 0.00017868500000000001,
+        "cumulative_s": 0.42352620300000005
+      },
+      {
+        "file": "/tmp/ixyk-small-probe-20260906/source/extractor/extractor.py",
+        "line": 323,
+        "function": "_extract_concrete",
+        "primitive": 11,
+        "calls": 11,
+        "self_s": 0.00042413300000000004,
+        "cumulative_s": 2.025294954
+      },
+      {
+        "file": "/tmp/ixyk-small-probe-20260906/source/extractor/xed.py",
+        "line": 62,
+        "function": "decode",
+        "primitive": 58,
+        "calls": 58,
+        "self_s": 0.000164319,
+        "cumulative_s": 0.20841505400000002
+      },
+      {
+        "file": "/tmp/ixyk-small-probe-20260906/source/extractor/normalization.py",
+        "line": 141,
+        "function": "normalize_model",
+        "primitive": 10,
+        "calls": 10,
+        "self_s": 3.1087e-05,
+        "cumulative_s": 0.026894387000000002
+      },
+      {
+        "file": "/tmp/ixyk-small-probe-20260906/source/extractor/xed.py",
+        "line": 52,
+        "function": "_invoke",
+        "primitive": 102,
+        "calls": 102,
+        "self_s": 0.0015081410000000002,
+        "cumulative_s": 0.5843106140000001
+      },
+      {
+        "file": "/tmp/ixyk-small-probe-20260906/source/extractor/angr_boundary.py",
+        "line": 170,
+        "function": "lift_block",
+        "primitive": 13,
+        "calls": 13,
+        "self_s": 2.7174e-05,
+        "cumulative_s": 0.009031082000000001
+      },
+      {
+        "file": "/tmp/ixyk-small-probe-20260906/source/extractor/runtime.py",
+        "line": 145,
+        "function": "load_shellcode",
+        "primitive": 13,
+        "calls": 13,
+        "self_s": 4.6919e-05,
+        "cumulative_s": 0.030692611
+      },
+      {
+        "file": "/tmp/ixyk-small-probe-20260906/source/extractor/fuzzer.py",
+        "line": 338,
+        "function": "publish",
+        "primitive": 15,
+        "calls": 15,
+        "self_s": 7.0171e-05,
+        "cumulative_s": 0.00011474300000000001
+      },
+      {
+        "file": "/tmp/ixyk-small-probe-20260906/source/extractor/fuzzer.py",
+        "line": 178,
+        "function": "__init__",
+        "primitive": 1,
+        "calls": 1,
+        "self_s": 3.518e-06,
+        "cumulative_s": 4.3990000000000006e-06
+      }
+    ]
+  }
+]
