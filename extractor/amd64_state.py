@@ -53,7 +53,7 @@ GPR64 = (
     "r15",
 )
 YMM256 = tuple(f"ymm{index}" for index in range(16))
-FLAG_NAMES = ("CF", "ZF", "SF", "OF", "PF", "AF")
+FLAG_NAMES = ("CF", "ZF", "SF", "OF", "PF", "AF", "DF", "AC", "ID")
 REGISTER_NAMES = GPR64 + YMM256 + ("rip",)
 REGISTER_WIDTH = {name: 64 for name in (*GPR64, "rip")} | {name: 256 for name in YMM256}
 MEMORY_NAME = "mem"
@@ -79,6 +79,9 @@ AMD64_FLAG_BIT: dict[str, int] = {
     "ZF": _ccall_constant("CondBitOffsets", "G_CC_SHIFT_Z"),
     "SF": _ccall_constant("CondBitOffsets", "G_CC_SHIFT_S"),
     "OF": _ccall_constant("CondBitOffsets", "G_CC_SHIFT_O"),
+    "DF": 10,
+    "AC": 18,
+    "ID": 21,
 }
 
 
@@ -92,7 +95,8 @@ class _AngrFlagAction(Protocol):
         dependency: Ast,
         *,
         platform: str | None = None,
-    ) -> tuple[Ast, Ast, Ast, Ast, Ast, Ast]: ...
+    ) -> tuple[Ast, Ast, Ast, Ast, Ast, Ast]:
+        ...
 
 
 _ANGR_UMUL = cast(_AngrFlagAction, _angr_ccall.pc_actions_UMUL)
@@ -499,6 +503,13 @@ def fresh_instruction_state(
     state.regs.cc_dep1 = _initial_cc_dep1(flag_bvs)
     state.regs.cc_dep2 = _claripy.BVV(0, 64)
     state.regs.cc_ndep = _claripy.BVV(0, 64)
+    state.regs.d = _claripy.If(
+        flag_bvs["DF"] == _claripy.BVV(1, 1),
+        _claripy.BVV((1 << 64) - 1, 64),
+        _claripy.BVV(1, 64),
+    )
+    state.regs.ac = _claripy.Concat(_claripy.BVV(0, 63), flag_bvs["AC"])
+    state.regs.id = _claripy.Concat(_claripy.BVV(0, 63), flag_bvs["ID"])
     state.globals["_ghot_flag_bvs"] = flag_bvs
     state.globals["_ghot_memory_expr"] = canonical_memory()
     state.globals["_ghot_memory_reads"] = {}

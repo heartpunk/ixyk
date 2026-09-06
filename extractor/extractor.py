@@ -47,9 +47,9 @@ import z3
 class _ExpectedSymbolicExitFilter(logging.Filter):
     """Hide only Angr's expected diagnostic for our symbolic return edge."""
 
-    _PREFIX: ClassVar[str] = (
-        "Exit state has over 256 possible solutions. Likely unconstrained; skipping."
-    )
+    _PREFIX: ClassVar[
+        str
+    ] = "Exit state has over 256 possible solutions. Likely unconstrained; skipping."
 
     @override
     def filter(self, record: logging.LogRecord) -> bool:
@@ -67,6 +67,9 @@ _MODELED_VEX_REGISTERS = (
     "cc_dep1",
     "cc_dep2",
     "cc_ndep",
+    "d",
+    "ac",
+    "id",
 )
 
 
@@ -448,10 +451,17 @@ def _extract_flag_updates(
     updates: dict[str, z3.ExprRef] = {}
     for name in FLAG_NAMES:
         bit = AMD64_FLAG_BIT[name]
-        value = resolve_memory_reads(
-            claripy_to_z3(_claripy.Extract(bit, bit, post_rflags)),
-            reads,
-        )
+        if name == "DF":
+            flag = _claripy.If(
+                post.regs.d == _claripy.BVV((1 << 64) - 1, 64),
+                _claripy.BVV(1, 1),
+                _claripy.BVV(0, 1),
+            )
+        elif name in {"AC", "ID"}:
+            flag = _claripy.Extract(0, 0, post.regs.__getattr__(name.lower()))
+        else:
+            flag = _claripy.Extract(bit, bit, post_rflags)
+        value = resolve_memory_reads(claripy_to_z3(flag), reads)
         if not _z3.structurally_equal(value, canonical_flag(name)):
             updates[f"rflags_{name}"] = value
     return updates

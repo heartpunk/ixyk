@@ -253,6 +253,10 @@ class InputLayout:
 def _input_state(
     code, source, memory, data, registers, flags, vary_inputs, *, layout=None
 ):
+    # Older callers supply only the six arithmetic flags; extra modeled flags
+    # default to zero. Production generation supplies the complete flag state.
+    if len(flags) == 6:
+        flags = [*flags, 0, 0, 0]
     scalars = (
         dict(zip(_FUZZED_REGISTERS, registers, strict=True))
         | {"rip": source}
@@ -612,6 +616,7 @@ class CompiledModel:
         environment = {
             name: value & ((1 << self.scalar_widths[name]) - 1)
             for name, value in before.scalars.items()
+            if name in self.scalar_widths
         }
         environment[MEMORY_NAME] = ConcreteArray.memory(before.memory)
         evaluate = evaluator(environment)
@@ -653,7 +658,9 @@ class CompiledModel:
         differences = [
             f"{name}: model={actual:#x}, emulator={expected:#x}"
             for name, expected in after.scalars.items()
-            if name != MEMORY_NAME and (actual := evaluate(updates[name])) != expected
+            if name in updates
+            and name != MEMORY_NAME
+            and (actual := evaluate(updates[name])) != expected
         ]
         mirrored_pc = evaluate(step.mirrored_pc)
         if mirrored_pc != after.scalars["rip"]:

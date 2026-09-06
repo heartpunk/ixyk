@@ -927,3 +927,20 @@ py_test(
         requirement("pytest"),
     ],
 )
+
+py_test(
+    name = "model_state_test",
+    srcs = ["model_state_test.py"],
+    data = ["@nix_native_deps//:libstdcxx"],
+    env = {"GHOT_LIBSTDCXX_RLOCATION": "$(rlocationpath @nix_native_deps//:libstdcxx)"},
+    deps = [
+        ":amd64_state",
+        ":extractor",
+        ":fuzzer",
+        ":runtime",
+        ":xed",
+        ":z3_runtime",
+        requirement("hypothesis"),
+        requirement("pytest"),
+    ],
+)
