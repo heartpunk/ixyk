@@ -5,7 +5,7 @@
 
 ## Abstract
 
-a proof of concept of the core of a symbolic-execution technique [[1]](#ref-1) for extracting symbolic state transformers with guards and updates expressed as satisfiability modulo theories (smt) [[3]](#ref-3) using smt-lib [[4]](#ref-4) fragments interpreted with z3 [[6]](#ref-6). 81/100 opcodes get models from angr [[5]](#ref-5), 78/100 pass the full 10k sample hypothesis [[9]](#ref-9) differential fuzz pass [[8]](#ref-8) comparing extracted models to unicorn [[7]](#ref-7) behavior. tl;dr: it subtracts the old state from the new state, and that's the whole thing. just takes the definitions seriously.
+a proof of concept of the core of a symbolic-execution technique [[1]](#ref-1) for extracting symbolic state transformers with guards and updates expressed as satisfiability modulo theories (smt) [[3]](#ref-3) using smt-lib [[4]](#ref-4) fragments interpreted with z3 [[6]](#ref-6). 81/100 opcodes get models from angr [[5]](#ref-5), 76/100 pass the full 10k sample hypothesis [[9]](#ref-9) differential fuzz pass [[8]](#ref-8) comparing extracted models to unicorn [[7]](#ref-7) behavior. tl;dr: it subtracts the old state from the new state, and that's the whole thing. just takes the definitions seriously.
 
 ## Status
 
@@ -25,48 +25,99 @@ the latest release and all archived versions.
 
 machine-readable citation metadata is available in [`CITATION.cff`](CITATION.cff).
 
+## Getting Started
+
+the pinned development environment is available through Nix. Docker provides the
+Linux/amd64 environment on macOS. run these commands from the repository checkout.
+
+with Nix, the public [`ixyk` development cache](https://ixyk.cachix.org), hosted
+by Cachix, lets you download available prebuilt dependencies. no Cachix account
+or token is needed for downloads. enable it once, then enter the environment:
+
+```sh
+# one-time cache setup; runs Cachix without installing it permanently
+nix run nixpkgs#cachix -- use ixyk
+nix develop
+ixyk-dev-check
+```
+
+the flake also declares the cache URL and signing key; accept those settings if
+Nix prompts for them.
+
+with Docker, as an alternative:
+
+```sh
+export IXYK_UID="$(id -u)" IXYK_GID="$(id -g)"
+docker compose pull dev
+docker compose run --rm dev
+```
+
+then, inside the container:
+
+```sh
+ixyk-dev-check
+```
+
 ## Validation
 
-the current linux/remote execution api (reapi) [[18]](#ref-18) campaign takes one representative encoding from each of
-the 100 highest-frequency normalized x86-64 instruction families in the source
-catalog and requests 10,000 deterministic hypothesis examples per probe.
+the abstract and tables below report the completed linux/remote execution api
+(reapi) [[18]](#ref-18) campaign from 2026-09-06, using source revision
+[`94a99a9`](https://github.com/heartpunk/ixyk/commit/94a99a9dfdc7dec295c3231465d4ae7a6e9626f0)
+and invocation `d7f32572-64dd-4474-8475-0fe7f735dac5`. it ran from 09:18 to 10:01 PDT,
+starting from one representative encoding for each of the 100 highest-frequency
+normalized x86-64 instruction families in the source catalog and requesting
+10,000 deterministic hypothesis examples per family. these measurements predate
+the final constructor/source-variation and flag-state changes; a fresh campaign
+on the current stack is pending.
 
-| Raw result | Families | Actual executions | Share of top-100 occurrence mass | Interpretation |
+| Campaign outcome | Families | Actual executions | Share of top-100 occurrence mass | Interpretation |
 |---|---:|---:|---:|---|
-| pass | 78 | 780,000 | 99.007986% | every requested model-versus-unicorn comparison agreed |
-| mismatch | 3 | 6,621 | 0.048367% | hypothesis stopped after finding and shrinking a counterexample |
-| unsupported | 18 | 0 | 0.883665% | extraction reached a declared theory, state, or outcome boundary before fuzzing |
-| acquisition error | 1 | 0 | 0.059982% | the instruction did not produce a liftable acquisition artifact |
-| **total** | **100** | **786,621** | **100.000000%** | **1,000,000 examples were requested across the campaign** |
+| pass | 76 | 760,000 | 89.942282% | every requested model-versus-unicorn comparison agreed |
+| mismatch | 4 | 40,000 | 1.109504% | completed all 10,000 executions while retaining disagreements |
+| incomplete (CALL) | 1 | 4,629 | 8.004567% | the fuzz worker exited without a final result; partial observations were retained |
+| unsupported | 18 | 0 | 0.883665% | preparation produced no executable models across a declared theory, state, or outcome boundary |
+| no liftable model (UD2) | 1 | 0 | 0.059982% | acquisition failed and no executable fallback was available |
+| **total** | **100** | **804,629** | **100.000000%** | **1,000,000 examples were requested across the campaign** |
 
-the three raw mismatches are useful harness findings, but do not presently
-demonstrate incorrect instruction semantics:
+81 families had executable models. raw acquisition statuses were 80 pass,
+18 unsupported, and 2 acquisition errors: CMPXCHG retained four concrete fallback
+models and passed 2,500 comparisons per model, while UD2 had no executable model.
+the table separates the 20 incomplete fuzz reports into CALL's partial run and
+the 19 families with no executable model; it does not count them as passing.
 
-| Probe | Minimized disagreement | Classification |
-|---|---|---|
-| `bt rax, rbx` | model and unicorn choose different AF values | oracle false positive: AF is architecturally undefined for BT [[10]](#ref-10) |
-| `bsr rax, rbx` | model and unicorn choose different PF values for a zero source | oracle false positive: PF and the zero-source destination are architecturally undefined for BSR [[10]](#ref-10) |
-| `leave` | unicorn rejects mapping the canonical high-half address derived from RBP | model/oracle memory-domain mismatch: symbolic memory admits the address but the concrete harness cannot map its terminal page |
+the following are recorded discovery findings, not minimized witnesses or a
+claim that each difference is a defect in the extracted instruction semantics:
 
-each concrete execution initializes all 16 64-bit general-purpose registers,
-all 16 256-bit YMM registers, six modeled status flags, RIP, and sparse
-zero-default byte memory. unicorn executes exactly one instruction. the checker
-then requires exactly one symbolic edge and compares the complete modeled
-scalar, vector, flag, program-counter, and memory post-state. generation uses a
-fixed seed, disables the hypothesis example database, and shrinks the first
-disagreement.
+| Probe | Recorded disagreements | Actual executions | First recorded difference / completion status |
+|---|---:|---:|---|
+| `ret` | 334 | 10,000 | RIP and mirrored PC differ |
+| `bt rax, rbx` | 8,121 | 10,000 | ZF differs |
+| `bsr rax, rbx` | 5,792 | 10,000 | PF differs |
+| `leave` | 394 | 10,000 | RBP differs |
+| `call` | 378 | 4,629 | incomplete; worker exited without a final result, with 412 unusable observations also retained |
 
-the 99.007986% figure is occurrence-weighted **within these top 100 families**.
-it is not a claim that every encoding or operand form—or 99% of all dynamically
-executed instructions—has been validated. see the full
-[`validation-notes.md`](validation-notes.md) evidence ledger for the complete
-100-family results, model shapes, failure taxonomy, witnesses, and additional
-control-flow caveats.
+this run froze its prepared models before sampling. each concrete execution
+initialized all 16 64-bit general-purpose registers, all 16 256-bit YMM registers,
+six modeled status flags, RIP, and sparse zero-default byte memory. unicorn
+executed exactly one instruction, and the checker compared the modeled outcome
+and complete modeled post-state. generation used a fixed seed and an
+action-local replay database. discovery continued through findings; separate
+shrinking and explanation stages are not included in these counts. the current
+implementation additionally models DF, AC, and ID, for nine flags in total;
+that expansion is not covered by this earlier measurement.
+
+the 89.942282% figure is occurrence-weighted **within these top 100 families**,
+using their combined 27,933,247,943 source-catalog occurrences as the denominator.
+it is not a claim that every encoding or operand form—or the same share of all
+dynamically executed instructions—has been validated. the existing
+[`validation-notes.md`](validation-notes.md) ledger preserves the earlier v0.0.1
+campaign and its witness classifications; it is historical evidence, not the
+ledger for the 2026-09-06 run summarized here.
 
 ## Reference Artifacts
 
 the deliberately versioned examples in [`artifacts/golden/`](artifacts/golden/)
-preserve exact acquisition, instruction-model. they are research reference artifacts,
+preserve exact acquisition, instruction-models. they are research reference artifacts,
 not ordinary `bazel-bin/` or `bazel-out/` contents. the directory documents what
 each example demonstrates, how to regenerate the set, and how to verify it against
 the pinned linux/reapi toolchain.
