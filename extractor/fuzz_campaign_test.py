@@ -17,6 +17,8 @@ from extractor.evidence_events import (
     Comparison,
     EvidenceHooks,
     FuzzInput,
+    StateSnapshot,
+    ToolFailure,
     evidence_types,
 )
 from extractor.evidence_recording import BackgroundRecorder
@@ -26,6 +28,7 @@ from extractor.fuzz_campaign import Campaign
 from extractor.fuzzer import ConcreteState, CompiledModel, _input_state, emulate
 from extractor.amd64_state import FLAG_NAMES, GPR64, YMM256
 from extractor.operand_slots import OperandDecodeError
+from extractor import runtime
 from extractor.runtime import load_shellcode
 from extractor.unicorn_boundary import unicorn_constant
 import unicorn
@@ -154,6 +157,53 @@ def test_forced_au_failure_preserves_real_direct_models():
     assert recorded == plain == ()
     assert len(predictions) == 1
     assert dict(predictions[0].scalars) == after.scalars
+
+
+def test_loader_failure_is_scoped_and_later_campaign_work_continues():
+    state = ConcreteState({"rip": 4096}, {4096: 0x90})
+    stream = BytesIO()
+    recorder = BackgroundRecorder(
+        backend=ReferenceJSONBackend(),
+        types=evidence_types(),
+        run=RunContext("a" * 40, "test-invocation"),
+        output=stream,
+    )
+    hooks = EvidenceHooks(recorder)
+    model = SimpleNamespace(source=4096)
+    first, unrelated = Campaign(b"\x90", hooks), Campaign(b"\xc3", hooks)
+
+    loader = [AssertionError(), object(), object()]
+    with (
+        patch.object(runtime.angr, "load_shellcode", side_effect=loader),
+        patch.object(campaign_module, "extract", return_value=model) as acquire,
+        patch.object(campaign_module, "CompiledModel", side_effect=lambda item: item),
+    ):
+        assert first.select(b"\x90", 4096, 1, before=state)[2] is None
+        assert first.select(b"\x90", 4096, 2, before=state)[2] is model
+        assert unrelated.select(b"\xc3", 4096, 1, before=state)[2] is model
+
+    recorder.close()
+    records = list(
+        EvidenceReader(
+            BytesIO(stream.getvalue()),
+            backend=ReferenceJSONBackend(),
+            types=evidence_types(),
+        )
+    )
+    findings = [
+        record.value for record in records if isinstance(record.value, ToolFailure)
+    ]
+    assert len(findings) == 1
+    finding = findings[0]
+    assert finding.stage == "acquisition"
+    assert finding.instruction == b"\x90"
+    assert finding.error_kind == "AssertionError"
+    assert finding.message == "AssertionError()"
+    assert finding.tool == "angr.load_shellcode"
+    assert "AssertionError" in finding.traceback
+    assert finding.before == StateSnapshot.capture(state)
+    assert first.acquisition_findings == 1
+    assert acquire.call_count == 2
 
 
 if __name__ == "__main__":

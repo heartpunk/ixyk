@@ -37,6 +37,17 @@ class Finding:
 
 
 @dataclass(frozen=True)
+class ToolFailure:
+    stage: str
+    instruction: bytes
+    tool: str
+    error_kind: str
+    message: str
+    traceback: str
+    before: StateSnapshot | None
+
+
+@dataclass(frozen=True)
 class FuzzInput:
     sample: int
     instruction: bytes
@@ -68,6 +79,7 @@ def evidence_types():
         (InstructionModel, "instruction_model"),
         (Acquisition, "acquisition"),
         (Finding, "finding"),
+        (ToolFailure, "tool_failure"),
         (FuzzInput, "fuzz_input"),
         (Comparison, "comparison"),
     ):
@@ -91,7 +103,18 @@ class EvidenceHooks:
         )
         return identifier
 
-    def finding(self, stage, code, error, *, context=None):
-        self.recorder.emit(
-            Finding(stage, code, type(error).__name__, str(error)), context=context
-        )
+    def finding(self, stage, code, error, *, context=None, before=None):
+        tool = getattr(error, "tool", None)
+        if tool is None:
+            value = Finding(stage, code, type(error).__name__, str(error))
+        else:
+            value = ToolFailure(
+                stage,
+                code,
+                tool,
+                error.error_kind,
+                error.error_message,
+                error.formatted_traceback,
+                StateSnapshot.capture(before) if before is not None else None,
+            )
+        self.recorder.emit(value, context=context)

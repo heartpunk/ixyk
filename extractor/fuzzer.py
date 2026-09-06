@@ -381,9 +381,16 @@ def fuzz(
             raise _ExecutionBudget()
         executions += 1
         publish()
-        if campaign is not None:
-            code, source, selected = campaign.select(code, source, executions)
         before = _input_state(code, source, memory, data, registers, flags, vary_inputs)
+        if campaign is not None:
+            generated_code, generated_source = code, source
+            code, source, selected = campaign.select(
+                code, source, executions, before=before
+            )
+            if code != generated_code or source != generated_source:
+                before = _input_state(
+                    code, source, memory, data, registers, flags, vary_inputs
+                )
         if campaign is not None:
             campaign.compare(selected, code, before, executions)
             report.update(campaign.summary())

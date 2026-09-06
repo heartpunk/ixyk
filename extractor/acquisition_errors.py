@@ -6,12 +6,15 @@ from antiunification.many import IncompatibleShapes
 from extractor.amd64_state import Amd64AdapterError
 from extractor.artifact import UnsupportedTheoryError
 from extractor.operand_slots import OperandDecodeError
+from extractor.tool_errors import ShellcodeLoadError
 from extractor.xed import EncodingError
+
 
 EXPECTED_ACQUISITION = (
     Amd64AdapterError,
     UnsupportedTheoryError,
     OperandDecodeError,
+    ShellcodeLoadError,
     EncodingError,
     IncompatibleShapes,
 )

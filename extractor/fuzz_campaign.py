@@ -35,7 +35,7 @@ class Campaign:
         if self.evidence is not None:
             self.evidence.finding(f"generation:form:{form}", self.instruction, error)
 
-    def select(self, code, source, sample):
+    def select(self, code, source, sample, *, before=None):
         context = f"sample:{self.instruction.hex()}:{sample}"
         if self.fixed_model is not None:
             self.route = "fallback"
@@ -64,7 +64,9 @@ class Campaign:
             def on_finding(name, encoding, error):
                 self.acquisition_findings += 1
                 if self.evidence is not None:
-                    self.evidence.finding(name, encoding, error, context=context)
+                    self.evidence.finding(
+                        name, encoding, error, context=context, before=before
+                    )
 
             try:
                 model = extract(
@@ -77,7 +79,9 @@ class Campaign:
             except EXPECTED_ACQUISITION as error:
                 self.acquisition_findings += 1
                 if self.evidence is not None:
-                    self.evidence.finding(stage[0], stage[1], error, context=context)
+                    self.evidence.finding(
+                        stage[0], stage[1], error, context=context, before=before
+                    )
                 self.pool = [
                     (encoding, model, CompiledModel(model))
                     for encoding, model in retained

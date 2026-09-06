@@ -193,12 +193,18 @@ py_library(
 )
 
 py_library(
+    name = "tool_errors",
+    srcs = ["tool_errors.py"],
+)
+
+py_library(
     name = "runtime",
     srcs = ["runtime.py"],
     data = ["amd64_smoke.hex"],
     target_compatible_with = _LINUX_X86_64,
     deps = [
         ":native_runtime",
+        ":tool_errors",
         requirement("angr"),
     ],
 )
@@ -831,6 +837,7 @@ py_library(
         ":amd64_state",
         ":artifact",
         ":operand_slots",
+        ":tool_errors",
         ":xed",
         "//antiunification:algebra",
     ],

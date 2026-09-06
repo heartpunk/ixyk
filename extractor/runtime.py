@@ -19,6 +19,7 @@ from extractor.native_runtime import (
 from extractor.native_runtime import (
     runfiles_root as _runfiles_root,
 )
+from extractor.tool_errors import ShellcodeLoadError
 
 _EXPECTED_PYTHON = (3, 12, 13)
 _EXPECTED_SOLVED_VALUE = 0x1234
@@ -144,11 +145,14 @@ __all__ = ["angr", "claripy"]
 def load_shellcode(shellcode: bytes, load_address: int) -> object:
     """Create the exact AMD64 shellcode project consumed by the extractor."""
 
-    return _as_angr(angr).load_shellcode(
-        shellcode,
-        arch="amd64",
-        load_address=load_address,
-    )
+    try:
+        return _as_angr(angr).load_shellcode(
+            shellcode,
+            arch="amd64",
+            load_address=load_address,
+        )
+    except Exception as error:
+        raise ShellcodeLoadError(error) from error
 
 
 def _fixture_bytes() -> bytes:
