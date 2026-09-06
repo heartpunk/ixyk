@@ -57,6 +57,7 @@ jobs:
             //antiunification:algebra_test \
             //antiunification:algebra_property_test \
             //extractor:model_syntax_property_test \
+            //extractor:concrete_eval_test \
             //extractor:au_inputs_test \
             //extractor:normalization_test \
             //extractor:n_plus_one_test \

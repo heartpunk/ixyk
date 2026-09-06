@@ -211,17 +211,21 @@ py_test(
 )
 
 py_library(
+    name = "concrete_eval",
+    srcs = ["concrete_eval.py"],
+    deps = [":artifact"],
+)
+
+py_library(
     name = "fuzzer",
     srcs = ["fuzzer.py"],
     target_compatible_with = _LINUX_X86_64,
     deps = [
         ":amd64_state",
         ":artifact",
-        ":typed_z3",
+        ":concrete_eval",
         ":unicorn_boundary",
-        ":z3_boundary",
         requirement("hypothesis"),
-        requirement("z3-solver"),
     ],
 )
 
@@ -575,5 +579,28 @@ py_test(
         ":z3_runtime",
         "//antiunification:algebra",
         requirement("pytest"),
+    ],
+)
+
+py_test(
+    name = "concrete_eval_test",
+    srcs = ["concrete_eval_test.py"],
+    data = ["@nix_native_deps//:libstdcxx"],
+    env = {
+        "GHOT_LIBSTDCXX_RLOCATION": "$(rlocationpath @nix_native_deps//:libstdcxx)",
+        "PYTHONNOUSERSITE": "1",
+        "PYTHONSAFEPATH": "1",
+    },
+    target_compatible_with = _LINUX_X86_64,
+    deps = [
+        ":artifact",
+        ":concrete_eval",
+        ":fuzzer",
+        ":typed_z3",
+        ":z3_runtime",
+        "//tools:differential_cases",
+        requirement("hypothesis"),
+        requirement("pytest"),
+        requirement("z3-solver"),
     ],
 )
