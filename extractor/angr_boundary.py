@@ -9,6 +9,7 @@ from collections.abc import Callable, Mapping, MutableMapping, MutableSet, Seque
 from typing import Protocol, cast
 
 from extractor import runtime
+from extractor.tool_errors import AngrOperationError
 
 
 class Ast(Protocol):
@@ -164,3 +165,24 @@ def expect_state(value: object) -> State:
     if not isinstance(state, type) or not isinstance(value, state):
         raise TypeError("state is not an Angr SimState")
     return cast(State, value)
+
+
+def lift_block(project: Project, address: int, *, num_inst: int) -> Block:
+    try:
+        return project.factory.block(address, num_inst=num_inst)
+    except Exception as error:
+        raise AngrOperationError("angr.factory.block", error) from error
+
+
+def blank_state(project: Project, address: int) -> State:
+    try:
+        return project.factory.blank_state(addr=address)
+    except Exception as error:
+        raise AngrOperationError("angr.factory.blank_state", error) from error
+
+
+def execute_successors(project: Project, state: State, *, num_inst: int) -> Successors:
+    try:
+        return project.factory.successors(state, num_inst=num_inst)
+    except Exception as error:
+        raise AngrOperationError("angr.factory.successors", error) from error

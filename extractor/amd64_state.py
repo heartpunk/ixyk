@@ -16,6 +16,7 @@ from extractor.angr_boundary import (
     State,
     angr as _angr,
     ast_not_equal,
+    blank_state,
     claripy as _claripy,
     expect_ast,
     expect_project,
@@ -54,9 +55,7 @@ GPR64 = (
 YMM256 = tuple(f"ymm{index}" for index in range(16))
 FLAG_NAMES = ("CF", "ZF", "SF", "OF", "PF", "AF")
 REGISTER_NAMES = GPR64 + YMM256 + ("rip",)
-REGISTER_WIDTH = {name: 64 for name in (*GPR64, "rip")} | {
-    name: 256 for name in YMM256
-}
+REGISTER_WIDTH = {name: 64 for name in (*GPR64, "rip")} | {name: 256 for name in YMM256}
 MEMORY_NAME = "mem"
 
 LTS_EXTRACTION_CONTEXT = z3.Context()
@@ -115,9 +114,7 @@ def _correct_angr_umul(
     )
     product = left.zero_extend(nbits) * right.zero_extend(nbits)
     high = product[2 * nbits - 1 : nbits]
-    carry = _claripy.If(
-        ast_not_equal(high, 0), _claripy.BVV(1, 1), _claripy.BVV(0, 1)
-    )
+    carry = _claripy.If(ast_not_equal(high, 0), _claripy.BVV(1, 1), _claripy.BVV(0, 1))
     return carry, parity, auxiliary, zero, sign, carry
 
 
@@ -483,7 +480,7 @@ def fresh_instruction_state(
         raise Amd64AdapterError(
             f"unexpected architecture: {project.arch.name}/{project.arch.bits}"
         )
-    state = project.factory.blank_state(addr=source)
+    state = blank_state(project, source)
     state.options.add(_angr.options.TRACK_MEMORY_ACTIONS)
     state.options.add(_angr.options.TRACK_REGISTER_ACTIONS)
     state.options.add(_angr.options.SYMBOLIC_WRITE_ADDRESSES)

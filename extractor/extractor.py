@@ -31,7 +31,13 @@ from extractor.amd64_state import (
     require_u64,
     resolve_memory_reads,
 )
-from extractor.angr_boundary import State, claripy as _claripy, expect_project
+from extractor.angr_boundary import (
+    State,
+    claripy as _claripy,
+    execute_successors,
+    expect_project,
+    lift_block,
+)
 from extractor.artifact import InstructionModel, StepSummary
 from extractor.typed_z3 import step_summary_from_z3
 
@@ -219,7 +225,7 @@ def extract(
 
     project = expect_project(raw_project)
     source = require_u64(source, "source")
-    code = bytes(project.factory.block(source, num_inst=1).bytes)
+    code = bytes(lift_block(project, source, num_inst=1).bytes)
     from extractor.acquisition_errors import EXPECTED_ACQUISITION
 
     direct = {}
@@ -307,7 +313,7 @@ def _extract_concrete(raw_project: object, source: int) -> InstructionModel:
     """Symbolically execute one exact instruction and extract every outcome."""
 
     project, source = expect_project(raw_project), require_u64(source, "source")
-    block = project.factory.block(source, num_inst=1)
+    block = lift_block(project, source, num_inst=1)
     if block.vex.instructions != 1 or len(block.capstone.insns) != 1:
         raise Amd64AdapterError(f"expected one decoded instruction at {source:#x}")
     _require_register_closure(project, block)
@@ -320,7 +326,7 @@ def _extract_concrete(raw_project: object, source: int) -> InstructionModel:
     pre = fresh_instruction_state(
         project, source, _vex_stack_scratch_writes(project, block)
     )
-    posts = tuple(project.factory.successors(pre, num_inst=1).all_successors)
+    posts = tuple(execute_successors(project, pre, num_inst=1).all_successors)
     if not posts:
         raise Amd64AdapterError(f"instruction at {source:#x} has no outcomes")
 

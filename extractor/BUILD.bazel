@@ -213,7 +213,10 @@ py_library(
     name = "angr_boundary",
     srcs = ["angr_boundary.py"],
     target_compatible_with = _LINUX_X86_64,
-    deps = [":runtime"],
+    deps = [
+        ":runtime",
+        ":tool_errors",
+    ],
 )
 
 py_library(
@@ -740,6 +743,7 @@ py_test(
         ":fuzzer",
         ":operand_slots",
         ":runtime",
+        ":tool_errors",
         ":unicorn_boundary",
         ":z3_runtime",
         "//antiunification:algebra",

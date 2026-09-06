@@ -4,7 +4,7 @@
 from collections import Counter
 from io import BytesIO
 from types import SimpleNamespace
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 from hypothesis import given, settings, strategies as st
 import pytest
@@ -29,6 +29,7 @@ from extractor.fuzzer import ConcreteState, CompiledModel, _input_state, emulate
 from extractor.amd64_state import FLAG_NAMES, GPR64, YMM256
 from extractor.operand_slots import OperandDecodeError
 from extractor import runtime
+from extractor.angr_boundary import lift_block
 from extractor.runtime import load_shellcode
 from extractor.unicorn_boundary import unicorn_constant
 import unicorn
@@ -204,6 +205,52 @@ def test_loader_failure_is_scoped_and_later_campaign_work_continues():
     assert finding.before == StateSnapshot.capture(state)
     assert first.acquisition_findings == 1
     assert acquire.call_count == 2
+
+
+def test_lifter_failure_is_scoped_and_next_sample_continues():
+    state = ConcreteState({"rip": 0}, {0: 0x90})
+    stream = BytesIO()
+    recorder = BackgroundRecorder(
+        backend=ReferenceJSONBackend(),
+        types=evidence_types(),
+        run=RunContext("a" * 40, "test-invocation"),
+        output=stream,
+    )
+    campaign = Campaign(b"\x90", EvidenceHooks(recorder))
+    model = SimpleNamespace(source=0)
+    factory = SimpleNamespace(block=Mock(side_effect=ValueError("No bytes in memory")))
+    attempts = iter((SimpleNamespace(factory=factory), model))
+
+    def extraction(project, source, **kwargs):
+        attempt = next(attempts)
+        if attempt is model:
+            return model
+        return lift_block(attempt, source, num_inst=1)
+
+    with (
+        patch.object(campaign_module, "load_shellcode", return_value=object()),
+        patch.object(campaign_module, "extract", side_effect=extraction),
+        patch.object(campaign_module, "CompiledModel", side_effect=lambda item: item),
+    ):
+        assert campaign.select(b"\x90", 0, 1, before=state)[2] is None
+        assert campaign.select(b"\x90", 0, 2, before=state)[2] is model
+
+    recorder.close()
+    records = list(
+        EvidenceReader(
+            BytesIO(stream.getvalue()),
+            backend=ReferenceJSONBackend(),
+            types=evidence_types(),
+        )
+    )
+    failures = [
+        record.value for record in records if isinstance(record.value, ToolFailure)
+    ]
+    assert len(failures) == 1
+    assert failures[0].tool == "angr.factory.block"
+    assert failures[0].error_kind == "ValueError"
+    assert failures[0].message == "No bytes in memory"
+    assert failures[0].before == StateSnapshot.capture(state)
 
 
 if __name__ == "__main__":
