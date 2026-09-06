@@ -1,0 +1,21 @@
+{
+  "schema": "ixyk.archived_campaign.v1",
+  "source_commit": "94a99a9dfdc7dec295c3231465d4ae7a6e9626f0",
+  "run_config_commit": "db9f0991cff6457204c84ca2cb6f9b3057522c4f",
+  "bazel_invocation_id": "d7f32572-64dd-4474-8475-0fe7f735dac5",
+  "source_archive_sha256": "723764acbbc1c36bfb4d44681daa6a49371cc53a56ffdf0f9531ba7cfbdae372",
+  "started": "2026-09-06T09:18:15.370188566-07:00",
+  "finished": "2026-09-06T10:01:50.148045071-07:00",
+  "run_exit": 0,
+  "families": 100,
+  "examples_requested_per_family": 10000,
+  "actual_executions": 804629,
+  "fuzz_statuses": {"pass": 76, "mismatch": 4, "incomplete": 20},
+  "acquisition_statuses": {"pass": 80, "unsupported": 18, "acquisition_error": 2},
+  "executable_model_families": 81,
+  "golden_directory": "../../golden",
+  "golden_import": "Existing REAPI model and acquisition files preserved byte-for-byte after decompression; zero-padded rank prefixes changed to the golden corpus naming convention.",
+  "included_evidence": ["100 fuzz JSON reports", "100 acquisition event streams", "audit summary", "evidence header audit", "CALL partial-evidence recovery", "original campaign BUILD configuration"],
+  "not_included": ["Bulk per-sample fuzz event streams", "Bazel build event log", "coordinator logs"],
+  "qualification": "Historical completed run, including incomplete family outcomes; not a revalidation of the final v0.0.2 source. This run predates the final constructor/source-variation and nine-flag expansion. Newer artifact updates are post-release follow-up."
+}
