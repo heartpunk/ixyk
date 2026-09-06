@@ -8,6 +8,15 @@ import re
 import subprocess
 
 
+def _read_json(path: Path):
+    contents = (
+        subprocess.check_output(["zstd", "-dc", str(path)])
+        if path.suffix == ".zst"
+        else path.read_bytes()
+    )
+    return json.loads(contents)
+
+
 def verify(workspace: Path) -> dict[str, int]:
     directory = workspace / "artifacts/golden"
     probes = json.loads((workspace / "catalog/x86_64_probes.json").read_text())[
@@ -15,6 +24,11 @@ def verify(workspace: Path) -> dict[str, int]:
     ]
     by_stem = {f"{p['rank']}_{p['name'].lower()}": p for p in probes}
     compressed = list(directory.glob("*.model.json.zst"))
+    acquisition_suffix = (
+        "acquisition.json.zst"
+        if any(directory.glob("*.acquisition.json.zst"))
+        else "acquisition.json"
+    )
     # Support the existing five-example corpus until the complete-corpus PR lands.
     stems = (
         set(by_stem)
@@ -22,7 +36,7 @@ def verify(workspace: Path) -> dict[str, int]:
         else {"2_add", "12_ret", "28_mulsd", "36_pxor", "65_int3"}
     )
     suffixes = (
-        ("acquisition.json", "model.json.zst")
+        (acquisition_suffix, "model.json.zst")
         if compressed
         else ("acquisition.json", "model.json", "fuzz-10000.json")
     )
@@ -48,7 +62,7 @@ def verify(workspace: Path) -> dict[str, int]:
             raise ValueError(f"invalid artifact or digest: {name}")
     counts = {"pass": 0, "unsupported": 0, "acquisition_error": 0}
     for stem in sorted(stems):
-        acquisition = json.loads((directory / f"{stem}.acquisition.json").read_text())
+        acquisition = _read_json(directory / f"{stem}.{acquisition_suffix}")
         status = acquisition["status"]
         if (
             acquisition["schema"] != "ixyk.instruction_acquisition.v1"
@@ -58,20 +72,21 @@ def verify(workspace: Path) -> dict[str, int]:
         if acquisition["instruction_hex"] != by_stem[stem]["bytes"]:
             raise ValueError(f"instruction identity mismatch: {stem}")
         counts[status] += 1
-        model_path = directory / f"{stem}.model.json"
-        contents = (
-            subprocess.check_output(["zstd", "-dc", str(model_path) + ".zst"])
-            if compressed
-            else model_path.read_bytes()
-        )
-        model = json.loads(contents)
-        if status == "pass":
+        model_suffix = "model.json.zst" if compressed else "model.json"
+        model = _read_json(directory / f"{stem}.{model_suffix}")
+        if status == "pass" or acquisition.get("model_route") == "direct":
             if (
                 model["schema"] != "ixyk.qf_abv.instruction.v1"
                 or not model.get("steps")
                 or not model.get("declarations")
             ):
                 raise ValueError(f"missing executable model: {stem}")
+            if status != "pass" and not any(
+                item.get("instruction_hex") == acquisition["instruction_hex"]
+                and item.get("model") == model
+                for item in acquisition.get("retained_models", [])
+            ):
+                raise ValueError(f"direct model is not retained in acquisition: {stem}")
         elif (
             model.get("schema") != "ixyk.unavailable_instruction_model.v1"
             or model.get("status") != status
