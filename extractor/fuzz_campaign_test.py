@@ -177,6 +177,11 @@ def test_forced_au_failure_preserves_real_direct_models():
     assert recorded == plain == ()
     assert len(predictions) == 1
     assert dict(predictions[0].scalars) == after.scalars
+    memory = predictions[0].memory
+    assert memory.index_width == 64
+    assert memory.value_width == 8
+    assert memory.default == 0
+    assert dict(memory.entries) == {k: v for k, v in after.memory.items() if v}
 
 
 @pytest.mark.parametrize(

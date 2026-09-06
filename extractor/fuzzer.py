@@ -625,7 +625,7 @@ class CompiledModel:
         step = enabled[0]
         updates = {a.name: a.value for a in step.simultaneous_update}
         if on_prediction is not None:
-            from extractor.evidence_events import ModelPrediction
+            from extractor.evidence_events import MemorySnapshot, ModelPrediction
 
             def prediction():
                 return ModelPrediction(
@@ -634,7 +634,7 @@ class CompiledModel:
                         for name, value in updates.items()
                         if name != MEMORY_NAME
                     ),
-                    evaluate(updates[MEMORY_NAME]).to_expression(8),
+                    MemorySnapshot.capture(evaluate(updates[MEMORY_NAME]), 8),
                     step.target.kind,
                     evaluate(step.mirrored_pc),
                 )

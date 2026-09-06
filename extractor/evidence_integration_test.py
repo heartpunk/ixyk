@@ -346,3 +346,41 @@ def test_fuzz_cli_consumes_the_frozen_acquisition(tmp_path, fallback, fixed_inpu
 
 if __name__ == "__main__":
     raise SystemExit(pytest.main([__file__]))
+
+
+@given(
+    st.integers(0, 255),
+    st.dictionaries(st.integers(0, 2**64 - 1), st.integers(0, 255), max_size=100),
+    st.integers(0, 2**64 - 1),
+    st.integers(0, 2**256 - 1),
+)
+@settings(deadline=None)
+def test_sparse_prediction_roundtrip(default, entries, probe, scalar):
+    from io import BytesIO
+    from extractor.concrete_eval import ConcreteArray
+    from extractor.evidence import EvidenceAdapter, RunContext
+    from extractor.evidence_events import Comparison, MemorySnapshot, ModelPrediction
+
+    memory = ConcreteArray(64, default, dict(entries))
+    snapshot = MemorySnapshot.capture(memory, 8)
+    prediction = ModelPrediction((("ymm0", scalar),), snapshot, "address", probe)
+    value = Comparison("agreement", prediction, None, "continued", ())
+    stream = BytesIO()
+    writer = EvidenceAdapter(
+        backend=ReferenceJSONBackend(), types=evidence_types(),
+        run=RunContext("test-commit", "test-invocation"), output=stream,
+    )
+    writer.emit(value)
+    stream.seek(0)
+    reader = EvidenceReader(stream, backend=ReferenceJSONBackend(), types=evidence_types())
+    restored = list(reader)[0].value
+    assert restored == value
+    encoded_memory = restored.model_after.memory
+    decoded = ConcreteArray(encoded_memory.index_width, encoded_memory.default,
+                            dict(encoded_memory.entries))
+    assert encoded_memory.value_width == 8
+    assert decoded == memory
+    assert decoded.select(probe) == memory.select(probe)
+    # Capturing evidence must not retain an alias to mutable evaluator memory.
+    memory.values[probe] = (memory.select(probe) + 1) % 256
+    assert dict(snapshot.entries) == entries

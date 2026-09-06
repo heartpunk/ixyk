@@ -893,6 +893,7 @@ py_test(
         requirement("zstandard"),
         ":amd64_state",
         ":artifact",
+        ":concrete_eval",
         ":evidence",
         ":evidence_events",
         ":evidence_recording",

@@ -6,7 +6,7 @@
 from dataclasses import dataclass
 from typing import Literal
 
-from extractor.artifact import InstructionModel, TypedExpr
+from extractor.artifact import InstructionModel
 from extractor.evidence import TypeRegistry
 
 
@@ -134,9 +134,21 @@ class FuzzInput:
 
 
 @dataclass(frozen=True)
+class MemorySnapshot:
+    index_width: int
+    value_width: int
+    default: int
+    entries: tuple[tuple[int, int], ...]
+
+    @classmethod
+    def capture(cls, memory, value_width):
+        return cls(memory.width, value_width, memory.default, tuple(memory.values.items()))
+
+
+@dataclass(frozen=True)
 class ModelPrediction:
     scalars: tuple[tuple[str, int], ...]
-    memory: TypedExpr
+    memory: MemorySnapshot
     target: str
     mirrored_pc: int
 
