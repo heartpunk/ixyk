@@ -1,0 +1,74 @@
+diff --git a/xed_mbuild.py b/xed_mbuild.py
+index 0421cf8..d46b8ec 100755
+--- a/xed_mbuild.py
++++ b/xed_mbuild.py
+@@ -693,6 +693,7 @@ def mkenv():
+                                  set_copyright=False,
+                                  asan=False,
+                                  enc2=False,
++                                 enc2_checked=True,
+                                  enc2_test=False,
+                                  enc2_test_checked=False,
+                                  enc2_operands_checked=False,
+@@ -939,6 +940,10 @@ def xed_args(env):
+                           action="store_true",
+                           dest="enc2",
+                           help="Build the enc2 fast encoder. Longer build.")
++    env.parser.add_option("--no-enc2-checked",
++                          action="store_false",
++                          dest="enc2_checked",
++                          help="Do not build the checked enc2 library.")
+     env.parser.add_option("--enc2-test", 
+                           action="store_true",
+                           dest="enc2_test",
+@@ -1781,23 +1786,27 @@ def build_libxedenc2(arg_env, work_queue, input_files, config):
+     dag.add(env,u)
+ 
+ 
+-    # The *checked* enc2 library
+-    lib_chk, dll_chk = xbc.make_lib_dll(env,'xed-chk-{}'.format(config))
+-    x = mbuild.join(env['build_dir'], lib_chk)
+-    env['shd_chk_lib']  = x
+-    env['link_chk_lib'] = x
+-    if  env['shared']:
+-        env['shd_chk_lib']  = mbuild.join(env['build_dir'], dll_chk)
++    if env['enc2_checked']:
++        # The *checked* enc2 library
++        lib_chk, dll_chk = xbc.make_lib_dll(env,'xed-chk-{}'.format(config))
++        x = mbuild.join(env['build_dir'], lib_chk)
++        env['shd_chk_lib']  = x
++        env['link_chk_lib'] = x
++        if  env['shared']:
++            env['shd_chk_lib']  = mbuild.join(env['build_dir'], dll_chk)
+ 
+-    gen_src    = mbuild.glob(env['build_dir'],'src-chk','*.c')
+-    nongen_src = _get_src(env,'enc2chk')
++        gen_src    = mbuild.glob(env['build_dir'],'src-chk','*.c')
++        nongen_src = _get_src(env,'enc2chk')
+ 
+-    objs = env.compile( dag, gen_src + nongen_src)
+-    if env['shared']:
+-        u = env.dynamic_lib(objs, env['shd_chk_lib'])
++        objs = env.compile( dag, gen_src + nongen_src)
++        if env['shared']:
++            u = env.dynamic_lib(objs, env['shd_chk_lib'])
++        else:
++            u = env.static_lib(objs, env['link_chk_lib'])
++        dag.add(env,u)
+     else:
+-        u = env.static_lib(objs, env['link_chk_lib'])
+-    dag.add(env,u)
++        env['shd_chk_lib'] = None
++        env['link_chk_lib'] = None
+ 
+     
+     okay = wq_build(env, work_queue, dag)
+@@ -2653,6 +2662,8 @@ def macro_args(env):
+     if env['enc2_test']:
+         env['enc2']=True
+         env['enc']=True
++    if not env['enc2_checked'] and env['enc2_test']:
++        xbc.cdie("--no-enc2-checked is incompatible with enc2 tests")
+ 
+ def work(env):
+     """External entry point for non-command line invocations.
