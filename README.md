@@ -5,7 +5,7 @@
 
 ## Abstract
 
-a proof of concept of the core of a symbolic-execution technique [[1]](#ref-1) for extracting symbolic state transformers with guards and updates expressed as satisfiability modulo theories (smt) [[3]](#ref-3) using smt-lib [[4]](#ref-4) fragments interpreted with z3 [[6]](#ref-6). 81/100 opcodes get models from angr [[5]](#ref-5), 76/100 pass the full 10k sample hypothesis [[9]](#ref-9) differential fuzz pass [[8]](#ref-8) comparing extracted models to unicorn [[7]](#ref-7) behavior. tl;dr: it subtracts the old state from the new state, and that's the whole thing. just takes the definitions seriously.
+a proof of concept of the core of a symbolic-execution and anti-unification oriented technique [[1]](#ref-1) for extracting symbolic state transformers with guards and updates expressed as satisfiability modulo theories (smt) [[3]](#ref-3) using smt-lib [[4]](#ref-4) fragments interpreted with z3 [[6]](#ref-6). 81/100 opcodes get models from angr [[5]](#ref-5), 76/100 pass the full 10k sample hypothesis [[9]](#ref-9) differential fuzz pass [[8]](#ref-8) comparing extracted models to unicorn [[7]](#ref-7) behavior. tl;dr: it subtracts the old state from the new state, and that's the whole thing. just takes the definitions seriously.
 
 ## Status
 
@@ -57,6 +57,12 @@ then, inside the container:
 ```sh
 ixyk-dev-check
 ```
+
+## Development
+
+we use a p fuzzing and property based testing heavy approach here. in general, we try to exhaustively test the properties that matter wrt making sure the models we generate will be worth fuzzing, but overall, we rely on the differential fuzzing more than anything else. in some places we've measured coverage and done mutation testing, but not reliably. these are near term v0.0.3 targets. in the end, however, it will be more sensible to use our own models to prove our own correctness. that's probably at least in v0.x.0 territory, for values of x>=1.
+
+most work has been done on osx and all build and test done on linux by way of linux based bazel clients triggering bazel REAPI actions.
 
 ## Validation
 
