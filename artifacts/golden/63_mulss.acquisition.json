@@ -1,6 +1,0 @@
-{
-  "error": "unsupported Z3 sort: FPSort(8, 24)",
-  "instruction_hex": "f30f59c1",
-  "schema": "ixyk.instruction_acquisition.v1",
-  "status": "unsupported"
-}
