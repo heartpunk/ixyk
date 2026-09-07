@@ -16,12 +16,12 @@ also, literally just so i can move on to next steps.
 ## Citation
 
 v0.0.2 release has the version-specific DOI
-[`DOI_TBD`](DOI_TBD). the aggregate DOI is and resolves
+[`10.5281/zenodo.22562518`](https://doi.org/10.5281/zenodo.22562518). the aggregate DOI is and resolves
 [`10.5281/zenodo.22290191`](https://doi.org/10.5281/zenodo.22290191) to
 the latest release and all archived versions.
 
 > Sophie Smithburg. (2026). *ixyk: symbolic state diffs are all you need*
-> (v0.0.2). Zenodo. DOI_TBD
+> (v0.0.2). Zenodo. https://doi.org/10.5281/zenodo.22562518
 
 machine-readable citation metadata is available in [`CITATION.cff`](CITATION.cff).
 
