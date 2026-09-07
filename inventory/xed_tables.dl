@@ -1,0 +1,18 @@
+.decl XedFunction(a:unsigned,n:symbol)
+.input XedFunction
+.decl XedObject(a:unsigned,n:symbol)
+.input XedObject
+.decl XedWord(o:unsigned,a:unsigned,v:unsigned)
+.input XedWord
+.decl XedTableRoot(n:symbol,a:unsigned)
+.input XedTableRoot
+.decl Table(n:symbol,a:unsigned)
+Table(n,a) :- XedTableRoot(n,a).
+Table(n,v) :- Table(n,a),XedWord(a,_,v),XedObject(v,_).
+.output Table
+.decl Callback(n:symbol,s:symbol,a:unsigned)
+Callback(n,s,v) :- Table(n,a),XedWord(a,_,v),XedFunction(v,s).
+.output Callback
+.decl UnresolvedPointer(n:symbol,a:unsigned,v:unsigned)
+UnresolvedPointer(n,p,v) :- Table(n,a),XedWord(a,p,v),v!=0,!XedObject(v,_),!XedFunction(v,_).
+.output UnresolvedPointer
