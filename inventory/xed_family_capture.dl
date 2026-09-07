@@ -1,0 +1,24 @@
+// Per-family operand-capture requirements. Recognition/ILD remain separate.
+.decl RecordCapture(i:unsigned,form:symbol,table:symbol,target:unsigned)
+.input RecordCapture
+.decl FamilyForm(f:symbol,form:symbol)
+.input FamilyForm
+.decl Edge(b:unsigned,n:unsigned)
+.input Edge
+.decl Insn(b:unsigned,a:unsigned,h:symbol,op:symbol)
+.input Insn
+.decl CaptureRoot(f:symbol,b:unsigned)
+CaptureRoot(f,t+1099511627776) :- FamilyForm(f,form),RecordCapture(_,form,_,t),t!=0.
+.output CaptureRoot
+.decl CaptureReach(f:symbol,b:unsigned)
+CaptureReach(f,b) :- CaptureRoot(f,b).
+CaptureReach(f,n) :- CaptureReach(f,b),Edge(b,n).
+.output CaptureReach
+.decl CaptureSite(f:symbol,a:unsigned,h:symbol,op:symbol)
+CaptureSite(f,a,h,op) :- CaptureReach(f,b),Insn(b,a,h,op).
+.output CaptureSite
+.decl Unknown(b:unsigned,r:symbol)
+.input Unknown
+.decl CaptureUnknown(f:symbol,b:unsigned,r:symbol)
+CaptureUnknown(f,b,r) :- CaptureReach(f,b),Unknown(b,r).
+.output CaptureUnknown

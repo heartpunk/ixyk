@@ -1,0 +1,31 @@
+// Classify existing census flags without assuming recovered targets exhaustive.
+.decl Unknown(b:unsigned,r:symbol)
+.input Unknown
+.decl Member(f:unsigned,b:unsigned)
+.input Member
+.decl Function(f:unsigned,m:symbol,n:symbol)
+.input Function
+.decl Insn(b:unsigned,a:unsigned,h:symbol,op:symbol)
+.input Insn
+.decl Reach(u:symbol,b:unsigned)
+.input Reach
+.decl Edge(b:unsigned,n:unsigned)
+.input Edge
+.decl Import(b:unsigned,m:symbol,s:symbol)
+.input Import
+.decl Transfer(u:symbol,b:unsigned,a:unsigned,h:symbol,op:symbol)
+Transfer(u,b,a,h,op) :- Reach(u,b), Unknown(b,"indirect_control_flow"), Insn(b,a,h,op), op="CALL".
+Transfer(u,b,a,h,op) :- Reach(u,b), Unknown(b,"indirect_control_flow"), Insn(b,a,h,op), op="JMP".
+.output Transfer
+.decl Owner(u:symbol,b:unsigned,n:symbol)
+Owner(u,b,n) :- Reach(u,b), Unknown(b,_), Member(f,b), Function(f,_,n).
+.output Owner
+.decl ExternalFlag(u:symbol,b:unsigned)
+ExternalFlag(u,b) :- Reach(u,b), Unknown(b,"external_or_unknown_target").
+.output ExternalFlag
+.decl KnownContract(u:symbol,b:unsigned,s:symbol)
+KnownContract(u,b,s) :- Reach(u,b), Import(b,_,s).
+.output KnownContract
+.decl RecoveredTarget(u:symbol,b:unsigned,n:unsigned)
+RecoveredTarget(u,b,n) :- Transfer(u,b,_,_,_), Edge(b,n).
+.output RecoveredTarget

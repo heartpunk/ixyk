@@ -33,6 +33,8 @@ Unresolved(u,b,r) :- Reach(u,b), Unknown(b,r).
 .decl ReachedFunction(u:symbol,m:symbol,s:symbol,b:unsigned)
 ReachedFunction(u,m,s,b) :- Reach(u,b), Function(b,m,s).
 .output ReachedFunction
+.decl OpcodeKey(u:symbol,op:symbol)
+OpcodeKey(u,op) :- Site(u,_,_,_,op).
 .decl OpcodeCount(u:symbol,op:symbol,n:number)
-OpcodeCount(u,op,n) :- Site(u,_,_,_,op), n=count : Site(u,_,_,_,op).
+OpcodeCount(u,op,n) :- OpcodeKey(u,op), n=count : Site(u,_,_,_,op).
 .output OpcodeCount

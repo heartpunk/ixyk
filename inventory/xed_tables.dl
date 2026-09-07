@@ -16,3 +16,12 @@ Callback(n,s,v) :- Table(n,a),XedWord(a,_,v),XedFunction(v,s).
 .decl UnresolvedPointer(n:symbol,a:unsigned,v:unsigned)
 UnresolvedPointer(n,p,v) :- Table(n,a),XedWord(a,p,v),v!=0,!XedObject(v,_),!XedFunction(v,_).
 .output UnresolvedPointer
+// ild_phash.py emits {key,l2_func} entries. Identify decoder tables by
+// their generated decoder function targets, then read only pointer fields.
+// This deliberately unions all matching decoder tables, including modes
+// excluded by the harness; it does not claim per-call target exhaustiveness.
+.decl NestedTable(o:unsigned,n:symbol)
+NestedTable(o,n) :- XedObject(o,n), match("lu_table.*",n), XedWord(o,p,v), (p-o)%16=8, XedFunction(v,s), match("xed3_phash_find_.*_l1",s).
+.output NestedTable
+Callback("nested_phash",s,v) :- NestedTable(o,_), XedWord(o,p,v), (p-o)%16=8, XedFunction(v,s).
+UnresolvedPointer("nested_phash",p,v) :- NestedTable(o,_), XedWord(o,p,v), (p-o)%16=8, v!=0, !XedFunction(v,_).
