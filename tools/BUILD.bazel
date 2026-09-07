@@ -24,7 +24,7 @@ _LINUX_X86_64 = [
 
 _GOLDEN_ARTIFACTS = [
     (
-        "%d_%s.acquisition.json" % (
+        "%d_%s.acquisition.json.zst" % (
             rank,
             family.lower(),
         ),

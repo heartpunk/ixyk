@@ -1,0 +1,351 @@
+{
+  "acquisition_statuses": {
+    "acquisition_error": 2,
+    "pass": 80,
+    "unsupported": 18
+  },
+  "elapsed_seconds": {
+    "max": 427.6444197590463,
+    "mean": 335.3237720282312,
+    "median": 405.8053995814407,
+    "min": 217.06204336276278,
+    "n": 80,
+    "p90": 415.71057901903987
+  },
+  "execution_counts": {
+    "max": 10000,
+    "min": 0,
+    "other": [
+      4629
+    ],
+    "ten_thousand": 80,
+    "zero": 19
+  },
+  "execution_seconds": {
+    "max": 425.094429994002,
+    "mean": 332.9825848923268,
+    "median": 402.6548912244616,
+    "min": 215.43888085475191,
+    "n": 80,
+    "p90": 412.97974591120146
+  },
+  "fallback": [
+    {
+      "actual": {
+        "480fb1d1": 2500,
+        "480fb1d3": 2500,
+        "480fb1d8": 2500,
+        "480fb1e1": 2500
+      },
+      "executions": 10000,
+      "instruction": "480fb1d8",
+      "planned": {
+        "480fb1d1": 2500,
+        "480fb1d3": 2500,
+        "480fb1d8": 2500,
+        "480fb1e1": 2500
+      },
+      "prepared_models": [
+        {
+          "instruction_hex": "480fb1d8",
+          "model_sha256": "7d77543d36011994a903a4f58174bcaa50d0225cd42582e02d449efea36cc7e5",
+          "route": "fallback",
+          "source": 4194304
+        },
+        {
+          "instruction_hex": "480fb1d1",
+          "model_sha256": "c39b64a261fe727df0d2c03f160e51e2851dfefcda7a47b4d1e8ad26df197133",
+          "route": "fallback",
+          "source": 4194304
+        },
+        {
+          "instruction_hex": "480fb1d3",
+          "model_sha256": "84469d78948b19e0c00ed52f4b822c05da07092ebd5c7151394220a524f1a97c",
+          "route": "fallback",
+          "source": 4194304
+        },
+        {
+          "instruction_hex": "480fb1e1",
+          "model_sha256": "1eb53e963219349abe10c8a673745e83c56ceaa04dd933e615d33c34b9b7145b",
+          "route": "fallback",
+          "source": 4194304
+        }
+      ]
+    }
+  ],
+  "file_counts": {
+    "acq_evidence": 100,
+    "acquisitions": 100,
+    "fuzz": 100,
+    "fuzz_evidence": 100,
+    "models": 100
+  },
+  "fuzz_processing": {
+    "complete": 80,
+    "incomplete": 20
+  },
+  "fuzz_statuses": {
+    "incomplete": 20,
+    "mismatch": 4,
+    "pass": 76
+  },
+  "incomplete": [
+    {
+      "agreements": 3838,
+      "disagreements": 378,
+      "error": null,
+      "executions": 4629,
+      "instruction": "e800000000",
+      "reason": "fuzz worker exited without a result",
+      "unusable": 412
+    },
+    {
+      "agreements": 0,
+      "disagreements": 0,
+      "error": null,
+      "executions": 0,
+      "instruction": "f20f59c1",
+      "reason": "preparation produced no executable models",
+      "unusable": 0
+    },
+    {
+      "agreements": 0,
+      "disagreements": 0,
+      "error": null,
+      "executions": 0,
+      "instruction": "f20f58c1",
+      "reason": "preparation produced no executable models",
+      "unusable": 0
+    },
+    {
+      "agreements": 0,
+      "disagreements": 0,
+      "error": null,
+      "executions": 0,
+      "instruction": "660f2ec1",
+      "reason": "preparation produced no executable models",
+      "unusable": 0
+    },
+    {
+      "agreements": 0,
+      "disagreements": 0,
+      "error": null,
+      "executions": 0,
+      "instruction": "f20f5cc1",
+      "reason": "preparation produced no executable models",
+      "unusable": 0
+    },
+    {
+      "agreements": 0,
+      "disagreements": 0,
+      "error": null,
+      "executions": 0,
+      "instruction": "f2480f2ac0",
+      "reason": "preparation produced no executable models",
+      "unusable": 0
+    },
+    {
+      "agreements": 0,
+      "disagreements": 0,
+      "error": null,
+      "executions": 0,
+      "instruction": "0f0b",
+      "reason": "preparation produced no executable models",
+      "unusable": 0
+    },
+    {
+      "agreements": 0,
+      "disagreements": 0,
+      "error": null,
+      "executions": 0,
+      "instruction": "48f7f3",
+      "reason": "preparation produced no executable models",
+      "unusable": 0
+    },
+    {
+      "agreements": 0,
+      "disagreements": 0,
+      "error": null,
+      "executions": 0,
+      "instruction": "f2480f2cc0",
+      "reason": "preparation produced no executable models",
+      "unusable": 0
+    },
+    {
+      "agreements": 0,
+      "disagreements": 0,
+      "error": null,
+      "executions": 0,
+      "instruction": "f20f5ec1",
+      "reason": "preparation produced no executable models",
+      "unusable": 0
+    },
+    {
+      "agreements": 0,
+      "disagreements": 0,
+      "error": null,
+      "executions": 0,
+      "instruction": "f30f59c1",
+      "reason": "preparation produced no executable models",
+      "unusable": 0
+    },
+    {
+      "agreements": 0,
+      "disagreements": 0,
+      "error": null,
+      "executions": 0,
+      "instruction": "f30f58c1",
+      "reason": "preparation produced no executable models",
+      "unusable": 0
+    },
+    {
+      "agreements": 0,
+      "disagreements": 0,
+      "error": null,
+      "executions": 0,
+      "instruction": "f348ab",
+      "reason": "preparation produced no executable models",
+      "unusable": 0
+    },
+    {
+      "agreements": 0,
+      "disagreements": 0,
+      "error": null,
+      "executions": 0,
+      "instruction": "f348a7",
+      "reason": "preparation produced no executable models",
+      "unusable": 0
+    },
+    {
+      "agreements": 0,
+      "disagreements": 0,
+      "error": null,
+      "executions": 0,
+      "instruction": "c5f358c2",
+      "reason": "preparation produced no executable models",
+      "unusable": 0
+    },
+    {
+      "agreements": 0,
+      "disagreements": 0,
+      "error": null,
+      "executions": 0,
+      "instruction": "f20f5fc1",
+      "reason": "preparation produced no executable models",
+      "unusable": 0
+    },
+    {
+      "agreements": 0,
+      "disagreements": 0,
+      "error": null,
+      "executions": 0,
+      "instruction": "660f59c1",
+      "reason": "preparation produced no executable models",
+      "unusable": 0
+    },
+    {
+      "agreements": 0,
+      "disagreements": 0,
+      "error": null,
+      "executions": 0,
+      "instruction": "0f2ec1",
+      "reason": "preparation produced no executable models",
+      "unusable": 0
+    },
+    {
+      "agreements": 0,
+      "disagreements": 0,
+      "error": null,
+      "executions": 0,
+      "instruction": "f30f5cc1",
+      "reason": "preparation produced no executable models",
+      "unusable": 0
+    },
+    {
+      "agreements": 0,
+      "disagreements": 0,
+      "error": null,
+      "executions": 0,
+      "instruction": "f30f5ac1",
+      "reason": "preparation produced no executable models",
+      "unusable": 0
+    }
+  ],
+  "mismatches": [
+    {
+      "agreements": 9666,
+      "differences": [
+        "rip: model=0xa056c344b373872c, emulator=0x0",
+        "mirrored_pc: model=0xa056c344b373872c, emulator=0x0"
+      ],
+      "disagreements": 334,
+      "executions": 10000,
+      "instruction": "c3",
+      "unusable": 0
+    },
+    {
+      "agreements": 1879,
+      "differences": [
+        "rflags_ZF: model=0x0, emulator=0x1"
+      ],
+      "disagreements": 8121,
+      "executions": 10000,
+      "instruction": "480fa3d8",
+      "unusable": 0
+    },
+    {
+      "agreements": 4208,
+      "differences": [
+        "rflags_PF: model=0x0, emulator=0x1"
+      ],
+      "disagreements": 5792,
+      "executions": 10000,
+      "instruction": "480fbdc3",
+      "unusable": 0
+    },
+    {
+      "agreements": 9606,
+      "differences": [
+        "rbp: model=0x1da286d2f3ed5e40, emulator=0x1da286d2f3ed0000"
+      ],
+      "disagreements": 394,
+      "executions": 10000,
+      "instruction": "c9",
+      "unusable": 0
+    }
+  ],
+  "preparation_seconds": {
+    "max": 0.18759686592966318,
+    "mean": 0.05408988948329352,
+    "median": 0.052170749520882964,
+    "min": 0.03622277220711112,
+    "n": 80,
+    "p90": 0.06878977012820542
+  },
+  "run.exit": "0",
+  "run.finished": "2026-09-06T10:01:50,148045071-07:00",
+  "run.started": "2026-09-06T09:18:15,370188566-07:00",
+  "sizes_bytes": {
+    "acq_evidence": 179873,
+    "acquisitions": 52131480,
+    "fuzz": 200849,
+    "fuzz_evidence": 982955161,
+    "models": 13620045,
+    "total_outputs": 1049087408
+  },
+  "total_acquisition_findings": 87,
+  "total_agreements": 789197,
+  "total_disagreements": 15019,
+  "total_executions": 804629,
+  "total_generation_findings": 0,
+  "total_seconds": {
+    "max": 425.1485929149203,
+    "mean": 333.03667587989764,
+    "median": 402.7168546229368,
+    "min": 215.47537453379482,
+    "n": 80,
+    "p90": 413.03020412195474
+  },
+  "total_unusable": 412,
+  "wall_seconds": 2614.777857
+}

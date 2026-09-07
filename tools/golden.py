@@ -91,7 +91,7 @@ def _digest(data: bytes) -> str:
 
 def _artifact_contents(destination: PurePosixPath, source: Path) -> bytes:
     data = source.read_bytes()
-    if destination.name.endswith(".model.json.zst"):
+    if destination.name.endswith(".json.zst"):
         return subprocess.run(
             (
                 "zstd",
@@ -133,6 +133,14 @@ def _update(directory: Path, contents: dict[PurePosixPath, bytes]) -> int:
     ]
     if _write_if_changed(directory / "MANIFEST.sha256", _manifest(contents)):
         changed.append("MANIFEST.sha256")
+    # Retire only the plain counterparts of successfully written compressed files.
+    for destination in sorted(contents):
+        if destination.name.endswith(".json.zst"):
+            plain = destination.with_suffix("")
+            previous = directory.joinpath(*plain.parts)
+            if plain not in contents and previous.is_file():
+                previous.unlink()
+                changed.append("removed " + plain.as_posix())
     if changed:
         print("updated golden artifacts: " + ", ".join(changed))
     else:

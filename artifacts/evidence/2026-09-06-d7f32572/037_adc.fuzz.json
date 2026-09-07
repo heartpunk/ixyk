@@ -1,0 +1,50 @@
+{
+  "acquisition_findings": 0,
+  "agreements": 10000,
+  "budget": {
+    "executions": 10000,
+    "seconds": 1800
+  },
+  "checkpoint": {
+    "entries": {},
+    "identity": {
+      "hypothesis": "6.160.0",
+      "instruction_hex": "4811d8",
+      "model_sha256": "3d1bc454310d49105777bfd00641de388391bedb21580ec0ff00286226a0d160",
+      "prepared_models": [
+        {
+          "instruction_hex": "4811d8",
+          "model_sha256": "3d1bc454310d49105777bfd00641de388391bedb21580ec0ff00286226a0d160",
+          "route": "generalized",
+          "source": 4194304
+        }
+      ],
+      "strategy": "ixyk.prepared-state-memory.v1"
+    }
+  },
+  "disagreements": 0,
+  "elapsed_seconds": 406.36073282407597,
+  "examples_requested": 10000,
+  "execution_seconds": 403.73207181715406,
+  "executions": 10000,
+  "fallback_allocations": {},
+  "generation_findings": 0,
+  "input_sha256": "92e3389bde75166b6f2d6e96074460203389a3c67e9dbad179ec822fc23eb594",
+  "instruction_hex": "4811d8",
+  "planned_fallback_allocations": {},
+  "preparation_seconds": 0.05502745322883129,
+  "prepared_models": [
+    {
+      "instruction_hex": "4811d8",
+      "model_sha256": "3d1bc454310d49105777bfd00641de388391bedb21580ec0ff00286226a0d160",
+      "route": "generalized",
+      "source": 4194304
+    }
+  ],
+  "processing": "complete",
+  "schema": "ixyk.differential_fuzz.v1",
+  "stage": "discover",
+  "status": "pass",
+  "total_seconds": 403.78710059821606,
+  "unusable": 0
+}

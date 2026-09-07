@@ -1,0 +1,46 @@
+{
+  "complete_records": 9667,
+  "file": "/srv/build-scratch/bazel-output-user-root/420a495630955211d003a8bbacd0ab8d/execroot/_main/bazel-out/k8-fastbuild/bin/overnight/003_call.fuzz.evidence.zst",
+  "manifest": {
+    "backend": "ixyk.reference-json.v1",
+    "commit": "94a99a9dfdc7dec295c3231465d4ae7a6e9626f0",
+    "invocation_id": "d7f32572-64dd-4474-8475-0fe7f735dac5",
+    "stream_id": "5ef770e4-4f39-4bdd-b32f-b56b187d3666",
+    "types": [
+      {
+        "kind": "acquisition",
+        "python_type": "extractor.evidence_events.Acquisition",
+        "representation": "extractor.evidence_events.Acquisition"
+      },
+      {
+        "kind": "comparison",
+        "python_type": "extractor.evidence_events.Comparison",
+        "representation": "extractor.evidence_events.Comparison"
+      },
+      {
+        "kind": "finding",
+        "python_type": "extractor.evidence_events.Finding",
+        "representation": "extractor.evidence_events.Finding"
+      },
+      {
+        "kind": "fuzz_input",
+        "python_type": "extractor.evidence_events.FuzzInput",
+        "representation": "extractor.evidence_events.FuzzInput"
+      },
+      {
+        "kind": "instruction_model",
+        "python_type": "extractor.artifact.InstructionModel",
+        "representation": "extractor.artifact.InstructionModel"
+      },
+      {
+        "kind": "tool_failure",
+        "python_type": "extractor.evidence_events.ToolFailure",
+        "representation": "extractor.evidence_events.ToolFailure"
+      }
+    ],
+    "version": 1
+  },
+  "trailing_partial_bytes": 144578,
+  "zstd_error": "/srv/build-scratch/bazel-output-user-root/420a495630955211d003a8bbacd0ab8d/execroot/_main/bazel-out/k8-fastbuild/bin/overnight/003_call.fuzz.evidence.zst : Read error (39) : premature end",
+  "zstd_exit": 1
+}
