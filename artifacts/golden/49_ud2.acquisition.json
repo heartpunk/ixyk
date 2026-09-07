@@ -1,6 +1,0 @@
-{
-  "error": "SimIRSBNoDecodeError: IR decoding error at 0x400000. You can hook this instruction with a python replacement using project.hook(0x400000, your_function, length=length_of_instruction).",
-  "instruction_hex": "0f0b",
-  "schema": "ixyk.instruction_acquisition.v1",
-  "status": "acquisition_error"
-}

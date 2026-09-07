@@ -1,0 +1,37 @@
+{
+  "acquisition_findings": 5,
+  "agreements": 0,
+  "budget": {
+    "executions": 10000,
+    "seconds": 1800
+  },
+  "checkpoint": {
+    "entries": {},
+    "identity": {
+      "hypothesis": "6.160.0",
+      "instruction_hex": "f2480f2ac0",
+      "model_sha256": null,
+      "prepared_models": [],
+      "strategy": "ixyk.prepared-state-memory.v1"
+    }
+  },
+  "disagreements": 0,
+  "elapsed_seconds": 2.129770032130182,
+  "examples_requested": 10000,
+  "execution_seconds": 0.0,
+  "executions": 0,
+  "fallback_allocations": {},
+  "generation_findings": 0,
+  "input_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "instruction_hex": "f2480f2ac0",
+  "planned_fallback_allocations": {},
+  "preparation_seconds": 0.05022521293722093,
+  "prepared_models": [],
+  "processing": "incomplete",
+  "reason": "preparation produced no executable models",
+  "schema": "ixyk.differential_fuzz.v1",
+  "stage": "discover",
+  "status": "incomplete",
+  "total_seconds": 0.050238105934113264,
+  "unusable": 0
+}
