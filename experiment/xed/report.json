@@ -848,7 +848,7 @@
   },
   "limitations": [
     "Recipe matching checks encoding/domain/alias applicability, not AU instantiation or semantic validity.",
-    "The table-inclusive scope unions all candidates from five source-identified tables; it is not specialized to only valid x86-64 inputs.",
+    "The table-inclusive scope unions five source-identified dispatch tables and 23 generated nested lookup tables; it is not specialized to only valid x86-64 inputs.",
     "Other unresolved indirect transfers remain explicit. Static table contents and runtime initialization are distinct obligations.",
     "Static initialized data and output-structure layout are part of the eventual decoder STS state."
   ]

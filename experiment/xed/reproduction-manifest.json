@@ -1,0 +1,41 @@
+{
+  "invocation": [
+    "/home/heartpunk/ixyk-analysis/source/inventory/xed_family_analysis.py",
+    "--facts",
+    "/home/heartpunk/ixyk-analysis/xed/run-v4/facts",
+    "--tables",
+    "/home/heartpunk/ixyk-analysis/xed/tables-v2",
+    "--records",
+    "/home/heartpunk/ixyk-analysis/xed/records/RecordCapture.facts",
+    "--patterns",
+    "/home/heartpunk/ixyk-analysis/xed/source-patterns.json",
+    "--catalog",
+    "/home/heartpunk/ixyk-analysis/xed/x86_64_top_100.json",
+    "--matches",
+    "/home/heartpunk/ixyk-analysis/xed/grouped-matches.json",
+    "--souffle",
+    "/nix/store/lhn9x9z2zwh8pzsdrnfcmq1qa5wbss41-souffle-2.4/bin/souffle",
+    "--out",
+    "/home/heartpunk/ixyk-analysis/xed/reproduced"
+  ],
+  "input_sha256": {
+    "/home/heartpunk/ixyk-analysis/xed/records/RecordCapture.facts": "b3684c153d3de73773b9f90769c4af74e275fb70fa3bd23e63293fba74165460",
+    "/home/heartpunk/ixyk-analysis/xed/source-patterns.json": "1724a1a3b7a9491be16a1306e51e4a400cad1a08bd9cf84add7500365c386df3",
+    "/home/heartpunk/ixyk-analysis/xed/x86_64_top_100.json": "0fbb3c35a2dcc16564c71891f42740b7050247a6288c3cc6382c2334b805543d",
+    "/home/heartpunk/ixyk-analysis/xed/grouped-matches.json": "ee0463c773803de8a9e98ed91661a890df72199ac58e7cbcbba1506af0fbff63",
+    "/home/heartpunk/ixyk-analysis/xed/reproduced/facts/Unknown.facts": "8d32c1e05448a8df77426fc7bd22547a334aca2425d3cef8e7d0a7f85aaa44c4",
+    "/home/heartpunk/ixyk-analysis/xed/reproduced/facts/Model.facts": "9d433fdc0535fde74d955b381f12a059b666f2685f3a1e2c73a4e902c773c198",
+    "/home/heartpunk/ixyk-analysis/xed/reproduced/facts/Need.facts": "f78952b8c71aaaf8d37c8e5850e46bc97cef2ac9950b3c02f88cb9ad3069f185",
+    "/home/heartpunk/ixyk-analysis/xed/reproduced/facts/RecordCapture.facts": "b3684c153d3de73773b9f90769c4af74e275fb70fa3bd23e63293fba74165460",
+    "/home/heartpunk/ixyk-analysis/xed/reproduced/facts/FamilyLookup.facts": "2a5d59db79483b8083cbe26130f333836dacfd7e7e14b839a6ba8e08bb6c74af",
+    "/home/heartpunk/ixyk-analysis/xed/reproduced/facts/Edge.facts": "014a4e870d57688a4e60f76fb010143467ecaeba0ff904e368a23576acd4e938",
+    "/home/heartpunk/ixyk-analysis/xed/reproduced/facts/Insn.facts": "c79554a4e5e7924e3d8afe8a0db47d27c61370224ac55a739d130ea83c574195",
+    "/home/heartpunk/ixyk-analysis/xed/reproduced/facts/Callback.facts": "85f5dc04815b27e25690d80f24eadba82642fd58a6b77370b0aee37b54e036ce",
+    "/home/heartpunk/ixyk-analysis/xed/reproduced/facts/Root.facts": "677103ea98f352fdf9f3279016daf73250c373b3d81799ddc929d0d044130b8d",
+    "/home/heartpunk/ixyk-analysis/xed/reproduced/facts/XedFunction.facts": "4dd0452258a1453934015467a489aa8e0dba37af51c62abe8bc7e5b874f10526",
+    "/home/heartpunk/ixyk-analysis/xed/reproduced/facts/FamilyForm.facts": "ccc101ac3b110178ef04d54b881dce2256f56e31244ba2ebc3e7821b3c7ac08c",
+    "/home/heartpunk/ixyk-analysis/xed/reproduced/facts/Order.facts": "780ed93608377d8d648d9d5eb4c73730fabdeb59b9355854fc62555d07b0bdb1",
+    "/home/heartpunk/ixyk-analysis/xed/reproduced/facts/ScopeSite.facts": "3944a0204bfdf7a3f963d76cdb9129e847d77eb2695bca414955e77f3844c5a7"
+  },
+  "scope": "Candidate envelopes; semantic and domain obligations remain explicit"
+}
