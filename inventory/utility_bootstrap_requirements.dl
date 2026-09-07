@@ -1,0 +1,52 @@
+// Missing host instruction requirements, with imports treated as contracts.
+.decl Root(g:number,b:unsigned)
+.input Root
+.decl Member(e:unsigned,b:unsigned)
+.input Member
+.decl Block(b:unsigned)
+.input Block
+.decl Encoding(b:unsigned,h:symbol,op:symbol)
+.input Encoding
+.decl Match(h:symbol,status:symbol)
+.input Match
+.decl Available(h:symbol)
+Available(h) :- Match(h,"generalized_recipe").
+.decl Edge(b:unsigned,n:unsigned)
+.input Edge
+.decl Import(b:unsigned,s:symbol)
+.input Import
+.decl Unknown(b:unsigned,r:symbol)
+.input Unknown
+.decl Reach(b:unsigned)
+Reach(b) :- Root(_,b).
+Reach(n) :- Reach(b),Edge(b,n).
+.decl Missing(b:unsigned,op:symbol)
+Missing(b,op) :- Encoding(b,h,op),!Available(h).
+.decl Requires(b:unsigned,op:symbol)
+Requires(b,op) :- Reach(b),Missing(b,op).
+Requires(b,op) :- Reach(b),Edge(b,n),Requires(n,op).
+.decl Need(m:symbol,g:number,op:symbol)
+Need("handler",g,op) :- Root(g,e),Member(e,b),Missing(b,op).
+Need("executable",g,op) :- Root(g,b),Requires(b,op).
+.output Need
+.decl Contract(b:unsigned,s:symbol)
+Contract(b,s) :- Reach(b),Import(b,s).
+Contract(b,s) :- Reach(b),Edge(b,n),Contract(n,s).
+.decl Boundary(g:number,s:symbol)
+Boundary(g,s) :- Root(g,b),Contract(b,s).
+.output Boundary
+.decl Incomplete(b:unsigned,r:symbol)
+Incomplete(b,r) :- Reach(b),Unknown(b,r).
+Incomplete(b,"missing_target_block") :- Root(_,b),!Block(b).
+Incomplete(b,r) :- Reach(b),Edge(b,n),Incomplete(n,r).
+.decl Open(g:number,r:symbol)
+Open(g,r) :- Root(g,b),Incomplete(b,r).
+.output Open
+.decl HasMember(e:unsigned)
+HasMember(e) :- Member(e,_).
+.decl MissingMember(g:number)
+MissingMember(g) :- Root(g,e),!HasMember(e).
+.output MissingMember
+.decl HasBody(g:number)
+HasBody(g) :- Root(g,e),Member(e,b),Encoding(b,_,op),op!="RET",op!="NOP",op!="ENDBR64".
+.output HasBody

@@ -1,0 +1,40 @@
+// Analyze model-applicability requirements; no assertion of semantic proof.
+.decl ScopeSite(f:symbol,m:symbol,a:unsigned,h:symbol,op:symbol)
+.input ScopeSite
+.decl Model(h:symbol,status:symbol,form:symbol)
+.input Model
+.decl Family(f:symbol)
+Family(f) :- ScopeSite(f,_,_,_,_).
+.decl Need(f:symbol,status:symbol,form:symbol)
+Need(f,s,form) :- ScopeSite(f,_,_,h,_),Model(h,s,form),s!="generalized_recipe".
+.output Need
+.decl Missing(f:symbol,form:symbol)
+Missing(f,form) :- Need(f,"missing_form",form).
+.output Missing
+.decl MissingFrequency(form:symbol,n:number)
+MissingFrequency(form,n) :- Missing(_,form), n=count : Missing(_,form).
+.output MissingFrequency
+.decl UnionSite(m:symbol,a:unsigned,h:symbol,op:symbol)
+UnionSite(m,a,h,op) :- ScopeSite(_,m,a,h,op).
+.output UnionSite
+.decl SiteFamilies(a:unsigned,n:number)
+SiteFamilies(a,n) :- UnionSite(_,a,_,_), n=count : ScopeSite(_,_,a,_,_).
+.output SiteFamilies
+.decl SharedSite(a:unsigned,h:symbol,op:symbol)
+SharedSite(a,h,op) :- UnionSite(_,a,h,op),SiteFamilies(a,100).
+.output SharedSite
+.decl Scenario(s:symbol)
+Scenario("current").
+Scenario("perfect_AU").
+Scenario("perfect_AU_PPN").
+Scenario("perfect_AU_PPN_IMUL_SAR_NOP").
+.decl Supplied(s:symbol,form:symbol)
+Supplied("perfect_AU_PPN",form) :- Model(_,_,form),match("(PUSH|POP|NOT)_.*",form).
+Supplied("perfect_AU_PPN_IMUL_SAR_NOP",form) :- Model(_,_,form),match("(PUSH|POP|NOT|IMUL|SAR|NOP)_.*",form).
+.decl Blocked(s:symbol,f:symbol,form:symbol)
+Blocked("current",f,form) :- Need(f,_,form).
+Blocked(s,f,form) :- Scenario(s),s!="current",Missing(f,form),!Supplied(s,form).
+.output Blocked
+.decl Applicable(s:symbol,f:symbol)
+Applicable(s,f) :- Scenario(s),Family(f),!Blocked(s,f,_).
+.output Applicable

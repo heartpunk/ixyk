@@ -1,0 +1,81 @@
+{
+  "ranking_basis": "Shared prerequisites first, then the smallest validated candidate scope, then marginal additional requirement groups. No numeric effort estimate or claim of global optimality.",
+  "sequence": [
+    {
+      "pr": 1,
+      "change": "Bring push/pop/not support to the current pipeline",
+      "prerequisites": [
+        "existing PR #36 updated to current interfaces"
+      ],
+      "acceptance": [
+        "Concrete required PUSH_GPRv_50, POP_GPRv_58 and NOT_GPRv variants instantiate and validate in the existing STS pipeline"
+      ],
+      "benefit": "Removes three absent-form groups shared by all 100 candidate scopes; alone completes none."
+    },
+    {
+      "pr": 2,
+      "change": "Close the remaining shared scalar form gaps",
+      "prerequisites": [
+        "current model/adaptor interfaces"
+      ],
+      "acceptance": [
+        "Validate IMUL_GPRv_GPRv_IMMz, IMUL_GPRv_GPRv_IMMb, SAR_GPRv_IMMb and NOP_90 on the required domains"
+      ],
+      "benefit": "Together with PR1 removes every absent-form group in the combined 100-family scope. Historical SAR/IMUL are different concrete forms and cannot be counted as satisfying these requirements."
+    },
+    {
+      "pr": 3,
+      "change": "Resolve the common AU/adaptor requirements and establish initialized decoder contracts",
+      "prerequisites": [
+        "PR1 and PR2 for a complete first decoder"
+      ],
+      "acceptance": [
+        "Instantiate and validate all required models for the 3,260 shared sites",
+        "Establish initialized table/relocation state and stack-check contract",
+        "Prioritize actual failing case groups; common immediate CMP/AND/ADD/MOV, LEA and shifts are measured hotspots"
+      ],
+      "benefit": "Common prerequisites for every family; use UD2 scope as the first complete acceptance target."
+    },
+    {
+      "pr": 4,
+      "change": "Deliver the first precise restricted-domain decoder embedding, starting with UD2",
+      "prerequisites": [
+        "PR3",
+        "source admission and dispatch-domain proof obligations"
+      ],
+      "acceptance": [
+        "Lift and compose the measured 3,266-site candidate envelope or a proved smaller specialization",
+        "Prove full decoded output equivalence under the declared input domain",
+        "Handle invalid/out-of-family inputs only if an explicit total-wrapper theorem is included"
+      ],
+      "benefit": "First end-to-end decoder result; exercises the existing STS and equivalence workflow."
+    },
+    {
+      "pr": 5,
+      "change": "Expand by measured marginal batches",
+      "prerequisites": [
+        "PR4"
+      ],
+      "acceptance": [
+        "Use marginal/Marginal.csv and NewNeed.csv to select each batch",
+        "First measured batch: INT3, CLC, LEAVE, RET, PMOVMSKB; zero new form/status groups after UD2, but additional cases and composition proofs remain",
+        "Refresh applicability and per-family proofs at each batch"
+      ],
+      "benefit": "Grow toward all 100 without requiring the entire XED decoder upfront."
+    },
+    {
+      "pr": 6,
+      "change": "Close remaining top-100 AU cases, then expand to full XED",
+      "prerequisites": [
+        "validated family batches"
+      ],
+      "acceptance": [
+        "Complete precise domains for all 100 families and their union",
+        "Full decoder additionally covers all other instruction records, invalid-input behavior, and remaining host form gaps",
+        "Prioritize immediate MOV/ADD/SUB/CMP/AND case repair by measured counts rather than adding unrelated theories"
+      ],
+      "benefit": "Combined 100 candidate scope is 291,329 sites; full decoder candidate scope is 480,088 sites."
+    }
+  ],
+  "parallel_option": "Existing emulator bootstrap can supply some missing variants after integer-core repairs and proved handler contracts; see bootstrap-context.json. Keep FP theory work separate unless a chosen implementation introduces FP host operations."
+}

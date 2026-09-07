@@ -1,0 +1,855 @@
+{
+  "scope": "XED x86-64 decode with initialized tables; initialization reported separately; no runtime-library bodies.",
+  "invocation": [
+    "/home/heartpunk/ixyk-analysis/source/inventory/xed_analysis.py",
+    "--binary",
+    "/home/heartpunk/ixyk-analysis/xed/decode-harness",
+    "--gtirb",
+    "/home/heartpunk/ixyk-analysis/xed/decode-harness.gtirb",
+    "--relations",
+    "/home/heartpunk/ixyk-analysis/xed/relations",
+    "--index",
+    "/home/heartpunk/ixyk-analysis/xed/au-index-v2.json",
+    "--native",
+    "/home/heartpunk/ixyk-analysis/source/utility-xed.so",
+    "--souffle",
+    "/nix/store/lhn9x9z2zwh8pzsdrnfcmq1qa5wbss41-souffle-2.4/bin/souffle",
+    "--tables",
+    "/home/heartpunk/ixyk-analysis/xed/tables-v2",
+    "--out",
+    "/home/heartpunk/ixyk-analysis/xed/run-v4"
+  ],
+  "provenance": {
+    "facts_manifest": {
+      "modules": [
+        {
+          "name": "xed",
+          "relations": {
+            "instruction": {
+              "path": "/home/heartpunk/ixyk-analysis/xed/relations/disassembly/instruction.csv",
+              "sha256": "a6d99fd1f349473536d4356f1f652058878a460226d28382b07e690595432d9e"
+            },
+            "code_in_refined_block": {
+              "path": "/home/heartpunk/ixyk-analysis/xed/relations/disassembly/code_in_refined_block.csv",
+              "sha256": "08108330543c33ea3aed4bbfe4d1392708fee36206fad7e2246c665c555e4473"
+            }
+          },
+          "elf": "/home/heartpunk/ixyk-analysis/xed/decode-harness",
+          "gtirb": "/home/heartpunk/ixyk-analysis/xed/decode-harness.gtirb",
+          "shift": 1099511627776,
+          "blocks": 129367,
+          "needed": [
+            "libc.so.6"
+          ],
+          "elf_sha256": "fd51b46ea3a1df68fee22544dffedf97c35f8bad2fc6e8a66afe680bf630063a",
+          "gtirb_sha256": "85e976221279776f5e0d841605bf5f577be71ba871ae8cf5c123a1924b4fc95a"
+        }
+      ],
+      "scope": "utility function entries; process initialization remains separate",
+      "fact_counts": {
+        "Edge": 115267,
+        "Insn": 526382,
+        "Root": 2,
+        "Import": 9,
+        "Export": 0,
+        "Unknown": 32209,
+        "Function": 51000,
+        "Member": 129367,
+        "Module": 129367
+      }
+    },
+    "binary_sha256": "fd51b46ea3a1df68fee22544dffedf97c35f8bad2fc6e8a66afe680bf630063a",
+    "gtirb_sha256": "85e976221279776f5e0d841605bf5f577be71ba871ae8cf5c123a1924b4fc95a",
+    "au_index_sha256": "2c479de43436c06e5be727598d3ee282581b19de57b2f5e555b9bff011727a3e",
+    "native_sha256": "d62ac7e900cfa6d861a8704aaa33503e2df077ff8c8cc3a76a0a5c8cc1766ce2",
+    "table_callbacks_sha256": "85f5dc04815b27e25690d80f24eadba82642fd58a6b77370b0aee37b54e036ce",
+    "table_unresolved_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "driver_sha256": "7bec63b3129e907291310c889ed6cd22bf3df0254da725b26423ddbab48eb9ef"
+  },
+  "matches": {
+    "decoder": {
+      "sites": 2937,
+      "status_counts": {
+        "ungeneralized_case": 395,
+        "generalized_recipe": 2429,
+        "unmatched_case": 4,
+        "direct_encoding": 44,
+        "missing_form": 65
+      },
+      "gaps": [
+        {
+          "status": "ungeneralized_case",
+          "form": "CMP_MEMb_IMMb_80r7",
+          "sites": 62
+        },
+        {
+          "status": "ungeneralized_case",
+          "form": "AND_GPRv_IMMb",
+          "sites": 55
+        },
+        {
+          "status": "ungeneralized_case",
+          "form": "LEA_GPRv_AGEN",
+          "sites": 41
+        },
+        {
+          "status": "ungeneralized_case",
+          "form": "ADD_GPRv_IMMb",
+          "sites": 40
+        },
+        {
+          "status": "missing_form",
+          "form": "POP_GPRv_58",
+          "sites": 32
+        },
+        {
+          "status": "ungeneralized_case",
+          "form": "SHR_GPRv_IMMb",
+          "sites": 32
+        },
+        {
+          "status": "ungeneralized_case",
+          "form": "MOV_GPRv_IMMv",
+          "sites": 30
+        },
+        {
+          "status": "ungeneralized_case",
+          "form": "CMP_AL_IMMb",
+          "sites": 25
+        },
+        {
+          "status": "ungeneralized_case",
+          "form": "CMP_GPRv_IMMb",
+          "sites": 22
+        },
+        {
+          "status": "ungeneralized_case",
+          "form": "CMP_GPR8_IMMb_80r7",
+          "sites": 22
+        },
+        {
+          "status": "direct_encoding",
+          "form": "AND_GPRv_IMMb",
+          "sites": 21
+        },
+        {
+          "status": "missing_form",
+          "form": "PUSH_GPRv_50",
+          "sites": 20
+        },
+        {
+          "status": "ungeneralized_case",
+          "form": "SHR_GPR8_IMMb",
+          "sites": 13
+        },
+        {
+          "status": "ungeneralized_case",
+          "form": "SUB_GPRv_IMMb",
+          "sites": 11
+        },
+        {
+          "status": "ungeneralized_case",
+          "form": "XOR_GPRv_IMMb",
+          "sites": 9
+        },
+        {
+          "status": "direct_encoding",
+          "form": "MOV_GPRv_IMMv",
+          "sites": 7
+        },
+        {
+          "status": "ungeneralized_case",
+          "form": "SHL_GPRv_IMMb_C1r4",
+          "sites": 7
+        },
+        {
+          "status": "direct_encoding",
+          "form": "CMP_GPRv_IMMb",
+          "sites": 6
+        },
+        {
+          "status": "missing_form",
+          "form": "NOT_GPRv",
+          "sites": 6
+        },
+        {
+          "status": "ungeneralized_case",
+          "form": "TEST_GPR8_IMMb_F6r0",
+          "sites": 5
+        },
+        {
+          "status": "ungeneralized_case",
+          "form": "SUB_GPRv_IMMz",
+          "sites": 4
+        },
+        {
+          "status": "direct_encoding",
+          "form": "SHR_GPRv_IMMb",
+          "sites": 4
+        },
+        {
+          "status": "ungeneralized_case",
+          "form": "AND_GPRv_IMMz",
+          "sites": 3
+        },
+        {
+          "status": "ungeneralized_case",
+          "form": "CMP_GPRv_IMMz",
+          "sites": 3
+        },
+        {
+          "status": "ungeneralized_case",
+          "form": "MOV_MEMv_IMMz",
+          "sites": 2
+        },
+        {
+          "status": "ungeneralized_case",
+          "form": "TEST_OrAX_IMMz",
+          "sites": 2
+        },
+        {
+          "status": "direct_encoding",
+          "form": "LEA_GPRv_AGEN",
+          "sites": 2
+        },
+        {
+          "status": "missing_form",
+          "form": "NOP_90",
+          "sites": 2
+        },
+        {
+          "status": "ungeneralized_case",
+          "form": "CMP_MEMv_IMMb",
+          "sites": 2
+        },
+        {
+          "status": "ungeneralized_case",
+          "form": "CMP_OrAX_IMMz",
+          "sites": 2
+        },
+        {
+          "status": "missing_form",
+          "form": "SAR_GPRv_IMMb",
+          "sites": 2
+        },
+        {
+          "status": "missing_form",
+          "form": "IMUL_GPRv_GPRv_IMMz",
+          "sites": 2
+        },
+        {
+          "status": "unmatched_case",
+          "form": "SUB_GPRv_MEMv",
+          "sites": 1
+        },
+        {
+          "status": "unmatched_case",
+          "form": "MOV_GPRv_MEMv",
+          "sites": 1
+        },
+        {
+          "status": "ungeneralized_case",
+          "form": "TEST_MEMb_IMMb_F6r0",
+          "sites": 1
+        },
+        {
+          "status": "ungeneralized_case",
+          "form": "ADD_GPRv_IMMz",
+          "sites": 1
+        },
+        {
+          "status": "ungeneralized_case",
+          "form": "ADD_MEMb_IMMb_80r0",
+          "sites": 1
+        },
+        {
+          "status": "unmatched_case",
+          "form": "LEA_GPRv_AGEN",
+          "sites": 1
+        },
+        {
+          "status": "unmatched_case",
+          "form": "NOP_MEMv_0F1F",
+          "sites": 1
+        },
+        {
+          "status": "direct_encoding",
+          "form": "XOR_GPRv_IMMb",
+          "sites": 1
+        },
+        {
+          "status": "direct_encoding",
+          "form": "CMP_AL_IMMb",
+          "sites": 1
+        },
+        {
+          "status": "direct_encoding",
+          "form": "CMP_GPR8_IMMb_80r7",
+          "sites": 1
+        },
+        {
+          "status": "direct_encoding",
+          "form": "SHR_GPR8_IMMb",
+          "sites": 1
+        },
+        {
+          "status": "missing_form",
+          "form": "IMUL_GPRv_GPRv_IMMb",
+          "sites": 1
+        }
+      ]
+    },
+    "decoder_with_tables": {
+      "sites": 480088,
+      "status_counts": {
+        "ungeneralized_case": 142361,
+        "generalized_recipe": 322317,
+        "direct_encoding": 10919,
+        "unmatched_case": 1384,
+        "missing_form": 3107
+      },
+      "gaps": [
+        {
+          "status": "ungeneralized_case",
+          "form": "MOV_GPRv_IMMv",
+          "sites": 44835
+        },
+        {
+          "status": "ungeneralized_case",
+          "form": "ADD_GPRv_IMMb",
+          "sites": 29884
+        },
+        {
+          "status": "ungeneralized_case",
+          "form": "SUB_GPRv_IMMb",
+          "sites": 29867
+        },
+        {
+          "status": "ungeneralized_case",
+          "form": "CMP_OrAX_IMMz",
+          "sites": 18760
+        },
+        {
+          "status": "ungeneralized_case",
+          "form": "AND_GPRv_IMMb",
+          "sites": 8452
+        },
+        {
+          "status": "direct_encoding",
+          "form": "MUL_GPRv",
+          "sites": 3382
+        },
+        {
+          "status": "ungeneralized_case",
+          "form": "MUL_GPRv",
+          "sites": 3282
+        },
+        {
+          "status": "direct_encoding",
+          "form": "SHL_GPRv_IMMb_C1r4",
+          "sites": 3172
+        },
+        {
+          "status": "ungeneralized_case",
+          "form": "LEA_GPRv_AGEN",
+          "sites": 2444
+        },
+        {
+          "status": "ungeneralized_case",
+          "form": "SHR_GPRv_IMMb",
+          "sites": 2013
+        },
+        {
+          "status": "missing_form",
+          "form": "POP_GPRv_58",
+          "sites": 1498
+        },
+        {
+          "status": "direct_encoding",
+          "form": "AND_GPRv_IMMb",
+          "sites": 1353
+        },
+        {
+          "status": "unmatched_case",
+          "form": "LEA_GPRv_AGEN",
+          "sites": 1319
+        },
+        {
+          "status": "direct_encoding",
+          "form": "MOV_GPRv_IMMv",
+          "sites": 816
+        },
+        {
+          "status": "direct_encoding",
+          "form": "LEA_GPRv_AGEN",
+          "sites": 793
+        },
+        {
+          "status": "ungeneralized_case",
+          "form": "CMP_GPRv_IMMb",
+          "sites": 782
+        },
+        {
+          "status": "ungeneralized_case",
+          "form": "SHL_GPRv_IMMb_C1r4",
+          "sites": 715
+        },
+        {
+          "status": "direct_encoding",
+          "form": "CMP_AL_IMMb",
+          "sites": 692
+        },
+        {
+          "status": "missing_form",
+          "form": "IMUL_GPRv_GPRv_IMMz",
+          "sites": 691
+        },
+        {
+          "status": "missing_form",
+          "form": "PUSH_GPRv_50",
+          "sites": 636
+        },
+        {
+          "status": "ungeneralized_case",
+          "form": "CMP_MEMb_IMMb_80r7",
+          "sites": 595
+        },
+        {
+          "status": "ungeneralized_case",
+          "form": "CMP_GPR8_IMMb_80r7",
+          "sites": 353
+        },
+        {
+          "status": "direct_encoding",
+          "form": "SHR_GPRv_IMMb",
+          "sites": 320
+        },
+        {
+          "status": "ungeneralized_case",
+          "form": "CMP_AL_IMMb",
+          "sites": 261
+        },
+        {
+          "status": "missing_form",
+          "form": "IMUL_GPRv_GPRv_IMMb",
+          "sites": 260
+        },
+        {
+          "status": "direct_encoding",
+          "form": "CMP_GPR8_IMMb_80r7",
+          "sites": 177
+        },
+        {
+          "status": "direct_encoding",
+          "form": "CMP_GPRv_IMMb",
+          "sites": 144
+        },
+        {
+          "status": "direct_encoding",
+          "form": "SUB_GPRv_IMMb",
+          "sites": 68
+        },
+        {
+          "status": "unmatched_case",
+          "form": "NOP_MEMv_0F1F",
+          "sites": 63
+        },
+        {
+          "status": "ungeneralized_case",
+          "form": "AND_OrAX_IMMz",
+          "sites": 24
+        },
+        {
+          "status": "ungeneralized_case",
+          "form": "TEST_OrAX_IMMz",
+          "sites": 18
+        },
+        {
+          "status": "ungeneralized_case",
+          "form": "CMP_GPRv_IMMz",
+          "sites": 13
+        },
+        {
+          "status": "ungeneralized_case",
+          "form": "SHR_GPR8_IMMb",
+          "sites": 13
+        },
+        {
+          "status": "ungeneralized_case",
+          "form": "TEST_GPR8_IMMb_F6r0",
+          "sites": 10
+        },
+        {
+          "status": "ungeneralized_case",
+          "form": "XOR_GPRv_IMMb",
+          "sites": 9
+        },
+        {
+          "status": "ungeneralized_case",
+          "form": "SUB_OrAX_IMMz",
+          "sites": 8
+        },
+        {
+          "status": "missing_form",
+          "form": "SAR_GPRv_IMMb",
+          "sites": 8
+        },
+        {
+          "status": "ungeneralized_case",
+          "form": "SUB_GPRv_IMMz",
+          "sites": 6
+        },
+        {
+          "status": "ungeneralized_case",
+          "form": "MOV_MEMv_IMMz",
+          "sites": 6
+        },
+        {
+          "status": "missing_form",
+          "form": "NOT_GPRv",
+          "sites": 6
+        },
+        {
+          "status": "missing_form",
+          "form": "IMUL_GPRv",
+          "sites": 4
+        },
+        {
+          "status": "ungeneralized_case",
+          "form": "AND_GPRv_IMMz",
+          "sites": 3
+        },
+        {
+          "status": "missing_form",
+          "form": "NOP_90",
+          "sites": 2
+        },
+        {
+          "status": "ungeneralized_case",
+          "form": "CMP_MEMv_IMMb",
+          "sites": 2
+        },
+        {
+          "status": "missing_form",
+          "form": "SAR_GPRv_ONE",
+          "sites": 2
+        },
+        {
+          "status": "unmatched_case",
+          "form": "SUB_GPRv_MEMv",
+          "sites": 1
+        },
+        {
+          "status": "unmatched_case",
+          "form": "MOV_GPRv_MEMv",
+          "sites": 1
+        },
+        {
+          "status": "ungeneralized_case",
+          "form": "TEST_MEMb_IMMb_F6r0",
+          "sites": 1
+        },
+        {
+          "status": "ungeneralized_case",
+          "form": "TEST_GPRv_IMMz_F7r0",
+          "sites": 1
+        },
+        {
+          "status": "ungeneralized_case",
+          "form": "ADD_GPRv_IMMz",
+          "sites": 1
+        },
+        {
+          "status": "ungeneralized_case",
+          "form": "ADD_MEMb_IMMb_80r0",
+          "sites": 1
+        },
+        {
+          "status": "direct_encoding",
+          "form": "XOR_GPRv_IMMb",
+          "sites": 1
+        },
+        {
+          "status": "ungeneralized_case",
+          "form": "AND_GPR8_IMMb_80r4",
+          "sites": 1
+        },
+        {
+          "status": "direct_encoding",
+          "form": "SHR_GPR8_IMMb",
+          "sites": 1
+        },
+        {
+          "status": "ungeneralized_case",
+          "form": "SBB_GPR8_IMMb_80r3",
+          "sites": 1
+        }
+      ]
+    },
+    "initialization": {
+      "sites": 2612,
+      "status_counts": {
+        "ungeneralized_case": 85,
+        "generalized_recipe": 2397,
+        "direct_encoding": 1,
+        "unmatched_case": 2,
+        "missing_form": 127
+      },
+      "gaps": [
+        {
+          "status": "ungeneralized_case",
+          "form": "MOV_GPRv_IMMv",
+          "sites": 64
+        },
+        {
+          "status": "missing_form",
+          "form": "MOVD_XMMdq_GPR32",
+          "sites": 50
+        },
+        {
+          "status": "missing_form",
+          "form": "PSHUFD_XMMdq_XMMdq_IMMb",
+          "sites": 50
+        },
+        {
+          "status": "missing_form",
+          "form": "PCMPEQD_XMMdq_XMMdq",
+          "sites": 11
+        },
+        {
+          "status": "missing_form",
+          "form": "PSRLD_XMMdq_IMMb",
+          "sites": 10
+        },
+        {
+          "status": "ungeneralized_case",
+          "form": "ADD_GPRv_IMMb",
+          "sites": 9
+        },
+        {
+          "status": "ungeneralized_case",
+          "form": "SUB_GPRv_IMMb",
+          "sites": 6
+        },
+        {
+          "status": "ungeneralized_case",
+          "form": "MOV_MEMv_IMMz",
+          "sites": 3
+        },
+        {
+          "status": "unmatched_case",
+          "form": "NOP_MEMv_0F1F",
+          "sites": 2
+        },
+        {
+          "status": "missing_form",
+          "form": "MOVQ_XMMdq_MEMq_0F7E",
+          "sites": 2
+        },
+        {
+          "status": "missing_form",
+          "form": "MOVQ_XMMdq_GPR64",
+          "sites": 2
+        },
+        {
+          "status": "missing_form",
+          "form": "PUNPCKLQDQ_XMMdq_XMMq",
+          "sites": 2
+        },
+        {
+          "status": "direct_encoding",
+          "form": "NOP_90",
+          "sites": 1
+        },
+        {
+          "status": "ungeneralized_case",
+          "form": "AND_GPRv_IMMb",
+          "sites": 1
+        },
+        {
+          "status": "ungeneralized_case",
+          "form": "SHR_GPR8_IMMb",
+          "sites": 1
+        },
+        {
+          "status": "ungeneralized_case",
+          "form": "OR_MEMv_IMMz",
+          "sites": 1
+        }
+      ]
+    }
+  },
+  "table_candidates_by_root": {
+    "nested_phash": 28216,
+    "xed3_chain_fptr_lu": 171,
+    "xed3_op_chain_fptr_lu": 852,
+    "xed_ild_imm_width_table": 15,
+    "xed_ild_disp_width_table": 7,
+    "xed3_phash_lu": 1547
+  },
+  "unique_table_candidate_functions": 30808,
+  "unresolved_table_pointers": [],
+  "table_candidates_missing_ddisasm_blocks": [],
+  "opcodes": {
+    "decoder": {
+      "SUB": 20,
+      "MOV": 663,
+      "TEST": 52,
+      "JE": 106,
+      "CALL": 54,
+      "ADD": 64,
+      "RET": 180,
+      "PUSH": 20,
+      "JMP": 95,
+      "LEA": 81,
+      "SETNE": 1,
+      "MOVZX": 169,
+      "NOP": 7,
+      "XOR": 874,
+      "POP": 32,
+      "AND": 82,
+      "CMP": 181,
+      "SHR": 57,
+      "SAR": 2,
+      "JNE": 70,
+      "STOSQ": 1,
+      "JA": 19,
+      "MOVSXD": 9,
+      "SETE": 10,
+      "SETBE": 1,
+      "CMOVE": 5,
+      "BT": 3,
+      "JAE": 9,
+      "MOVSX": 2,
+      "JBE": 8,
+      "SHL": 9,
+      "JLE": 4,
+      "SBB": 5,
+      "JL": 1,
+      "JB": 3,
+      "CMOVA": 1,
+      "NOT": 6,
+      "JS": 1,
+      "JG": 3,
+      "JGE": 5,
+      "OR": 3,
+      "IMUL": 3,
+      "MOVDQA": 6,
+      "MOVAPS": 6,
+      "CDQE": 3,
+      "JNS": 1
+    },
+    "decoder_with_tables": {
+      "SUB": 35009,
+      "MOV": 99350,
+      "TEST": 1956,
+      "JE": 2026,
+      "CALL": 31966,
+      "ADD": 33341,
+      "RET": 34104,
+      "PUSH": 636,
+      "JMP": 3307,
+      "LEA": 16371,
+      "SETNE": 1,
+      "MOVZX": 6911,
+      "NOP": 131,
+      "XOR": 112909,
+      "POP": 1498,
+      "AND": 9836,
+      "CMP": 32115,
+      "SHR": 7874,
+      "SAR": 10,
+      "JNE": 11982,
+      "STOSQ": 1,
+      "JA": 941,
+      "MOVSXD": 379,
+      "SETE": 206,
+      "SETBE": 1,
+      "CMOVE": 18881,
+      "MOVABS": 6668,
+      "BT": 3,
+      "JAE": 9,
+      "MOVSX": 2,
+      "JBE": 49,
+      "NEG": 13,
+      "SHL": 3900,
+      "JLE": 4,
+      "SBB": 30,
+      "JL": 1,
+      "MUL": 6664,
+      "JB": 3,
+      "CMOVA": 1,
+      "NOT": 6,
+      "JS": 1,
+      "JG": 3,
+      "JGE": 5,
+      "OR": 3,
+      "IMUL": 955,
+      "MOVDQA": 11,
+      "MOVAPS": 6,
+      "MOVUPS": 5,
+      "CDQE": 3,
+      "JNS": 1
+    },
+    "initialization": {
+      "SUB": 6,
+      "MOV": 203,
+      "TEST": 9,
+      "JE": 7,
+      "CALL": 35,
+      "ADD": 9,
+      "RET": 29,
+      "JMP": 6,
+      "LEA": 53,
+      "MOVZX": 5,
+      "NOP": 3,
+      "XOR": 82,
+      "AND": 1,
+      "CMP": 2,
+      "SHR": 1,
+      "JNE": 4,
+      "STOSQ": 2,
+      "MOVABS": 3,
+      "SHL": 1,
+      "OR": 2,
+      "MOVDQA": 698,
+      "MOVAPS": 44,
+      "PXOR": 7,
+      "MOVUPS": 1273,
+      "MOVD": 50,
+      "PSHUFD": 50,
+      "PCMPEQD": 11,
+      "PSRLD": 10,
+      "MOVQ": 4,
+      "PUNPCKLQDQ": 2
+    }
+  },
+  "external_contracts": {
+    "decoder": [
+      "__stack_chk_fail"
+    ],
+    "decoder_with_tables": [
+      "__stack_chk_fail"
+    ],
+    "initialization": []
+  },
+  "unresolved_control_flow": {
+    "decoder": {
+      "external_or_unknown_target": 6,
+      "indirect_control_flow": 9,
+      "indirect_or_unclassified_transfer": 9
+    },
+    "decoder_with_tables": {
+      "external_or_unknown_target": 29,
+      "indirect_control_flow": 402,
+      "indirect_or_unclassified_transfer": 402
+    },
+    "initialization": {}
+  },
+  "limitations": [
+    "Recipe matching checks encoding/domain/alias applicability, not AU instantiation or semantic validity.",
+    "The table-inclusive scope unions five source-identified dispatch tables and 23 generated nested lookup tables; it is not specialized to only valid x86-64 inputs.",
+    "Other unresolved indirect transfers remain explicit. Static table contents and runtime initialization are distinct obligations.",
+    "Static initialized data and output-structure layout are part of the eventual decoder STS state."
+  ]
+}

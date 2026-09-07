@@ -1,0 +1,40 @@
+// Rooted utility-only reachability. External calls terminate at contract boundaries.
+.decl Edge(b:unsigned,n:unsigned)
+.input Edge
+.decl Insn(b:unsigned,a:unsigned,h:symbol,op:symbol)
+.input Insn
+.decl Root(u:symbol,b:unsigned)
+.input Root
+.decl Import(b:unsigned,m:symbol,s:symbol)
+.input Import
+.decl Export(m:symbol,s:symbol,b:unsigned,k:symbol)
+.input Export
+.decl Unknown(b:unsigned,r:symbol)
+.input Unknown
+.decl Function(b:unsigned,m:symbol,s:symbol)
+.input Function
+.decl Member(f:unsigned,b:unsigned)
+.input Member
+.decl Module(b:unsigned,m:symbol)
+.input Module
+.decl Reach(u:symbol,b:unsigned)
+Reach(u,b) :- Root(u,b).
+Reach(u,n) :- Reach(u,b), Edge(b,n).
+.output Reach
+.decl Site(u:symbol,m:symbol,a:unsigned,h:symbol,op:symbol)
+Site(u,m,a,h,op) :- Reach(u,b), Module(b,m), Insn(b,a,h,op).
+.output Site
+.decl Boundary(u:symbol,b:unsigned,m:symbol,s:symbol)
+Boundary(u,b,m,s) :- Reach(u,b), Import(b,m,s).
+.output Boundary
+.decl Unresolved(u:symbol,b:unsigned,r:symbol)
+Unresolved(u,b,r) :- Reach(u,b), Unknown(b,r).
+.output Unresolved
+.decl ReachedFunction(u:symbol,m:symbol,s:symbol,b:unsigned)
+ReachedFunction(u,m,s,b) :- Reach(u,b), Function(b,m,s).
+.output ReachedFunction
+.decl OpcodeKey(u:symbol,op:symbol)
+OpcodeKey(u,op) :- Site(u,_,_,_,op).
+.decl OpcodeCount(u:symbol,op:symbol,n:number)
+OpcodeCount(u,op,n) :- OpcodeKey(u,op), n=count : Site(u,_,_,_,op).
+.output OpcodeCount

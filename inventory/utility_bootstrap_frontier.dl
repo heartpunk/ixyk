@@ -1,0 +1,18 @@
+// Minimal residual sets among eligible alternative handler groups.
+// These are conditional proof-work candidates, not certified implementations.
+.decl Known(s:symbol,m:symbol,op:symbol)
+.input Known(IO=file,filename="Known.csv")
+.decl Residual(s:symbol,m:symbol,g:number,need:symbol)
+.input Residual(IO=file,filename="Residual.csv")
+.decl Supply(g:number,op:symbol)
+.input Supply
+.decl Size(s:symbol,m:symbol,g:number,op:symbol,n:number)
+Size(s,m,g,op,n) :- Residual(s,m,g,_),Supply(g,op),!Known(s,m,op),n=count:{Residual(s,m,g,_)}.
+.decl Minimum(s:symbol,m:symbol,op:symbol,n:number)
+Minimum(s,m,op,n) :- Size(s,m,_,op,_),n=min k:{Size(s,m,_,op,k)}.
+.decl BestHandler(s:symbol,m:symbol,op:symbol,g:number,n:number)
+BestHandler(s,m,op,g,n) :- Minimum(s,m,op,n),Size(s,m,g,op,n).
+.output BestHandler
+.decl BestNeed(s:symbol,m:symbol,op:symbol,g:number,need:symbol)
+BestNeed(s,m,op,g,need) :- BestHandler(s,m,op,g,_),Residual(s,m,g,need).
+.output BestNeed

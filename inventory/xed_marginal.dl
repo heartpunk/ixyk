@@ -1,0 +1,19 @@
+// Marginal requirements along an explicit, reproducible family order.
+.decl Order(f:symbol,r:unsigned)
+.input Order
+.decl Need(f:symbol,status:symbol,form:symbol)
+.input Need
+.decl ScopeSite(f:symbol,m:symbol,a:unsigned,h:symbol,op:symbol)
+.input ScopeSite
+.decl PriorNeed(r:unsigned,s:symbol,form:symbol)
+PriorNeed(r,s,form) :- Order(_,r),Order(f,q),q<r,Need(f,s,form).
+.decl NewNeed(f:symbol,r:unsigned,s:symbol,form:symbol)
+NewNeed(f,r,s,form) :- Order(f,r),Need(f,s,form),!PriorNeed(r,s,form).
+.output NewNeed
+.decl PriorSite(r:unsigned,a:unsigned)
+PriorSite(r,a) :- Order(_,r),Order(f,q),q<r,ScopeSite(f,_,a,_,_).
+.decl NewSite(f:symbol,r:unsigned,a:unsigned)
+NewSite(f,r,a) :- Order(f,r),ScopeSite(f,_,a,_,_),!PriorSite(r,a).
+.decl Marginal(f:symbol,r:unsigned,sites:number,needs:number)
+Marginal(f,r,sites,needs) :- Order(f,r),sites=count : NewSite(f,r,_),needs=count : NewNeed(f,r,_,_).
+.output Marginal

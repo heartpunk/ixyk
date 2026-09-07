@@ -1,0 +1,21 @@
+.decl Root(g:number,e:unsigned)
+.input Root
+.decl Member(e:unsigned,b:unsigned)
+.input Member
+.decl Edge(b:unsigned,n:unsigned)
+.input Edge
+.decl Import(b:unsigned,s:symbol)
+.input Import
+.decl FunctionName(b:unsigned,s:symbol)
+.input FunctionName
+.decl Own(g:number,b:unsigned)
+Own(g,b) :- Root(g,e),Member(e,b).
+.decl HandlerExit(g:number,b:unsigned,n:unsigned)
+HandlerExit(g,b,n) :- Own(g,b),Edge(b,n),!Own(g,n).
+.output HandlerExit
+.decl HandlerContract(g:number,b:unsigned,n:unsigned,s:symbol)
+HandlerContract(g,b,n,s) :- HandlerExit(g,b,n),FunctionName(n,s).
+.output HandlerContract
+.decl HandlerImport(g:number,b:unsigned,s:symbol)
+HandlerImport(g,b,s) :- Own(g,b),Import(b,s).
+.output HandlerImport

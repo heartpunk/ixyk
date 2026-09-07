@@ -1,0 +1,42 @@
+{
+  "input_domain": {
+    "machine_mode": "LONG_64; address width 64, as fixed by decode-harness.c",
+    "state": "Fresh decoded-instruction structure, initialized XED tables, valid readable input buffer and writable output structure; chip selection follows the harness zero-initialization.",
+    "full_decoder": "All supplied byte strings up to the decoder length bound, including malformed and unsupported encodings; preserve XED error behavior.",
+    "family_decoder": "Inputs whose successful XED decoding belongs to the named catalog family, across its admitted variants. Current scope retains all record modes as an overapproximation.",
+    "outside_family": "Not covered by the restricted-domain theorem. A total membership/rejection wrapper requires a separate recognizer proof or the full decoder; successful-family scope alone cannot justify rejection.",
+    "precision": "Preserve decoded length, instruction identity, operand/register selection, widths, addressing/displacements, immediates, prefixes, and output/error state; family recognition alone is insufficient."
+  },
+  "obligations": [
+    {
+      "id": "source_admission",
+      "work": "Validate raw-pattern catalog against generated/build-admitted definitions and record identities. Existing compiled-name checks establish that selected lookup functions exist, not that every accepted variant was enumerated."
+    },
+    {
+      "id": "dispatch_exhaustiveness",
+      "work": "Prove map/opcode selection, instruction-record indices, lookup bucket bounds and pointer-table layouts, including invalid handlers; validate remaining Ddisasm indirect branches. Static recovered target sets are candidates, not proofs."
+    },
+    {
+      "id": "initialization",
+      "work": "Establish the initialized-table invariant once, or include and lift xed_tables_init. The packaged initializer also initializes encoder tables. Preserve relocations and static data in the modeled state."
+    },
+    {
+      "id": "instruction_models",
+      "work": "Instantiate AU recipes for required encodings and validate their semantics; resolve direct-model relocation, ungeneralized cases, unmatched cases and absent forms. Existing applicability counts alone discharge none of these proofs."
+    },
+    {
+      "id": "external_contract",
+      "work": "Supply __stack_chk_fail as a nonreturning contract, or prove the stack guard cannot fail within the admitted state domain. No libc implementation closure."
+    },
+    {
+      "id": "composition",
+      "work": "Compose instruction STSes with memory, control flow and call/return state, using existing Lean embedding and equivalence tooling. Prove the restricted domain and projection preserve full decoded output, not just opcode identity."
+    }
+  ],
+  "analysis_limits": [
+    "Per-family scopes are conservative candidate envelopes, not proven minimal paths.",
+    "Scope-size/gap-count ordering is a reproducible prioritization proxy, not an effort estimate or globally optimal PR order.",
+    "A form/status group may contain many distinct AU cases; zero new groups does not mean zero new case work.",
+    "FP guest instructions do not imply FP host arithmetic in a decoder. Initialization SIMD work is separate from FP theory."
+  ]
+}
