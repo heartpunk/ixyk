@@ -1,0 +1,39 @@
+// Candidate envelopes for valid inputs belonging to a catalog family.
+// All record modes and shared ILD handlers retained; source pattern admission
+// and indirect-target exhaustiveness remain explicit proof obligations.
+#include "xed_family_capture.dl"
+.decl FamilyLookup(f:symbol,n:symbol)
+.input FamilyLookup
+.decl XedFunction(a:unsigned,n:symbol)
+.input XedFunction
+.decl Callback(t:symbol,n:symbol,a:unsigned)
+.input Callback
+.decl Root(u:symbol,b:unsigned)
+.input Root
+.decl Family(f:symbol)
+Family(f) :- FamilyLookup(f,_).
+.decl MissingLookup(f:symbol,n:symbol)
+MissingLookup(f,n) :- FamilyLookup(f,n), !XedFunction(_,n).
+.output MissingLookup
+.decl ScopeRoot(f:symbol,b:unsigned)
+ScopeRoot(f,b) :- CaptureRoot(f,b).
+ScopeRoot(f,b) :- Family(f),Root("decoder",b).
+ScopeRoot(f,a+1099511627776) :- FamilyLookup(f,n),XedFunction(a,n).
+// Generator names each second-level function parent_<bucket>_l1. Restrict
+// candidates to pointers actually found in the generated lookup tables.
+ScopeRoot(f,a+1099511627776) :- FamilyLookup(f,n),Callback("nested_phash",s,a),match(cat(n,"_[0-9]+_l1"),s).
+ScopeRoot(f,a+1099511627776) :- Family(f),Callback("nested_phash","xed_phash_invalid",a).
+ScopeRoot(f,a+1099511627776) :- Family(f),Callback("nested_phash","xed_phash_invalid_const",a).
+ScopeRoot(f,a+1099511627776) :- Family(f),Callback("xed_ild_disp_width_table",_,a).
+ScopeRoot(f,a+1099511627776) :- Family(f),Callback("xed_ild_imm_width_table",_,a).
+.output ScopeRoot
+.decl ScopeReach(f:symbol,b:unsigned)
+ScopeReach(f,b) :- ScopeRoot(f,b).
+ScopeReach(f,n) :- ScopeReach(f,b),Edge(b,n).
+.output ScopeReach
+.decl ScopeSite(f:symbol,m:symbol,a:unsigned,h:symbol,op:symbol)
+ScopeSite(f,"xed",a,h,op) :- ScopeReach(f,b),Insn(b,a,h,op).
+.output ScopeSite
+.decl ScopeUnknown(f:symbol,b:unsigned,r:symbol)
+ScopeUnknown(f,b,r) :- ScopeReach(f,b),Unknown(b,r).
+.output ScopeUnknown

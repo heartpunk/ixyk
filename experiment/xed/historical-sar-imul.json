@@ -1,0 +1,28 @@
+[
+  {
+    "family": "18_sar",
+    "acquisition": {
+      "error": null,
+      "instruction_hex": "48d3f8",
+      "schema": "ixyk.instruction_acquisition.v1",
+      "status": "pass"
+    },
+    "model_path": "artifacts/golden/18_sar.model.json.zst",
+    "model_sha256": "45463aa8cc4483e1ca647f7b071dfb99125aad5a68c9ab1bac169385da087cd2",
+    "encoding_form": "SAR_GPRv_CL",
+    "interpretation": "Historical concrete acquisition; not current post-AU coverage. The observed form differs from missing immediate/one-operand forms in the preliminary XED census."
+  },
+  {
+    "family": "32_imul",
+    "acquisition": {
+      "error": null,
+      "instruction_hex": "480fafc3",
+      "schema": "ixyk.instruction_acquisition.v1",
+      "status": "pass"
+    },
+    "model_path": "artifacts/golden/32_imul.model.json.zst",
+    "model_sha256": "a5c9009a73d9b824e40fb22d702b3a765210d7247f8430a4539b4e1f284cf522",
+    "encoding_form": "IMUL_GPRv_GPRv",
+    "interpretation": "Historical concrete acquisition; not current post-AU coverage. The observed form differs from missing immediate/one-operand forms in the preliminary XED census."
+  }
+]

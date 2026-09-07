@@ -1,0 +1,189 @@
+{
+  "source": "experiment/utilities/repair-waves-report.json",
+  "sha256": "fb3fb077127a06384d9513edc68a70668f01a05ad49cd822bca0eb166a5cee9f",
+  "conditions": [
+    "Recipe reconstruction, instantiation and semantic validity are not established by the matcher.",
+    "A guest handler supplies all uses of its mnemonic only as an optimistic form-generalization and state-projection hypothesis.",
+    "Handler mode assumes contracts for all calls leaving each handler body; executable mode follows internal Bochs code and assumes external contracts.",
+    "Unknown control flow and contracts remain obligations, not established proofs.",
+    "Residual graph cycles combine alternative handlers and do not prove that every implementation is cyclic."
+  ],
+  "results": [
+    {
+      "scenario": "planned_plus_shl",
+      "scope": "handler",
+      "complete_groups": 37,
+      "relevant_waves": {
+        "0": [
+          "SHL"
+        ],
+        "1": [
+          "MOV"
+        ],
+        "2": [],
+        "3": []
+      },
+      "relevant_residual_cycle_members": [
+        "ADD",
+        "AND",
+        "CMP",
+        "IMUL",
+        "LEA",
+        "SAR",
+        "SHR",
+        "SUB"
+      ]
+    },
+    {
+      "scenario": "planned_plus_shl",
+      "scope": "executable",
+      "complete_groups": 196,
+      "relevant_waves": {
+        "0": [
+          "SHL"
+        ],
+        "1": [
+          "MOV",
+          "SUB"
+        ],
+        "2": [
+          "AND"
+        ],
+        "3": [
+          "CMP"
+        ],
+        "4": []
+      },
+      "relevant_residual_cycle_members": [
+        "ADD",
+        "IMUL",
+        "LEA",
+        "SAR",
+        "SHR"
+      ]
+    },
+    {
+      "scenario": "planned_plus_shl_nop",
+      "scope": "handler",
+      "complete_groups": 456,
+      "relevant_waves": {
+        "0": [
+          "NOP",
+          "SHL"
+        ],
+        "1": [
+          "MOV",
+          "SUB"
+        ],
+        "2": [
+          "AND",
+          "MUL"
+        ],
+        "3": [
+          "CMP"
+        ],
+        "4": [],
+        "5": [],
+        "6": []
+      },
+      "relevant_residual_cycle_members": [
+        "ADD",
+        "IMUL",
+        "LEA",
+        "SAR",
+        "SHR"
+      ]
+    },
+    {
+      "scenario": "planned_plus_shl_nop",
+      "scope": "executable",
+      "complete_groups": 196,
+      "relevant_waves": {
+        "0": [
+          "NOP",
+          "SHL"
+        ],
+        "1": [
+          "MOV",
+          "SUB"
+        ],
+        "2": [
+          "AND"
+        ],
+        "3": [
+          "CMP"
+        ],
+        "4": []
+      },
+      "relevant_residual_cycle_members": [
+        "ADD",
+        "IMUL",
+        "LEA",
+        "SAR",
+        "SHR"
+      ]
+    },
+    {
+      "scenario": "planned_plus_integer_core",
+      "scope": "handler",
+      "complete_groups": 4143,
+      "relevant_waves": {
+        "0": [
+          "ADD",
+          "NOP",
+          "SHR",
+          "LEA",
+          "SHL",
+          "SAR"
+        ],
+        "1": [
+          "MOV",
+          "SUB"
+        ],
+        "2": [
+          "AND",
+          "MUL",
+          "IMUL"
+        ],
+        "3": [
+          "CMP"
+        ],
+        "4": [],
+        "5": [],
+        "6": []
+      },
+      "relevant_residual_cycle_members": []
+    },
+    {
+      "scenario": "planned_plus_integer_core",
+      "scope": "executable",
+      "complete_groups": 542,
+      "relevant_waves": {
+        "0": [
+          "ADD",
+          "NOP",
+          "SHR",
+          "LEA",
+          "SHL",
+          "SAR"
+        ],
+        "1": [
+          "MOV",
+          "SUB"
+        ],
+        "2": [
+          "AND"
+        ],
+        "3": [
+          "CMP"
+        ],
+        "4": [],
+        "5": []
+      },
+      "relevant_residual_cycle_members": [
+        "IMUL"
+      ]
+    }
+  ],
+  "interpretation": "Existing Bochs conditional waves, not newly verified XED semantics. Handler boundaries assume contracts; executable follows internal Bochs code. No runtime library closure."
+}
