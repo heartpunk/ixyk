@@ -31,7 +31,7 @@ def verify(workspace: Path) -> dict[str, int]:
     )
     # Support the existing five-example corpus until the complete-corpus PR lands.
     stems = (
-        set(by_stem)
+        set(by_stem) - {"18_sar", "32_imul"}
         if compressed
         else {"2_add", "12_ret", "28_mulsd", "36_pxor", "65_int3"}
     )

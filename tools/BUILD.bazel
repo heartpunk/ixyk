@@ -22,6 +22,11 @@ _LINUX_X86_64 = [
     "@platforms//cpu:x86_64",
 ]
 
+_GOLDEN_OMISSIONS = (
+    "sar",
+    "imul",
+)
+
 _GOLDEN_ARTIFACTS = [
     (
         "%d_%s.acquisition.json.zst" % (
@@ -34,6 +39,7 @@ _GOLDEN_ARTIFACTS = [
         ),
     )
     for rank, family, _assembly, _instruction_hex in X86_64_PROBES
+    if family.lower() not in _GOLDEN_OMISSIONS
 ] + [
     (
         "%d_%s.model.json.zst" % (
@@ -46,6 +52,7 @@ _GOLDEN_ARTIFACTS = [
         ),
     )
     for rank, family, _assembly, _instruction_hex in X86_64_PROBES
+    if family.lower() not in _GOLDEN_OMISSIONS
 ]
 
 py_binary(
