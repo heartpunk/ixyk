@@ -1,0 +1,67 @@
+{
+  "schema": "ixyk.evidence_benchmark.v1",
+  "commit": "1ca1aef6e15025a223a2822fd988137138ca87c0",
+  "invocation_id": "final-LEA-off",
+  "recording": "off",
+  "backend": null,
+  "samples_per_opcode": 100,
+  "queue_capacity": 64,
+  "compression": "zstd:3",
+  "elapsed_ns": 1283976309,
+  "peak_rss_bytes": 213721088,
+  "cases": [
+    {
+      "schema": "ixyk.differential_fuzz.v1",
+      "status": "pass",
+      "instruction_hex": "488d444b08",
+      "examples_requested": 100,
+      "executions": 100,
+      "stage": "discover",
+      "processing": "complete",
+      "checkpoint": {
+        "identity": {
+          "hypothesis": "6.160.0",
+          "strategy": "ixyk.prepared-state-memory.v1",
+          "model_sha256": null,
+          "instruction_hex": "488d444b08",
+          "prepared_models": [
+            {
+              "instruction_hex": "488d444b08",
+              "source": 4194304,
+              "route": "generalized",
+              "model_sha256": "e4f3abf0cd92cbeb8d1be8d578afb29908ade0912016d6c80cc19ff5bbebb228"
+            }
+          ]
+        },
+        "entries": {}
+      },
+      "prepared_models": [
+        {
+          "instruction_hex": "488d444b08",
+          "source": 4194304,
+          "route": "generalized",
+          "model_sha256": "e4f3abf0cd92cbeb8d1be8d578afb29908ade0912016d6c80cc19ff5bbebb228"
+        }
+      ],
+      "planned_fallback_allocations": {},
+      "agreements": 100,
+      "disagreements": 0,
+      "unusable": 0,
+      "acquisition_findings": 0,
+      "generation_findings": 0,
+      "fallback_allocations": {},
+      "input_sha256": "c79ae956a3b1176719cacdea8f8512ee1ca45c4fc565df7d8618b7cd358efb1b",
+      "preparation_seconds": 0.3463477180339396,
+      "execution_seconds": 0.9373083990067244,
+      "total_seconds": 1.2836569952778518,
+      "opcode": "LEA",
+      "setup_ns": 6986,
+      "compute_ns": 1283923420,
+      "elapsed_ns": 1283932239,
+      "finalize_ns": 225,
+      "recording": null,
+      "io_ns": 0,
+      "output_bytes": 0
+    }
+  ]
+}

@@ -41,6 +41,7 @@ in pkgs.stdenv.mkDerivation {
     mkdir -p "$out/include" "$out/lib" "$out/share"
     cp -r obj/wkit/include/xed "$out/include/"
     cp obj/libxed.a obj/enc2-m64-a64/libxed-enc2-m64-a64.a "$out/lib/"
+    cp obj/ixyk-enc2-fuzz.h "$out/include/xed/"
     cp obj/ixyk-enc2-dispatch.h "$out/include/xed/"
     cp obj/ixyk-enc2-unmapped.json "$out/share/"
     runHook postInstall

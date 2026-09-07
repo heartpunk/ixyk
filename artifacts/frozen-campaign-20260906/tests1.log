@@ -1,0 +1,12 @@
+.........................                                                [100%]
+=============================== warnings summary ===============================
+extractor/fuzz_campaign_test.py::test_outcomes_continue_and_recording_does_not_change_comparisons
+  /home/heartpunk/workspaces/ixyk-perf/ixyk-small-probe-20260906/wheels/hypothesis/core.py:1008: HypothesisWarning: The recursion limit will not be reset, since it was changed during test execution (from 1000 to 10000).
+    with unwrap_markers_from_group(), ensure_free_stackframes():
+
+extractor/fuzz_campaign_test.py::test_outcomes_continue_and_recording_does_not_change_comparisons
+  /home/heartpunk/workspaces/ixyk-perf/ixyk-small-probe-20260906/wheels/hypothesis/internal/conjecture/engine.py:432: HypothesisWarning: The recursion limit will not be reset, since it was changed during test execution (from 1000 to 10000).
+    with ensure_free_stackframes():
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+25 passed, 2 warnings in 12.58s

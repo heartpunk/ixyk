@@ -9,6 +9,7 @@ from multiprocessing import Pipe
 from multiprocessing.connection import Connection
 from subprocess import Popen, TimeoutExpired
 import sys
+import signal
 from tempfile import TemporaryFile
 from time import monotonic
 import traceback
@@ -21,13 +22,31 @@ from extractor.fuzzer import fuzz
 def _worker(
     connection: Connection, model: str, instruction: bytes, options: dict
 ) -> None:
+    from extractor.evidence_session import recording_session
+
+    def interrupted(signum, frame):
+        # Ctrl-C can reach both parent and child; the parent then sends SIGTERM.
+        # A second signal must not interrupt the evidence drain already underway.
+        signal.signal(signal.SIGINT, signal.SIG_IGN)
+        signal.signal(signal.SIGTERM, signal.SIG_IGN)
+        raise KeyboardInterrupt("fuzz worker interrupted")
+
+    recording = options.pop("recording", None)
+    if recording is not None:
+        signal.signal(signal.SIGTERM, interrupted)
+        signal.signal(signal.SIGINT, interrupted)
     try:
-        report = fuzz(
-            InstructionModel.from_json(model),
-            instruction,
-            progress=lambda value: connection.send(("progress", value)),
-            **options,
-        )
+        with recording_session(recording) as evidence:
+            report = fuzz(
+                None
+                if (options.get("vary_inputs") or options.get("continue_on_findings"))
+                and json.loads(model).get("schema") != InstructionModel.schema
+                else InstructionModel.from_json(model),
+                instruction,
+                progress=lambda value: connection.send(("progress", value)),
+                evidence=evidence,
+                **options,
+            )
         connection.send(("complete", report))
     except BaseException:
         connection.send(("error", traceback.format_exc()))
@@ -85,6 +104,7 @@ def run_bounded(model: str, instruction: bytes, seconds: float, **options) -> di
             raise
         finally:
             sender.close()
+        worker_failure = None
         try:
             while True:
                 remaining = seconds - (monotonic() - started)
@@ -94,23 +114,47 @@ def run_bounded(model: str, instruction: bytes, seconds: float, **options) -> di
                     break
                 try:
                     kind, value = receiver.recv()
-                except EOFError as error:
-                    raise RuntimeError("fuzz worker exited without a result") from error
+                except EOFError:
+                    report["processing"] = "incomplete"
+                    report["reason"] = "fuzz worker exited without a result"
+                    worker_failure = "exit"
+                    break
                 if kind == "error":
-                    raise RuntimeError(value)
+                    report["processing"] = "incomplete"
+                    report["reason"] = "fuzz worker reported an error"
+                    report["error"] = value
+                    worker_failure = "reported"
+                    break
                 report = value
                 if kind == "complete":
                     break
         finally:
             # Only this call's private child is terminated and reaped.
             if worker.poll() is None:
-                worker.terminate()
+                if worker_failure is not None:
+                    try:
+                        worker.wait(timeout=1)
+                    except TimeoutExpired:
+                        worker.terminate()
+                else:
+                    worker.terminate()
             try:
                 worker.wait(timeout=1)
             except TimeoutExpired:
                 worker.kill()
                 worker.wait()
             receiver.close()
+        if worker_failure is not None:
+            report["worker_exit_code"] = worker.returncode
+            if (
+                worker_failure == "exit"
+                and worker.returncode is not None
+                and worker.returncode < 0
+            ):
+                try:
+                    report["worker_signal"] = signal.Signals(-worker.returncode).name
+                except ValueError:
+                    report["worker_signal"] = f"signal {-worker.returncode}"
     report["elapsed_seconds"] = monotonic() - started
     report["budget"] = {"seconds": seconds, "executions": options.get("max_executions")}
     return report

@@ -1,0 +1,20 @@
+{
+  "source_commit": "1ca1aef6e15025a223a2822fd988137138ca87c0",
+  "host": "shire",
+  "memory_max": "4G",
+  "swap_max": 0,
+  "cpu_quota": "200%",
+  "parallel_workers": 1,
+  "omp_threads": 1,
+  "invalid_runs": {
+    "baseline-profile-ADD-off": "Old Shire bridge lacked forms/fuzz API; excluded."
+  },
+  "bridge_origin": "nixos:/srv/build-scratch/bazel-output-user-root/927c2e8240b0146ff22bc15fcc920d13/execroot/_main/bazel-out/k8-fastbuild/bin/extractor/xed_bridge",
+  "bridge_source_sha256": "bff35fa244bc3bd03f418bf96d42f410cbf90903689ccf2466c78cab909e09da",
+  "files": {
+    "zstandard-0.25.0-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl": "5a56ba0db2d244117ed744dfa8f6f5b366e14148e00de44723413b2f3938a902",
+    "xed_bridge": "8549b5e2777ebe10fe8218794ff1ff47f3040d51e8401c2a5e68036cad5a08b7",
+    "source.tar.gz": "958a9f7835bf49974217584c4c1d921a5296092f430d94588a12c766eb5f49d0",
+    "hypothesis-6.160.0-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl": "4716ceb2adc72ea20138cd6a5600d102895f46fe95a42d915e032eed54b77ee6"
+  }
+}

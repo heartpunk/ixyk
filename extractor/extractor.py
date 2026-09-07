@@ -31,7 +31,13 @@ from extractor.amd64_state import (
     require_u64,
     resolve_memory_reads,
 )
-from extractor.angr_boundary import State, claripy as _claripy, expect_project
+from extractor.angr_boundary import (
+    State,
+    claripy as _claripy,
+    execute_successors,
+    expect_project,
+    lift_block,
+)
 from extractor.artifact import InstructionModel, StepSummary
 from extractor.typed_z3 import step_summary_from_z3
 
@@ -41,9 +47,9 @@ import z3
 class _ExpectedSymbolicExitFilter(logging.Filter):
     """Hide only Angr's expected diagnostic for our symbolic return edge."""
 
-    _PREFIX: ClassVar[str] = (
-        "Exit state has over 256 possible solutions. Likely unconstrained; skipping."
-    )
+    _PREFIX: ClassVar[
+        str
+    ] = "Exit state has over 256 possible solutions. Likely unconstrained; skipping."
 
     @override
     def filter(self, record: logging.LogRecord) -> bool:
@@ -61,6 +67,9 @@ _MODELED_VEX_REGISTERS = (
     "cc_dep1",
     "cc_dep2",
     "cc_ndep",
+    "d",
+    "ac",
+    "id",
 )
 
 
@@ -201,8 +210,11 @@ def _vex_stack_scratch_writes(raw_project: object, block: object) -> frozenset[i
     return frozenset(scratch)
 
 
-def extract(raw_project: object, source: int) -> InstructionModel:
+def extract(
+    raw_project: object, source: int, *, on_model=None, on_stage=None, on_finding=None
+) -> InstructionModel:
     """Extract separating inputs, anti-unify them, and instantiate this request."""
+    from antiunification.algebra import AlgebraError
     from antiunification.many import antiunify_many
     from extractor.au_inputs import instruction_inputs
     from extractor.model_syntax import QFAbvSyntax
@@ -217,11 +229,54 @@ def extract(raw_project: object, source: int) -> InstructionModel:
 
     project = expect_project(raw_project)
     source = require_u64(source, "source")
-    code = bytes(project.factory.block(source, num_inst=1).bytes)
-    codes = instruction_inputs(code)
-    models = tuple(
-        _extract_concrete(load_shellcode(item, source), source) for item in codes
-    )
+    code = bytes(lift_block(project, source, num_inst=1).bytes)
+    from extractor.acquisition_errors import EXPECTED_ACQUISITION
+
+    direct = {}
+    failed = {}
+
+    def acquire(item):
+        if item in direct:
+            return direct[item]
+        if item in failed:
+            return None
+        if on_stage is not None:
+            on_stage("extraction", item)
+        try:
+            model = _extract_concrete(load_shellcode(item, source), source)
+        except EXPECTED_ACQUISITION as error:
+            if on_finding is None:
+                raise
+            on_finding("extraction", item, error)
+            failed[item] = error
+            return None
+        direct[item] = model
+        if on_model is not None:
+            on_model(item, model, "direct")
+        return model
+
+    # Preserve the requested encoding before candidate generation or AU can fail.
+    if on_model is not None:
+        acquire(code)
+    if on_stage is not None:
+        on_stage("generation", code)
+    codes, acquired = [], []
+    for item in instruction_inputs(code):
+        model = acquire(item)
+        if model is not None:
+            codes.append(item)
+            acquired.append(model)
+    if not acquired:
+        if failed:
+            raise next(iter(failed.values()))
+        raise OperandDecodeError("no AU candidates could be extracted")
+    if failed:
+        raise OperandDecodeError(
+            "AU candidate set is incomplete; concrete acquisitions retained"
+        )
+    models = tuple(acquired)
+    if on_stage is not None:
+        on_stage("generalization", code)
     declarations = models[0].declarations
     if any(model.declarations != declarations for model in models):
         raise OperandDecodeError("AU input declarations disagree")
@@ -234,29 +289,45 @@ def extract(raw_project: object, source: int) -> InstructionModel:
         normalize_model(model, normalization_labels(row))
         for model, row in zip(models, rows, strict=True)
     )
+    if on_model is not None:
+        for item, model in zip(codes, models, strict=True):
+            on_model(item, model, "normalized")
     columns = {name: tuple(row[name] for row in rows) for name in rows[0]}
     if any(all(value == column[0] for value in column) for column in columns.values()):
         raise OperandDecodeError("an AU parameter did not vary")
-    result = antiunify_many(QFAbvSyntax(), models, correspondences=columns)
+    try:
+        result = antiunify_many(QFAbvSyntax(), models, correspondences=columns)
+    except AlgebraError as error:
+        raise OperandDecodeError(
+            f"AU algebra could not reconstruct model: {error}"
+        ) from error
     unexplained = set(result.substitutions[0]) - columns.keys()
     if unexplained:
         raise OperandDecodeError(
             f"AU differences are not explained by operands: {sorted(unexplained)}"
         )
     requested = canonical_bindings(decode(code), declarations, source)
-    value = result.instantiate(
-        {name: requested[name] for name in result.substitutions[0]}
-    )
+    try:
+        value = result.instantiate(
+            {name: requested[name] for name in result.substitutions[0]}
+        )
+    except AlgebraError as error:
+        raise OperandDecodeError(
+            f"AU algebra could not reconstruct model: {error}"
+        ) from error
     if not isinstance(value, InstructionModel):
         raise OperandDecodeError("AU did not reconstruct an instruction model")
-    return normalize_model(value, normalization_labels(requested))
+    model = normalize_model(value, normalization_labels(requested))
+    if on_model is not None:
+        on_model(code, model, "generalized")
+    return model
 
 
 def _extract_concrete(raw_project: object, source: int) -> InstructionModel:
     """Symbolically execute one exact instruction and extract every outcome."""
 
     project, source = expect_project(raw_project), require_u64(source, "source")
-    block = project.factory.block(source, num_inst=1)
+    block = lift_block(project, source, num_inst=1)
     if block.vex.instructions != 1 or len(block.capstone.insns) != 1:
         raise Amd64AdapterError(f"expected one decoded instruction at {source:#x}")
     _require_register_closure(project, block)
@@ -269,7 +340,7 @@ def _extract_concrete(raw_project: object, source: int) -> InstructionModel:
     pre = fresh_instruction_state(
         project, source, _vex_stack_scratch_writes(project, block)
     )
-    posts = tuple(project.factory.successors(pre, num_inst=1).all_successors)
+    posts = tuple(execute_successors(project, pre, num_inst=1).all_successors)
     if not posts:
         raise Amd64AdapterError(f"instruction at {source:#x} has no outcomes")
 
@@ -380,10 +451,17 @@ def _extract_flag_updates(
     updates: dict[str, z3.ExprRef] = {}
     for name in FLAG_NAMES:
         bit = AMD64_FLAG_BIT[name]
-        value = resolve_memory_reads(
-            claripy_to_z3(_claripy.Extract(bit, bit, post_rflags)),
-            reads,
-        )
+        if name == "DF":
+            flag = _claripy.If(
+                post.regs.d == _claripy.BVV((1 << 64) - 1, 64),
+                _claripy.BVV(1, 1),
+                _claripy.BVV(0, 1),
+            )
+        elif name in {"AC", "ID"}:
+            flag = _claripy.Extract(0, 0, post.regs.__getattr__(name.lower()))
+        else:
+            flag = _claripy.Extract(bit, bit, post_rflags)
+        value = resolve_memory_reads(claripy_to_z3(flag), reads)
         if not _z3.structurally_equal(value, canonical_flag(name)):
             updates[f"rflags_{name}"] = value
     return updates

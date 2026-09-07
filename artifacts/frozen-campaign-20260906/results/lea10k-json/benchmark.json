@@ -1,0 +1,72 @@
+{
+  "schema": "ixyk.evidence_benchmark.v1",
+  "commit": "1ca1aef6e15025a223a2822fd988137138ca87c0",
+  "invocation_id": "frozen-working-copy-lea10k-json",
+  "recording": "reference-json",
+  "backend": null,
+  "samples_per_opcode": 10000,
+  "queue_capacity": 64,
+  "compression": "zstd:3",
+  "elapsed_ns": 287315765782,
+  "peak_rss_bytes": 522846208,
+  "cases": [
+    {
+      "schema": "ixyk.differential_fuzz.v1",
+      "status": "pass",
+      "instruction_hex": "488d444b08",
+      "examples_requested": 10000,
+      "executions": 10000,
+      "stage": "discover",
+      "processing": "complete",
+      "checkpoint": {
+        "identity": {
+          "hypothesis": "6.160.0",
+          "strategy": "ixyk.prepared-state-memory.v1",
+          "model_sha256": null,
+          "instruction_hex": "488d444b08"
+        },
+        "entries": {}
+      },
+      "prepared_models": [
+        {
+          "instruction_hex": "488d444b08",
+          "source": 4194304,
+          "route": "generalized"
+        }
+      ],
+      "planned_fallback_allocations": {},
+      "agreements": 10000,
+      "disagreements": 0,
+      "unusable": 0,
+      "acquisition_findings": 0,
+      "generation_findings": 0,
+      "fallback_allocations": {},
+      "input_sha256": "a46773ecc4ef38453f34d982cd48481e4a8e1f3f5ec349ed41df5424ed95ee92",
+      "preparation_seconds": 0.35815510572865605,
+      "execution_seconds": 286.95009965309873,
+      "total_seconds": 287.30825554579496,
+      "opcode": "LEA",
+      "setup_ns": 5334939,
+      "compute_ns": 287308909530,
+      "elapsed_ns": 287315679409,
+      "finalize_ns": 30409,
+      "recording": {
+        "capture_ns": 78143055445,
+        "submit_ns": 174981303,
+        "blocked_ns": 0,
+        "encode_ns": 157004954789,
+        "write_ns": 1878467016,
+        "flush_ns": 2147390094,
+        "worker_cpu_ns": 148346077560,
+        "drain_ns": 1399400,
+        "records": 20028,
+        "flushes": 10000,
+        "payload_bytes": 1891818057,
+        "framed_bytes": 1892874773,
+        "queue_high_water": 20
+      },
+      "io_ns": 768792931,
+      "output_bytes": 12575784
+    }
+  ]
+}

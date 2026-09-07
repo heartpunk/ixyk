@@ -18,7 +18,8 @@ class EncodingError(ValueError):
 
 # "class" is the field name in XED's process protocol.
 RegisterInfo = TypedDict(
-    "RegisterInfo", {"name": str, "parent": str, "width": int, "class": str}
+    "RegisterInfo",
+    {"name": str, "parent": str, "width": int, "class": str, "value": int},
 )
 
 
@@ -124,3 +125,35 @@ def relative_target(decoded: InstructionInfo, source: int) -> int:
     if not decoded["branch_width"]:
         raise EncodingError("instruction has no relative branch operand")
     return (source + decoded["length"] + decoded["branch"]) % (1 << 64)
+
+
+@cache
+def _native():
+    import ctypes
+
+    library = ctypes.CDLL(str(runfiles_root() / "_main/extractor/xed_native.so"))
+    library.ixyk_native_init()
+    library.ixyk_native_encode.argtypes = [
+        ctypes.c_uint,
+        ctypes.POINTER(ctypes.c_uint64),
+        ctypes.c_uint,
+    ]
+    library.ixyk_native_encode.restype = ctypes.c_void_p
+    library.ixyk_native_error.restype = ctypes.c_char_p
+    library.ixyk_native_free.argtypes = [ctypes.c_void_p]
+    return library
+
+
+def encode_constructor(index: int, values) -> InstructionInfo:
+    """Use the existing ENC2 constructor without launching a subprocess."""
+    import ctypes
+
+    library = _native()
+    arguments = (ctypes.c_uint64 * len(values))(*values)
+    pointer = library.ixyk_native_encode(index, arguments, len(values))
+    if not pointer:
+        raise EncodingError(library.ixyk_native_error().decode())
+    try:
+        return json.loads(ctypes.string_at(pointer))
+    finally:
+        library.ixyk_native_free(pointer)

@@ -12,11 +12,24 @@ from typing import Protocol, cast
 
 
 class Emulator(Protocol):
-    def mem_map(self, address: int, size: int) -> None: ...
-    def mem_write(self, address: int, data: bytes) -> None: ...
-    def mem_read(self, address: int, size: int) -> bytearray: ...
-    def reg_write(self, register: int, value: int) -> None: ...
-    def reg_read(self, register: int) -> int: ...
+    def ctl_set_tlb_mode(self, mode: int) -> None:
+        ...
+
+    def mem_map(self, address: int, size: int) -> None:
+        ...
+
+    def mem_write(self, address: int, data: bytes) -> None:
+        ...
+
+    def mem_read(self, address: int, size: int) -> bytearray:
+        ...
+
+    def reg_write(self, register: int, value: int) -> None:
+        ...
+
+    def reg_read(self, register: int) -> int:
+        ...
+
     def hook_add(
         self,
         hook_type: int,
@@ -25,10 +38,13 @@ class Emulator(Protocol):
         begin: int = 1,
         end: int = 0,
         *arguments: int,
-    ) -> object: ...
+    ) -> object:
+        ...
+
     def emu_start(
         self, begin: int, until: int, timeout: int = 0, count: int = 0
-    ) -> None: ...
+    ) -> None:
+        ...
 
 
 def _constant(module: ModuleType, name: str) -> int:
@@ -51,10 +67,13 @@ _error = _error_value
 
 
 def amd64_emulator() -> Emulator:
-    return _factory(
+    emulator = _factory(
         _constant(_unicorn, "UC_ARCH_X86"),
         _constant(_unicorn, "UC_MODE_64"),
     )
+    # The semantic model uses flat 64-bit addresses, not a configured guest MMU.
+    emulator.ctl_set_tlb_mode(_constant(_unicorn, "UC_TLB_VIRTUAL"))
+    return emulator
 
 
 def amd64_register(name: str) -> int:
@@ -66,7 +85,10 @@ def unicorn_constant(name: str) -> int:
 
 
 def is_cpu_exception(error: BaseException) -> bool:
-    return (
-        isinstance(error, _error)
-        and getattr(error, "errno", None) == unicorn_constant("UC_ERR_EXCEPTION")
-    )
+    return isinstance(error, _error) and getattr(
+        error, "errno", None
+    ) == unicorn_constant("UC_ERR_EXCEPTION")
+
+
+def is_emulator_error(error: BaseException) -> bool:
+    return isinstance(error, _error)

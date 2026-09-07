@@ -9,13 +9,14 @@ from collections.abc import Callable, Iterable, Mapping, Sequence
 from dataclasses import dataclass
 from typing import Literal, NotRequired, TypedDict
 import hashlib
+import json
+from time import perf_counter
 
 import hypothesis
 from hypothesis.database import ExampleDatabase
 
 from hypothesis import Phase, given, seed, settings, strategies as st
 
-from extractor import z3_boundary as _z3
 from extractor.amd64_state import (
     AMD64_FLAG_BIT,
     FLAG_NAMES,
@@ -23,8 +24,8 @@ from extractor.amd64_state import (
     MEMORY_NAME,
     YMM256,
 )
-from extractor.artifact import InstructionModel, StepSummary
-from extractor.typed_z3 import expr_to_z3, variables_from_declarations
+from extractor.artifact import InstructionModel
+from extractor.concrete_eval import ConcreteArray, evaluator, share_expressions
 from extractor.unicorn_boundary import (
     Emulator,
     amd64_emulator,
@@ -32,7 +33,6 @@ from extractor.unicorn_boundary import (
     is_cpu_exception,
     unicorn_constant,
 )
-import z3
 
 
 @dataclass(frozen=True)
@@ -43,7 +43,9 @@ class ConcreteState:
 
 class FuzzReport(TypedDict):
     schema: str
-    status: Literal["pass", "mismatch", "incomplete"]
+    status: Literal["pass", "mismatch", "incomplete", "acquisition_error"]
+    error: NotRequired[str]
+    input: NotRequired[dict]
     instruction_hex: str
     examples_requested: int
     executions: int
@@ -54,6 +56,21 @@ class FuzzReport(TypedDict):
     reason: NotRequired[str]
     checkpoint: NotRequired[dict]
     explanation: NotRequired[list[str]]
+    agreements: NotRequired[int]
+    disagreements: NotRequired[int]
+    unusable: NotRequired[int]
+    acquisition_findings: NotRequired[int]
+    generation_findings: NotRequired[int]
+    fallback_allocations: NotRequired[dict[str, int]]
+    input_sha256: NotRequired[str]
+    active_input: NotRequired[dict]
+    preparation_seconds: NotRequired[float]
+    execution_seconds: NotRequired[float]
+    total_seconds: NotRequired[float]
+    prepared_models: NotRequired[list[dict]]
+    planned_fallback_allocations: NotRequired[dict[str, int]]
+    worker_exit_code: NotRequired[int]
+    worker_signal: NotRequired[str]
 
 
 _PAGE_SIZE = 0x1000
@@ -85,6 +102,12 @@ def emulate(instruction: bytes, before: ConcreteState) -> ConcreteState:
     emulator, memory, mapped = amd64_emulator(), dict(before.memory), set[int]()
 
     def map_range(address: int, size: int) -> None:
+        address %= 1 << 64
+        if address + size > 1 << 64:
+            first_size = (1 << 64) - address
+            map_range(address, first_size)
+            map_range(0, size - first_size)
+            return
         first = address & -_PAGE_SIZE
         last = (address + size - 1) & -_PAGE_SIZE
         for page in range(first, last + _PAGE_SIZE, _PAGE_SIZE):
@@ -118,10 +141,11 @@ def emulate(instruction: bytes, before: ConcreteState) -> ConcreteState:
     ) -> None:
         for offset in range(size):
             byte = value >> (8 * offset) & 0xFF
+            target = (address + offset) % (1 << 64)
             if byte:
-                memory[address + offset] = byte
+                memory[target] = byte
             else:
-                _ = memory.pop(address + offset, None)
+                _ = memory.pop(target, None)
 
     _ = emulator.hook_add(
         unicorn_constant("UC_HOOK_MEM_READ_UNMAPPED")
@@ -150,6 +174,14 @@ def emulate(instruction: bytes, before: ConcreteState) -> ConcreteState:
         for name in FLAG_NAMES
     }
     return ConcreteState(scalars, memory)
+
+
+class ComparisonUnavailable(Exception):
+    """The current model cannot establish a unique comparison outcome."""
+
+
+class _InputAcquisitionError(Exception):
+    pass
 
 
 class _ExecutionBudget(BaseException):
@@ -195,8 +227,72 @@ class _ReplayDatabase(ExampleDatabase):
         }
 
 
+@dataclass(frozen=True)
+class InputLayout:
+    base: str
+    index: str
+    scale: int
+    displacement: int
+
+    @classmethod
+    def prepare(cls, code):
+        from extractor.xed import decode
+
+        return cls.from_decoded(decode(code))
+
+    @classmethod
+    def from_decoded(cls, decoded):
+        return cls(
+            decoded["base"]["name"].lower(),
+            decoded["index"]["name"].lower(),
+            decoded["scale"],
+            decoded["displacement"],
+        )
+
+
+def _input_state(
+    code, source, memory, data, registers, flags, vary_inputs, *, layout=None
+):
+    # Older callers supply only the six arithmetic flags; extra modeled flags
+    # default to zero. Production generation supplies the complete flag state.
+    if len(flags) == 6:
+        flags = [*flags, 0, 0, 0]
+    scalars = (
+        dict(zip(_FUZZED_REGISTERS, registers, strict=True))
+        | {"rip": source}
+        | {
+            f"rflags_{name}": int(value)
+            for name, value in zip(FLAG_NAMES, flags, strict=True)
+        }
+    )
+    memory = dict(memory)
+    if vary_inputs:
+        # Exercise loads from generated register addresses, including RSP.
+        if layout is None:
+            layout = InputLayout.prepare(code)
+        for address in registers[: len(GPR64)]:
+            memory[address] = data
+        base = (
+            (source + len(code))
+            if layout.base in {"rip", "eip"}
+            else scalars.get(layout.base, 0)
+        )
+        if layout.base == "eip":
+            base &= (1 << 32) - 1
+        index = scalars.get(layout.index, 0)
+        address = (base + index * layout.scale + layout.displacement) % (1 << 64)
+        memory[address] = data
+    initial = {
+        (address + i) % (1 << 64): byte
+        for address, block in memory.items()
+        for i, byte in enumerate(block)
+    }
+    initial.update({(source + i) % (1 << 64): byte for i, byte in enumerate(code)})
+    return ConcreteState(scalars, initial)
+
+
 def fuzz(
-    artifact: InstructionModel,
+    artifact: InstructionModel | None,
     instruction: bytes,
     examples: int,
     *,
@@ -204,10 +300,38 @@ def fuzz(
     previous: dict | None = None,
     max_executions: int | None = None,
     progress: Callable[[dict], None] | None = None,
+    vary_inputs: bool = False,
+    continue_on_findings: bool = False,
+    evidence=None,
+    acquisition: dict | None = None,
 ) -> FuzzReport:
     """Discover or resume a failure, exporting an action-local replay database."""
     if examples <= 0 or (max_executions is not None and max_executions <= 0):
         raise ValueError("example and execution budgets must be positive")
+    from extractor.fuzz_inputs import MEMORY
+
+    started = perf_counter()
+
+    if artifact is None and not vary_inputs and not continue_on_findings:
+        raise ValueError("fixed-input fuzzing requires an available model")
+    campaign = None
+    if continue_on_findings:
+        if stage != "discover":
+            raise ValueError("cumulative fuzzing requires discovery")
+        from extractor.fuzz_campaign import Campaign
+
+        campaign = Campaign(instruction, evidence, fixed_model=artifact)
+    elif evidence is not None:
+        raise ValueError("evidence recording requires cumulative fuzzing")
+    if campaign is not None:
+        campaign.prepare(acquisition=acquisition, vary_encodings=vary_inputs)
+    elif artifact is None:
+        raise ValueError("fuzzing requires a prepared model")
+    codes = st.data() if campaign is not None and vary_inputs else st.just(instruction)
+    source = artifact.source if artifact is not None else 0x400000
+    layout = (
+        InputLayout.prepare(instruction) if vary_inputs and campaign is None else None
+    )
     phases = {
         "discover": (Phase.generate,),
         "shrink": (Phase.reuse, Phase.shrink),
@@ -215,10 +339,36 @@ def fuzz(
     }
     identity = {
         "hypothesis": hypothesis.__version__,
-        "strategy": "ixyk.amd64-registers-flags.v1",
-        "model_sha256": hashlib.sha256(artifact.to_json().encode()).hexdigest(),
+        "strategy": "ixyk.prepared-constructors-source-memory.v2"
+        if vary_inputs
+        else "ixyk.amd64-registers-flags.v1",
+        "model_sha256": hashlib.sha256(artifact.to_json().encode()).hexdigest()
+        if artifact
+        else None,
         "instruction_hex": instruction.hex(),
     }
+    prepared_models = (
+        [
+            {
+                "instruction_hex": item.code.hex(),
+                "source": item.source,
+                "route": item.route,
+                "case_sha256": hashlib.sha256(
+                    json.dumps(item.case.to_data(), sort_keys=True).encode()
+                ).hexdigest()
+                if item.case is not None
+                else None,
+                "model_sha256": hashlib.sha256(
+                    item.compiled.artifact.to_json().encode()
+                ).hexdigest(),
+            }
+            for item in campaign.models
+        ]
+        if campaign is not None
+        else []
+    )
+    if campaign is not None:
+        identity["prepared_models"] = prepared_models
     entries = {}
     if stage != "discover":
         if previous is None or previous.get("status") != "mismatch":
@@ -257,65 +407,151 @@ def fuzz(
 
     database.changed = publish
     publish()
-    compiled = CompiledModel(artifact)
-    code_memory = dict(enumerate(instruction, artifact.source))
-
-    # settings must wrap seed: seed itself disables the database. Keep a fixed
-    # seed while explicitly restoring our declared, action-local replay input.
-    @settings(
-        max_examples=examples,
-        deadline=None,
-        database=database,
-        phases=phases[stage],
-        report_multiple_bugs=False,
+    compiled = (
+        CompiledModel(artifact) if artifact is not None and campaign is None else None
     )
-    @seed(0)
-    @given(
-        registers=_REGISTERS,
-        flags=st.lists(
-            st.booleans(), min_size=len(FLAG_NAMES), max_size=len(FLAG_NAMES)
-        ),
-    )
-    def agrees(registers: tuple[int, ...], flags: list[bool]) -> None:
-        nonlocal executions, reproduced
-        if max_executions is not None and executions >= max_executions:
-            raise _ExecutionBudget()
-        executions += 1
-        publish()
-        scalars = (
-            dict(zip(_FUZZED_REGISTERS, registers, strict=True))
-            | {"rip": artifact.source}
-            | {
-                f"rflags_{name}": int(value)
-                for name, value in zip(FLAG_NAMES, flags, strict=True)
-            }
+    preparation_seconds = perf_counter() - started
+    sampling_started = perf_counter()
+    if campaign is not None:
+        report["prepared_models"] = prepared_models
+        budget = (
+            min(examples, max_executions) if max_executions is not None else examples
         )
-        before = ConcreteState(scalars, code_memory)
-        try:
-            after = emulate(instruction, before)
-        except Exception as error:
-            if not is_cpu_exception(error):
-                differences = (f"emulator {type(error).__name__}: {error}",)
-            else:
-                differences = compiled.differences(before, "error")
-        else:
-            differences = compiled.differences(before, after)
-        if differences:
-            reproduced = True
-            report["status"] = "mismatch"
-            # Preserve the simplest observed witness if processing is interrupted;
-            # explanation probes can otherwise overwrite it with large values.
-            incumbent = report.get("witness")
-            if incumbent is None or tuple(scalars.values()) < tuple(
-                incumbent[name] for name in scalars
-            ):
-                report["differences"] = list(differences)
-                report["witness"] = dict(scalars)
+        report["planned_fallback_allocations"] = {
+            f"{item.code.hex()}@{item.source:x}": (
+                budget // len(campaign.models) + (index < budget % len(campaign.models))
+            )
+            for index, item in enumerate(campaign.models)
+            if item.route == "fallback"
+        }
+        if not campaign.models:
+            report.update(
+                campaign.summary(),
+                reason="preparation produced no executable models",
+                preparation_seconds=preparation_seconds,
+                execution_seconds=0.0,
+                total_seconds=perf_counter() - started,
+            )
             publish()
-            raise _Mismatch(before, differences)
+            return report
+    sample_input = {}
+
+    def run_case(case_index, case_budget):
+        # Keep one structural strategy fixed for each Hypothesis engine. The
+        # campaign budget is divided evenly, without changing draws on replay.
+        # settings must wrap seed: seed itself disables the database. Keep a fixed
+        # seed while explicitly restoring our declared, action-local replay input.
+        @settings(
+            max_examples=case_budget,
+            deadline=None,
+            database=database,
+            phases=phases[stage],
+            report_multiple_bugs=False,
+        )
+        @seed(0)
+        @given(
+            code=codes,
+            source=st.integers(0, (1 << 64) - 16)
+            if campaign is not None and vary_inputs
+            else st.just(source),
+            memory=MEMORY if vary_inputs else st.just({}),
+            data=st.binary(min_size=32, max_size=32) if vary_inputs else st.just(b""),
+            registers=st.tuples(
+                *(_U256 if name in YMM256 else _U64 for name in _FUZZED_REGISTERS)
+            )
+            if vary_inputs
+            else _REGISTERS,
+            flags=st.lists(
+                st.booleans(), min_size=len(FLAG_NAMES), max_size=len(FLAG_NAMES)
+            ),
+        )
+        def agrees(
+            code: bytes,
+            source: int,
+            memory: dict[int, bytes],
+            data: bytes,
+            registers: tuple[int, ...],
+            flags: list[bool],
+        ) -> None:
+            nonlocal executions, reproduced, sample_input
+            if max_executions is not None and executions >= max_executions:
+                raise _ExecutionBudget()
+            selected = campaign.select(case_index + 1) if campaign is not None else None
+            if selected is not None:
+                if vary_inputs:
+                    selected = campaign.bind(selected, code, source)
+                code, source = selected.code, selected.source
+            executions += 1
+            before = _input_state(
+                code,
+                source,
+                memory,
+                data,
+                registers,
+                flags,
+                vary_inputs,
+                layout=selected.layout if selected is not None else layout,
+            )
+            if campaign is not None:
+                report["active_input"] = {
+                    "instruction_hex": code.hex(),
+                    "source": source,
+                    "scalars": dict(before.scalars),
+                    "memory": {str(k): v for k, v in sorted(before.memory.items())},
+                }
+            publish()
+            if campaign is not None:
+                assert selected is not None
+                campaign.compare(selected.compiled, code, before, executions)
+                report.pop("active_input", None)
+                report.update(campaign.summary())
+                publish()
+                return
+            scalars, initial = before.scalars, before.memory
+            sample_input = {
+                "instruction_hex": code.hex(),
+                "scalars": dict(scalars),
+                "memory": {str(k): v for k, v in sorted(initial.items())},
+            }
+            current = compiled
+            assert current is not None
+            try:
+                after = emulate(code, before)
+            except Exception as error:
+                if not is_cpu_exception(error):
+                    differences = (f"emulator {type(error).__name__}: {error}",)
+                else:
+                    differences = current.differences(before, "error")
+            else:
+                differences = current.differences(before, after)
+            if differences:
+                report["input"] = sample_input
+                reproduced = True
+                report["status"] = "mismatch"
+                # Preserve the simplest observed witness if processing is interrupted;
+                # explanation probes can otherwise overwrite it with large values.
+                incumbent = report.get("witness")
+                if incumbent is None or tuple(scalars.values()) < tuple(
+                    incumbent[name] for name in scalars
+                ):
+                    report["differences"] = list(differences)
+                    report["witness"] = dict(scalars)
+                publish()
+                raise _Mismatch(before, differences)
+
+        agrees()
 
     try:
-        agrees()
+        total_budget = (
+            min(examples, max_executions) if max_executions is not None else examples
+        )
+        count = len(campaign.models) if campaign is not None else 1
+        for index in range(count):
+            case_budget = total_budget // count + (index < total_budget % count)
+            if case_budget:
+                run_case(index, case_budget)
+    except _InputAcquisitionError:
+        pass
     except _Mismatch as mismatch:
         report["status"] = "mismatch"
         report["differences"] = list(mismatch.differences)
@@ -330,157 +566,108 @@ def fuzz(
             report["status"] = "pass"
             report["processing"] = "complete"
         elif not reproduced:
-            report["reason"] = (
-                "saved failure did not reproduce; discovery was not rerun"
-            )
+            report[
+                "reason"
+            ] = "saved failure did not reproduce; discovery was not rerun"
+    if campaign is not None:
+        report.update(campaign.summary())
+        report["status"] = (
+            "mismatch"
+            if campaign.disagreements
+            else "incomplete"
+            if campaign.unusable
+            else "pass"
+        )
+    report.update(
+        preparation_seconds=preparation_seconds,
+        execution_seconds=perf_counter() - sampling_started,
+        total_seconds=perf_counter() - started,
+    )
     publish()
     return report
 
 
-@dataclass(frozen=True)
-class _CompiledStep:
-    source: StepSummary
-    guard: z3.BoolRef
-    updates: Mapping[str, z3.ExprRef]
-    mirrored_pc: z3.BitVecRef
-
-
 class CompiledModel:
-    """One deserialized model compiled once for many concrete witnesses."""
+    """Share a typed model once, then evaluate concrete witnesses without SMT."""
 
     def __init__(self, artifact: InstructionModel) -> None:
-        self.context: z3.Context = z3.Context()
-        self.variables: dict[str, z3.ExprRef] = variables_from_declarations(
-            artifact.declarations, self.context
-        )
-        self.steps: tuple[_CompiledStep, ...] = tuple(
-            self._compile(step) for step in artifact.steps
-        )
-
-    def _compile(self, step: StepSummary) -> _CompiledStep:
-        guard = expr_to_z3(step.guard, self.variables, self.context)
-        mirrored_pc = expr_to_z3(step.mirrored_pc, self.variables, self.context)
-        if not isinstance(guard, z3.BoolRef):
-            raise TypeError("instruction guard is not Boolean")
-        if not isinstance(mirrored_pc, z3.BitVecRef):
-            raise TypeError("mirrored PC is not a bit-vector")
-        return _CompiledStep(
-            step,
-            guard,
-            {
-                assignment.name: expr_to_z3(
-                    assignment.value, self.variables, self.context
-                )
-                for assignment in step.simultaneous_update
-            },
-            mirrored_pc,
-        )
+        self.artifact = share_expressions(artifact)
+        self.steps = self.artifact.steps
+        self.scalar_widths = {
+            d.name: d.sort.require_bv_width()
+            for d in artifact.declarations
+            if d.name != MEMORY_NAME
+        }
+        memory = next(d for d in artifact.declarations if d.name == MEMORY_NAME)
+        if memory.sort.require_array_widths() != (64, 8):
+            raise TypeError("input memory is not a BV64-to-BV8 array")
 
     def differences(
         self,
         before: ConcreteState,
-        after: ConcreteState | Literal["error"],
+        after: ConcreteState | Literal["error"] | None,
+        *,
+        on_prediction=None,
+        require_outcome=False,
     ) -> tuple[str, ...]:
-        constraints = self._input_constraints(before)
-        enabled = tuple(
-            step
-            for step in self.steps
-            if _z3.check_status(self._check((*constraints, step.guard))) == z3.Z3_L_TRUE
-        )
+        missing = self.scalar_widths.keys() - before.scalars.keys()
+        if missing:
+            raise ComparisonUnavailable(f"missing concrete inputs: {sorted(missing)}")
+        environment = {
+            name: value & ((1 << self.scalar_widths[name]) - 1)
+            for name, value in before.scalars.items()
+            if name in self.scalar_widths
+        }
+        environment[MEMORY_NAME] = ConcreteArray.memory(before.memory)
+        evaluate = evaluator(environment)
+        enabled = tuple(step for step in self.steps if evaluate(step.guard))
         if len(enabled) != 1:
+            if require_outcome:
+                raise ComparisonUnavailable(
+                    f"enabled edges: {len(enabled)}; expected exactly one"
+                )
             return (f"enabled edges: {len(enabled)}; expected exactly one",)
-
         step = enabled[0]
+        updates = {a.name: a.value for a in step.simultaneous_update}
+        if on_prediction is not None:
+            from extractor.evidence_events import MemorySnapshot, ModelPrediction
+
+            def prediction():
+                return ModelPrediction(
+                    tuple(
+                        (name, evaluate(value))
+                        for name, value in updates.items()
+                        if name != MEMORY_NAME
+                    ),
+                    MemorySnapshot.capture(evaluate(updates[MEMORY_NAME]), 8),
+                    step.target.kind,
+                    evaluate(step.mirrored_pc),
+                )
+
+            on_prediction(prediction)
+        if after is None:
+            return ()
         if after == "error":
             return (
                 ()
-                if step.source.target.kind == "error"
-                else (f"target: model={step.source.target.kind}, emulator=error",)
+                if step.target.kind == "error"
+                else (f"target: model={step.target.kind}, emulator=error",)
             )
-        if step.source.target.kind == "error":
+        if step.target.kind == "error":
             return ("target: model=error, emulator=continued",)
-        solver = self._solver((*constraints, step.guard))
-        _z3.require_sat(_z3.solver_check(solver))
-        solution = _z3.solver_model(solver)
         differences = [
             f"{name}: model={actual:#x}, emulator={expected:#x}"
             for name, expected in after.scalars.items()
-            if name != MEMORY_NAME
-            and (actual := self._evaluate_bv(solution, step.updates[name])) != expected
+            if name in updates
+            and name != MEMORY_NAME
+            and (actual := evaluate(updates[name])) != expected
         ]
-        mirrored_pc = self._evaluate_bv(solution, step.mirrored_pc)
+        mirrored_pc = evaluate(step.mirrored_pc)
         if mirrored_pc != after.scalars["rip"]:
             differences.append(
                 f"mirrored_pc: model={mirrored_pc:#x}, emulator="
                 + f"{after.scalars['rip']:#x}"
             )
-        if self._memory_differs(
-            (*constraints, step.guard), step.updates[MEMORY_NAME], after.memory
-        ):
+        if evaluate(updates[MEMORY_NAME]) != ConcreteArray.memory(after.memory):
             differences.append("memory differs")
         return tuple(differences)
-
-    def _input_constraints(self, state: ConcreteState) -> tuple[z3.BoolRef, ...]:
-        constraints: list[z3.BoolRef] = []
-        for name, value in state.scalars.items():
-            variable = self.variables[name]
-            if not isinstance(variable, z3.BitVecRef):
-                raise TypeError(f"input {name!r} is not a bit-vector")
-            constraints.append(
-                _z3.equal(
-                    variable,
-                    _z3.bit_vec_val(value, variable.size(), self.context),
-                )
-            )
-        memory = self.variables[MEMORY_NAME]
-        if not isinstance(memory, z3.ArrayRef):
-            raise TypeError("input memory is not an array")
-        constraints.append(_z3.equal(memory, self._memory(state.memory)))
-        return tuple(constraints)
-
-    def _memory(self, values: Mapping[int, int]) -> z3.ArrayRef:
-        result = _z3.constant_array(
-            _z3.bit_vec_sort(64, self.context),
-            _z3.bit_vec_val(0, 8, self.context),
-        )
-        for address, value in sorted(values.items()):
-            if not 0 <= address < 1 << 64 or not 0 <= value < 1 << 8:
-                raise ValueError("concrete memory is not a BV64-to-BV8 map")
-            result = _z3.store(
-                result,
-                _z3.bit_vec_val(address, 64, self.context),
-                _z3.bit_vec_val(value, 8, self.context),
-            )
-        return result
-
-    def _memory_differs(
-        self,
-        constraints: Sequence[z3.BoolRef],
-        modeled: z3.ExprRef,
-        expected: Mapping[int, int],
-    ) -> bool:
-        if not isinstance(modeled, z3.ArrayRef):
-            raise TypeError("output memory is not an array")
-        result = self._check(
-            (*constraints, _z3.negate(_z3.equal(modeled, self._memory(expected))))
-        )
-        status = _z3.check_status(result)
-        if status == z3.Z3_L_UNDEF:
-            raise AssertionError("Z3 returned unknown while comparing memory")
-        return status == z3.Z3_L_TRUE
-
-    def _solver(self, constraints: Sequence[z3.BoolRef]) -> z3.Solver:
-        solver = _z3.solver(self.context)
-        for constraint in constraints:
-            _z3.solver_add(solver, constraint)
-        return solver
-
-    def _check(self, constraints: Sequence[z3.BoolRef]) -> z3.CheckSatResult:
-        return _z3.solver_check(self._solver(constraints))
-
-    @staticmethod
-    def _evaluate_bv(model: z3.ModelRef, expression: z3.ExprRef) -> int:
-        value = _z3.model_eval(model, expression)
-        if not isinstance(value, z3.BitVecNumRef):
-            raise TypeError("modeled scalar output is not concrete")
-        return value.as_long()

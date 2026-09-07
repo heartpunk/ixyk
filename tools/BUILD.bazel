@@ -1,6 +1,7 @@
 # SPDX-FileCopyrightText: 2026 Sophie Smithburg
 # SPDX-License-Identifier: GPL-3.0-or-later
 
+load("@ixyk_pypi//:requirements.bzl", "requirement")
 load("@rules_python//python:defs.bzl", "py_binary", "py_library", "py_test")
 load("//catalog:x86_64_probes.bzl", "X86_64_PROBES")
 load(":reapi_platform.bzl", "local_reapi_platform")
@@ -87,3 +88,16 @@ platform(
 )
 
 local_reapi_platform()
+
+py_library(
+    name = "differential_cases",
+    srcs = ["lean_differential.py"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//extractor:artifact",
+        "//extractor:normalization",
+        "//extractor:typed_z3",
+        requirement("hypothesis"),
+        requirement("z3-solver"),
+    ],
+)

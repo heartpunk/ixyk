@@ -1,0 +1,113 @@
+{
+  "schema": "ixyk.evidence_benchmark.v1",
+  "commit": "1ca1aef6e15025a223a2822fd988137138ca87c0",
+  "invocation_id": "final-add10k-forced-fallback",
+  "recording": "off",
+  "backend": null,
+  "samples_per_opcode": 10000,
+  "queue_capacity": 64,
+  "compression": "zstd:3",
+  "elapsed_ns": 66782952743,
+  "peak_rss_bytes": 446386176,
+  "cases": [
+    {
+      "schema": "ixyk.differential_fuzz.v1",
+      "status": "pass",
+      "instruction_hex": "4801d8",
+      "examples_requested": 10000,
+      "executions": 10000,
+      "stage": "discover",
+      "processing": "complete",
+      "checkpoint": {
+        "identity": {
+          "hypothesis": "6.160.0",
+          "strategy": "ixyk.prepared-state-memory.v1",
+          "model_sha256": null,
+          "instruction_hex": "4801d8",
+          "prepared_models": [
+            {
+              "instruction_hex": "4801d8",
+              "source": 4194304,
+              "route": "fallback",
+              "model_sha256": "ef08d15ed1f1dbddca0dd06e3341819664f7973e6efeb9fcaae5f9cd4669495b"
+            },
+            {
+              "instruction_hex": "4801c1",
+              "source": 4194304,
+              "route": "fallback",
+              "model_sha256": "86fd5b1e2de82bbd2916c3f851f795708e463e61b028ded14851ff562adcf763"
+            },
+            {
+              "instruction_hex": "4801c2",
+              "source": 4194304,
+              "route": "fallback",
+              "model_sha256": "1f7a0aa965246ecab2de2f0ab7986efbb709f9a5f417e2925d9e0d3a73fb123e"
+            },
+            {
+              "instruction_hex": "4801d1",
+              "source": 4194304,
+              "route": "fallback",
+              "model_sha256": "5172a09d26cb41a321ac520857f3f0470002f84b357d9832a2293e05f7b6e22c"
+            }
+          ]
+        },
+        "entries": {}
+      },
+      "prepared_models": [
+        {
+          "instruction_hex": "4801d8",
+          "source": 4194304,
+          "route": "fallback",
+          "model_sha256": "ef08d15ed1f1dbddca0dd06e3341819664f7973e6efeb9fcaae5f9cd4669495b"
+        },
+        {
+          "instruction_hex": "4801c1",
+          "source": 4194304,
+          "route": "fallback",
+          "model_sha256": "86fd5b1e2de82bbd2916c3f851f795708e463e61b028ded14851ff562adcf763"
+        },
+        {
+          "instruction_hex": "4801c2",
+          "source": 4194304,
+          "route": "fallback",
+          "model_sha256": "1f7a0aa965246ecab2de2f0ab7986efbb709f9a5f417e2925d9e0d3a73fb123e"
+        },
+        {
+          "instruction_hex": "4801d1",
+          "source": 4194304,
+          "route": "fallback",
+          "model_sha256": "5172a09d26cb41a321ac520857f3f0470002f84b357d9832a2293e05f7b6e22c"
+        }
+      ],
+      "planned_fallback_allocations": {
+        "4801d8": 2500,
+        "4801c1": 2500,
+        "4801c2": 2500,
+        "4801d1": 2500
+      },
+      "agreements": 10000,
+      "disagreements": 0,
+      "unusable": 0,
+      "acquisition_findings": 1,
+      "generation_findings": 0,
+      "fallback_allocations": {
+        "4801d8": 2500,
+        "4801c1": 2500,
+        "4801c2": 2500,
+        "4801d1": 2500
+      },
+      "input_sha256": "2d5ca0901d8708de998e7a64c7828afc3b17c4872959aae4ef919a3eb75c3d5a",
+      "preparation_seconds": 0.19187776185572147,
+      "execution_seconds": 66.59075904916972,
+      "total_seconds": 66.78263792581856,
+      "opcode": "ADD",
+      "setup_ns": 6777,
+      "compute_ns": 66782902246,
+      "elapsed_ns": 66782910532,
+      "finalize_ns": 144,
+      "recording": null,
+      "io_ns": 0,
+      "output_bytes": 0
+    }
+  ]
+}

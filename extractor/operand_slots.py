@@ -11,7 +11,7 @@ from typing import Protocol, cast
 
 import capstone  # pyright: ignore[reportMissingTypeStubs]
 
-from extractor.angr_boundary import Project
+from extractor.angr_boundary import Project, lift_block
 from extractor.artifact import Declaration, InstructionModel, TermSort
 from extractor.model_syntax import (
     AddressAtom,
@@ -122,7 +122,7 @@ def decode_operand_slots(
 ) -> DecodedInstruction:
     """Decode slots and bind explicit register operands to canonical variables."""
 
-    block = project.factory.block(address, num_inst=1)
+    block = lift_block(project, address, num_inst=1)
     if block.vex.instructions != 1 or len(block.capstone.insns) != 1:
         raise OperandDecodeError("expected exactly one decoded instruction")
     wrapped = block.capstone.insns[0]

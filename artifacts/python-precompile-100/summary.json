@@ -1,0 +1,36 @@
+{
+  "source_head": "a8391ef1d68669c8771fb122363bbb75cbe51a16",
+  "tested_source_commit": "99969fdb62d13b07d0a3978b72f5c2af74af26f9",
+  "profile_source_commit": "c50e6a307bffbab5bd6bf18bffde854f409b055d",
+  "flag": "--@rules_python//python/config_settings:precompile=enabled",
+  "samples_per_opcode": 100,
+  "opcodes": [
+    "ADD",
+    "JE",
+    "LEA",
+    "MOVSD"
+  ],
+  "all_inputs_models_outcomes_equal": true,
+  "source_import_compilations": 1996,
+  "precompiled_import_compilations": 0,
+  "profile_import_seconds": {
+    "source": 4.972,
+    "precompiled": 1.752
+  },
+  "bazel_elapsed_seconds": {
+    "source": 10.945,
+    "precompiled_initial_materialization": 19.265,
+    "precompiled_reuse": 8.219,
+    "first_bytecode_cache_fill": 615.674
+  },
+  "workload_seconds": {
+    "source": 6.651581865,
+    "precompiled_reuse": 4.199742422
+  },
+  "limitations": [
+    "Fleet placement was not pinned; timings are exploratory, not a same-host controlled estimate.",
+    "Four representative opcodes at 100 samples, not full catalog or 10000 samples.",
+    "Catalog uses separate acquisition and fuzz processes; this benchmark shares startup across four opcodes."
+  ],
+  "recommendation": "Enable existing rules_python precompilation and cache its outputs as the next stack layer."
+}

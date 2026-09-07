@@ -6,9 +6,13 @@
 from __future__ import annotations
 
 import ctypes
+import faulthandler
 import os
 from pathlib import Path
 
+
+# Fatal native faults must leave all Python thread stacks in the action log.
+faulthandler.enable(all_threads=True)
 
 _LIBSTDCXX_RLOCATION_ENV = "GHOT_LIBSTDCXX_RLOCATION"
 

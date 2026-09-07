@@ -1,0 +1,81 @@
+{
+  "schema": "ixyk.evidence_benchmark.v1",
+  "commit": "1ca1aef6e15025a223a2822fd988137138ca87c0",
+  "invocation_id": "final-MOVSD-reference-json",
+  "recording": "reference-json",
+  "backend": null,
+  "samples_per_opcode": 100,
+  "queue_capacity": 64,
+  "compression": "zstd:3",
+  "elapsed_ns": 2731507841,
+  "peak_rss_bytes": 229011456,
+  "cases": [
+    {
+      "schema": "ixyk.differential_fuzz.v1",
+      "status": "pass",
+      "instruction_hex": "f20f10c1",
+      "examples_requested": 100,
+      "executions": 100,
+      "stage": "discover",
+      "processing": "complete",
+      "checkpoint": {
+        "identity": {
+          "hypothesis": "6.160.0",
+          "strategy": "ixyk.prepared-state-memory.v1",
+          "model_sha256": null,
+          "instruction_hex": "f20f10c1",
+          "prepared_models": [
+            {
+              "instruction_hex": "f20f10c1",
+              "source": 4194304,
+              "route": "generalized",
+              "model_sha256": "6d643cff0e611f3f9c3a25cae59ac85508ca77eef31fc7760ad722f4a076ba2c"
+            }
+          ]
+        },
+        "entries": {}
+      },
+      "prepared_models": [
+        {
+          "instruction_hex": "f20f10c1",
+          "source": 4194304,
+          "route": "generalized",
+          "model_sha256": "6d643cff0e611f3f9c3a25cae59ac85508ca77eef31fc7760ad722f4a076ba2c"
+        }
+      ],
+      "planned_fallback_allocations": {},
+      "agreements": 100,
+      "disagreements": 0,
+      "unusable": 0,
+      "acquisition_findings": 0,
+      "generation_findings": 0,
+      "fallback_allocations": {},
+      "input_sha256": "af810bbdba0ae52f290b02fa05bba3386b9a2ca60f74912e066da8369186bcf3",
+      "preparation_seconds": 0.14460254926234484,
+      "execution_seconds": 2.5804135547950864,
+      "total_seconds": 2.7250167741440237,
+      "opcode": "MOVSD",
+      "setup_ns": 5006618,
+      "compute_ns": 2725332664,
+      "elapsed_ns": 2731427336,
+      "finalize_ns": 29989,
+      "recording": {
+        "capture_ns": 639000234,
+        "submit_ns": 1651541,
+        "blocked_ns": 0,
+        "encode_ns": 1153541723,
+        "write_ns": 30528850,
+        "flush_ns": 11539378,
+        "worker_cpu_ns": 1108788748,
+        "drain_ns": 1053655,
+        "records": 212,
+        "flushes": 100,
+        "payload_bytes": 16874444,
+        "framed_bytes": 16886331,
+        "queue_high_water": 5
+      },
+      "io_ns": 6995544,
+      "output_bytes": 140436
+    }
+  ]
+}

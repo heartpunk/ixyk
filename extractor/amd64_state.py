@@ -16,6 +16,7 @@ from extractor.angr_boundary import (
     State,
     angr as _angr,
     ast_not_equal,
+    blank_state,
     claripy as _claripy,
     expect_ast,
     expect_project,
@@ -52,11 +53,9 @@ GPR64 = (
     "r15",
 )
 YMM256 = tuple(f"ymm{index}" for index in range(16))
-FLAG_NAMES = ("CF", "ZF", "SF", "OF", "PF", "AF")
+FLAG_NAMES = ("CF", "ZF", "SF", "OF", "PF", "AF", "DF", "AC", "ID")
 REGISTER_NAMES = GPR64 + YMM256 + ("rip",)
-REGISTER_WIDTH = {name: 64 for name in (*GPR64, "rip")} | {
-    name: 256 for name in YMM256
-}
+REGISTER_WIDTH = {name: 64 for name in (*GPR64, "rip")} | {name: 256 for name in YMM256}
 MEMORY_NAME = "mem"
 
 LTS_EXTRACTION_CONTEXT = z3.Context()
@@ -80,6 +79,9 @@ AMD64_FLAG_BIT: dict[str, int] = {
     "ZF": _ccall_constant("CondBitOffsets", "G_CC_SHIFT_Z"),
     "SF": _ccall_constant("CondBitOffsets", "G_CC_SHIFT_S"),
     "OF": _ccall_constant("CondBitOffsets", "G_CC_SHIFT_O"),
+    "DF": 10,
+    "AC": 18,
+    "ID": 21,
 }
 
 
@@ -93,7 +95,8 @@ class _AngrFlagAction(Protocol):
         dependency: Ast,
         *,
         platform: str | None = None,
-    ) -> tuple[Ast, Ast, Ast, Ast, Ast, Ast]: ...
+    ) -> tuple[Ast, Ast, Ast, Ast, Ast, Ast]:
+        ...
 
 
 _ANGR_UMUL = cast(_AngrFlagAction, _angr_ccall.pc_actions_UMUL)
@@ -115,9 +118,7 @@ def _correct_angr_umul(
     )
     product = left.zero_extend(nbits) * right.zero_extend(nbits)
     high = product[2 * nbits - 1 : nbits]
-    carry = _claripy.If(
-        ast_not_equal(high, 0), _claripy.BVV(1, 1), _claripy.BVV(0, 1)
-    )
+    carry = _claripy.If(ast_not_equal(high, 0), _claripy.BVV(1, 1), _claripy.BVV(0, 1))
     return carry, parity, auxiliary, zero, sign, carry
 
 
@@ -483,7 +484,7 @@ def fresh_instruction_state(
         raise Amd64AdapterError(
             f"unexpected architecture: {project.arch.name}/{project.arch.bits}"
         )
-    state = project.factory.blank_state(addr=source)
+    state = blank_state(project, source)
     state.options.add(_angr.options.TRACK_MEMORY_ACTIONS)
     state.options.add(_angr.options.TRACK_REGISTER_ACTIONS)
     state.options.add(_angr.options.SYMBOLIC_WRITE_ADDRESSES)
@@ -502,6 +503,13 @@ def fresh_instruction_state(
     state.regs.cc_dep1 = _initial_cc_dep1(flag_bvs)
     state.regs.cc_dep2 = _claripy.BVV(0, 64)
     state.regs.cc_ndep = _claripy.BVV(0, 64)
+    state.regs.d = _claripy.If(
+        flag_bvs["DF"] == _claripy.BVV(1, 1),
+        _claripy.BVV((1 << 64) - 1, 64),
+        _claripy.BVV(1, 64),
+    )
+    state.regs.ac = _claripy.Concat(_claripy.BVV(0, 63), flag_bvs["AC"])
+    state.regs.id = _claripy.Concat(_claripy.BVV(0, 63), flag_bvs["ID"])
     state.globals["_ghot_flag_bvs"] = flag_bvs
     state.globals["_ghot_memory_expr"] = canonical_memory()
     state.globals["_ghot_memory_reads"] = {}

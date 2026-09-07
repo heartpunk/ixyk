@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2026 Sophie Smithburg
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-"""Acquisition emits exact models or explicit fail-closed artifacts."""
+"""Acquisition preserves models and reports unsupported attempts explicitly."""
 
 import json
 from pathlib import Path
@@ -31,9 +31,7 @@ def _acquire(instruction_hex: str, directory: Path) -> tuple[Path, dict[str, obj
     return model, cast(dict[str, object], raw)
 
 
-def _fuzz(
-    instruction_hex: str, model: Path, directory: Path
-) -> dict[str, object]:
+def _fuzz(instruction_hex: str, model: Path, directory: Path) -> dict[str, object]:
     output = directory / "fuzz.json"
     fuzz_main(
         (
@@ -43,6 +41,7 @@ def _fuzz(
             str(model),
             "--instruction-hex",
             instruction_hex,
+            "--fixed-inputs",
             "--examples",
             "10",
             "--output",

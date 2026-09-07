@@ -9,15 +9,21 @@ from collections.abc import Callable, Mapping, MutableMapping, MutableSet, Seque
 from typing import Protocol, cast
 
 from extractor import runtime
+from extractor.tool_errors import AngrOperationError
 
 
 class Ast(Protocol):
     op: str
     args: tuple[object, ...]
 
-    def __getitem__(self, key: int | slice) -> Ast: ...
-    def __mul__(self, other: Ast) -> Ast: ...
-    def zero_extend(self, bits: int) -> Ast: ...
+    def __getitem__(self, key: int | slice) -> Ast:
+        ...
+
+    def __mul__(self, other: Ast) -> Ast:
+        ...
+
+    def zero_extend(self, bits: int) -> Ast:
+        ...
 
 
 class Registers(Protocol):
@@ -28,7 +34,8 @@ class Registers(Protocol):
     cc_dep2: Ast
     cc_ndep: Ast
 
-    def __getattr__(self, name: str) -> Ast: ...
+    def __getattr__(self, name: str) -> Ast:
+        ...
 
 
 class Inspector(Protocol):
@@ -47,7 +54,8 @@ class Inspector(Protocol):
         *,
         when: object,
         action: Callable[[object], None],
-    ) -> None: ...
+    ) -> None:
+        ...
 
 
 class HistoryAction(Protocol):
@@ -96,9 +104,16 @@ class Successors(Protocol):
 
 
 class Factory(Protocol):
-    def blank_state(self, *, addr: int) -> State: ...
-    def block(self, address: int, *, num_inst: int) -> Block: ...
-    def successors(self, state: State, *, num_inst: int) -> Successors: ...
+    def blank_state(self, *, addr: int) -> State:
+        ...
+
+    def block(
+        self, address: int, *, num_inst: int, byte_string: bytes | None = None
+    ) -> Block:
+        ...
+
+    def successors(self, state: State, *, num_inst: int) -> Successors:
+        ...
 
 
 class Arch(Protocol):
@@ -127,11 +142,20 @@ class Angr(Protocol):
 
 
 class Claripy(Protocol):
-    def BVS(self, name: str, size: int, *, explicit_name: bool) -> Ast: ...
-    def BVV(self, value: int, size: int) -> Ast: ...
-    def Concat(self, *pieces: Ast) -> Ast: ...
-    def Extract(self, high: int, low: int, value: Ast) -> Ast: ...
-    def If(self, condition: object, then: Ast, otherwise: Ast) -> Ast: ...
+    def BVS(self, name: str, size: int, *, explicit_name: bool) -> Ast:
+        ...
+
+    def BVV(self, value: int, size: int) -> Ast:
+        ...
+
+    def Concat(self, *pieces: Ast) -> Ast:
+        ...
+
+    def Extract(self, high: int, low: int, value: Ast) -> Ast:
+        ...
+
+    def If(self, condition: object, then: Ast, otherwise: Ast) -> Ast:
+        ...
 
 
 angr = cast(Angr, cast(object, runtime.angr))
@@ -164,3 +188,34 @@ def expect_state(value: object) -> State:
     if not isinstance(state, type) or not isinstance(value, state):
         raise TypeError("state is not an Angr SimState")
     return cast(State, value)
+
+
+def lift_block(
+    project: Project,
+    address: int,
+    *,
+    num_inst: int,
+    byte_string: bytes | None = None,
+) -> Block:
+    try:
+        if byte_string is None:
+            return project.factory.block(address, num_inst=num_inst)
+        return project.factory.block(
+            address, num_inst=num_inst, byte_string=byte_string
+        )
+    except Exception as error:
+        raise AngrOperationError("angr.factory.block", error) from error
+
+
+def blank_state(project: Project, address: int) -> State:
+    try:
+        return project.factory.blank_state(addr=address)
+    except Exception as error:
+        raise AngrOperationError("angr.factory.blank_state", error) from error
+
+
+def execute_successors(project: Project, state: State, *, num_inst: int) -> Successors:
+    try:
+        return project.factory.successors(state, num_inst=num_inst)
+    except Exception as error:
+        raise AngrOperationError("angr.factory.successors", error) from error

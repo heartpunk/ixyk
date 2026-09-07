@@ -5,6 +5,7 @@ common --repo_env=IXYK_NIX_LIBSTDCXX_ROOT
 common --repo_env=IXYK_NIX_XED_ROOT
 common --repo_env=IXYK_NIX_PYTHON_RUNTIME
 
+build --@rules_python//python/config_settings:precompile=enabled
 build --incompatible_strict_action_env
 build --spawn_strategy=sandboxed
 

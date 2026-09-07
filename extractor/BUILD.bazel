@@ -9,6 +9,57 @@ load(":semantic_regression_test.bzl", "semantic_regression_test")
 package(default_visibility = ["//visibility:public"])
 
 py_library(
+    name = "evidence",
+    srcs = ["evidence.py"],
+)
+
+py_library(
+    name = "evidence_reference_json",
+    srcs = ["evidence_reference_json.py"],
+    deps = [":evidence"],
+)
+
+py_test(
+    name = "evidence_test",
+    srcs = ["evidence_test.py"],
+    deps = [
+        ":artifact",
+        ":evidence",
+        ":evidence_reference_json",
+        requirement("hypothesis"),
+        requirement("pytest"),
+    ],
+)
+
+py_library(
+    name = "evidence_events",
+    srcs = ["evidence_events.py"],
+    deps = [
+        ":artifact",
+        ":evidence",
+    ],
+)
+
+py_library(
+    name = "evidence_recording",
+    srcs = ["evidence_recording.py"],
+    deps = [":evidence"],
+)
+
+py_test(
+    name = "evidence_recording_test",
+    srcs = ["evidence_recording_test.py"],
+    deps = [
+        ":evidence",
+        ":evidence_events",
+        ":evidence_recording",
+        ":evidence_reference_json",
+        requirement("hypothesis"),
+        requirement("pytest"),
+    ],
+)
+
+py_library(
     name = "normalization",
     srcs = ["normalization.py"],
     deps = [":artifact"],
@@ -64,10 +115,20 @@ cc_binary(
     deps = ["@nix_native_deps//:xed_enc2"],
 )
 
+cc_binary(
+    name = "xed_native.so",
+    srcs = ["xed_bridge.c"],
+    linkshared = True,
+    deps = ["@nix_native_deps//:xed_enc2"],
+)
+
 py_library(
     name = "xed",
     srcs = ["xed.py"],
-    data = [":xed_bridge"],
+    data = [
+        ":xed_bridge",
+        ":xed_native.so",
+    ],
     deps = [":native_runtime"],
 )
 
@@ -142,12 +203,18 @@ py_library(
 )
 
 py_library(
+    name = "tool_errors",
+    srcs = ["tool_errors.py"],
+)
+
+py_library(
     name = "runtime",
     srcs = ["runtime.py"],
     data = ["amd64_smoke.hex"],
     target_compatible_with = _LINUX_X86_64,
     deps = [
         ":native_runtime",
+        ":tool_errors",
         requirement("angr"),
     ],
 )
@@ -156,7 +223,10 @@ py_library(
     name = "angr_boundary",
     srcs = ["angr_boundary.py"],
     target_compatible_with = _LINUX_X86_64,
-    deps = [":runtime"],
+    deps = [
+        ":runtime",
+        ":tool_errors",
+    ],
 )
 
 py_library(
@@ -177,6 +247,7 @@ py_library(
     srcs = ["extractor.py"],
     target_compatible_with = _LINUX_X86_64,
     deps = [
+        ":acquisition_errors",
         ":amd64_state",
         ":angr_boundary",
         ":artifact",
@@ -211,15 +282,37 @@ py_test(
 )
 
 py_library(
+    name = "concrete_eval",
+    srcs = ["concrete_eval.py"],
+    deps = [":artifact"],
+)
+
+py_library(
     name = "fuzzer",
-    srcs = ["fuzzer.py"],
+    srcs = [
+        "constructor_inputs.py",
+        "fuzz_campaign.py",
+        "fuzz_inputs.py",
+        "fuzzer.py",
+        "prepared_cases.py",
+    ],
     target_compatible_with = _LINUX_X86_64,
     deps = [
+        ":acquisition_errors",
         ":amd64_state",
         ":artifact",
+        ":concrete_eval",
+        ":evidence_events",
+        ":extractor",
+        ":model_syntax",
+        ":normalization",
+        ":operand_slots",
+        ":runtime",
         ":typed_z3",
         ":unicorn_boundary",
+        ":xed",
         ":z3_boundary",
+        "//antiunification:algebra",
         requirement("hypothesis"),
         requirement("z3-solver"),
     ],
@@ -231,6 +324,7 @@ py_library(
     target_compatible_with = _LINUX_X86_64,
     deps = [
         ":artifact",
+        ":evidence_session",
         ":fuzzer",
         ":z3_runtime",
     ],
@@ -252,6 +346,7 @@ py_test(
     srcs = ["fuzz_runner_test.py"],
     data = ["@nix_native_deps//:libstdcxx"],
     deps = [
+        ":evidence_session",
         ":fuzz_runner",
         requirement("pytest"),
     ],
@@ -262,6 +357,7 @@ py_library(
     srcs = ["fuzz_cli.py"],
     target_compatible_with = _LINUX_X86_64,
     deps = [
+        ":evidence_session",
         ":fuzz_runner",
         ":z3_runtime",
     ],
@@ -312,10 +408,13 @@ py_library(
     srcs = ["acquire_cli.py"],
     target_compatible_with = _LINUX_X86_64,
     deps = [
+        ":acquisition_errors",
         ":amd64_state",
         ":artifact",
+        ":evidence_session",
         ":extract_cli",
         ":extractor",
+        ":fuzzer",
         ":runtime",
     ],
 )
@@ -358,7 +457,8 @@ py_test(
 
 py_test(
     name = "acquire_cli_test",
-    size = "small",
+    # Exercises full constructor-catalog preparation for four instruction families.
+    size = "large",
     srcs = ["acquire_cli_test.py"],
     data = ["@nix_native_deps//:libstdcxx"],
     env = {
@@ -574,6 +674,273 @@ py_test(
         ":runtime",
         ":z3_runtime",
         "//antiunification:algebra",
+        requirement("pytest"),
+    ],
+)
+
+py_test(
+    name = "fuzz_inputs_test",
+    srcs = ["fuzz_inputs_test.py"],
+    data = ["@nix_native_deps//:libstdcxx"],
+    deps = [
+        ":extractor",
+        ":fuzzer",
+        ":runtime",
+        ":xed",
+        ":z3_runtime",
+        requirement("hypothesis"),
+    ],
+)
+
+py_library(
+    name = "evidence_benchmark_lib",
+    testonly = True,
+    srcs = ["evidence_benchmark.py"],
+    target_compatible_with = _LINUX_X86_64,
+    deps = [
+        ":evidence",
+        ":evidence_events",
+        ":evidence_recording",
+        ":evidence_reference_json",
+        ":fuzzer",
+        ":z3_runtime",
+        requirement("zstandard"),
+    ],
+)
+
+py_binary(
+    name = "evidence_benchmark",
+    testonly = True,
+    srcs = ["evidence_benchmark_main.py"],
+    data = ["@nix_native_deps//:libstdcxx"],
+    env = {
+        "GHOT_LIBSTDCXX_RLOCATION": "$(rlocationpath @nix_native_deps//:libstdcxx)",
+        "PYTHONNOUSERSITE": "1",
+        "PYTHONSAFEPATH": "1",
+    },
+    main = "evidence_benchmark_main.py",
+    target_compatible_with = _LINUX_X86_64,
+    deps = [":evidence_benchmark_lib"],
+)
+
+py_test(
+    name = "evidence_benchmark_test",
+    srcs = ["evidence_benchmark_test.py"],
+    target_compatible_with = _LINUX_X86_64,
+    deps = [
+        ":evidence",
+        ":evidence_benchmark_lib",
+        ":evidence_events",
+        ":evidence_reference_json",
+        requirement("hypothesis"),
+        requirement("pytest"),
+        requirement("zstandard"),
+    ],
+)
+
+py_test(
+    name = "fuzz_campaign_test",
+    srcs = ["fuzz_campaign_test.py"],
+    data = ["@nix_native_deps//:libstdcxx"],
+    env = {
+        "GHOT_LIBSTDCXX_RLOCATION": "$(rlocationpath @nix_native_deps//:libstdcxx)",
+        "PYTHONNOUSERSITE": "1",
+        "PYTHONSAFEPATH": "1",
+    },
+    target_compatible_with = _LINUX_X86_64,
+    deps = [
+        ":amd64_state",
+        ":artifact",
+        ":evidence",
+        ":evidence_events",
+        ":evidence_recording",
+        ":evidence_reference_json",
+        ":extractor",
+        ":fuzzer",
+        ":operand_slots",
+        ":runtime",
+        ":tool_errors",
+        ":unicorn_boundary",
+        ":z3_runtime",
+        "//antiunification:algebra",
+        requirement("hypothesis"),
+        requirement("pytest"),
+        requirement("unicorn"),
+    ],
+)
+
+py_test(
+    name = "evidence_baseline_test",
+    size = "large",
+    timeout = "eternal",
+    srcs = ["evidence_baseline_test.py"],
+    data = ["@nix_native_deps//:libstdcxx"],
+    env = {
+        "GHOT_LIBSTDCXX_RLOCATION": "$(rlocationpath @nix_native_deps//:libstdcxx)",
+        "PYTHONNOUSERSITE": "1",
+        "PYTHONSAFEPATH": "1",
+    },
+    tags = ["manual"],
+    target_compatible_with = _LINUX_X86_64,
+    deps = [":evidence_benchmark_lib"],
+)
+
+py_test(
+    name = "concrete_eval_test",
+    srcs = ["concrete_eval_test.py"],
+    data = ["@nix_native_deps//:libstdcxx"],
+    env = {
+        "GHOT_LIBSTDCXX_RLOCATION": "$(rlocationpath @nix_native_deps//:libstdcxx)",
+        "PYTHONNOUSERSITE": "1",
+        "PYTHONSAFEPATH": "1",
+    },
+    target_compatible_with = _LINUX_X86_64,
+    deps = [
+        ":artifact",
+        ":concrete_eval",
+        ":evidence",
+        ":evidence_events",
+        ":evidence_reference_json",
+        ":fuzzer",
+        ":typed_z3",
+        ":z3_runtime",
+        "//tools:differential_cases",
+        requirement("hypothesis"),
+        requirement("pytest"),
+        requirement("z3-solver"),
+    ],
+)
+
+# Separate REAPI actions let Bazel schedule each opcode and recording mode.
+[
+    py_test(
+        name = "concrete_baseline_" + opcode.lower() + "_" + mode.replace("-", "_") + "_test",
+        size = "large",
+        timeout = "eternal",
+        srcs = ["evidence_baseline_test.py"],
+        args = [
+            "--opcode",
+            opcode,
+            "--recording",
+            mode,
+            "--samples",
+            "100",
+        ],
+        data = ["@nix_native_deps//:libstdcxx"],
+        env = {
+            "GHOT_LIBSTDCXX_RLOCATION": "$(rlocationpath @nix_native_deps//:libstdcxx)",
+            "PYTHONNOUSERSITE": "1",
+            "PYTHONSAFEPATH": "1",
+        },
+        main = "evidence_baseline_test.py",
+        tags = ["manual"],
+        target_compatible_with = _LINUX_X86_64,
+        deps = [":evidence_benchmark_lib"],
+    )
+    for opcode in [
+        "ADD",
+        "MOV",
+        "XCHG",
+        "RET",
+    ]
+    for mode in [
+        "off",
+        "reference-json",
+    ]
+]
+
+py_library(
+    name = "acquisition_errors",
+    srcs = ["acquisition_errors.py"],
+    target_compatible_with = _LINUX_X86_64,
+    deps = [
+        ":amd64_state",
+        ":artifact",
+        ":operand_slots",
+        ":tool_errors",
+        ":xed",
+        "//antiunification:algebra",
+    ],
+)
+
+py_library(
+    name = "evidence_session",
+    srcs = ["evidence_session.py"],
+    deps = [
+        ":evidence",
+        ":evidence_events",
+        ":evidence_recording",
+        ":evidence_reference_json",
+        requirement("zstandard"),
+    ],
+)
+
+py_test(
+    name = "evidence_integration_test",
+    srcs = ["evidence_integration_test.py"],
+    data = ["@nix_native_deps//:libstdcxx"],
+    env = {
+        "GHOT_LIBSTDCXX_RLOCATION": "$(rlocationpath @nix_native_deps//:libstdcxx)",
+        "PYTHONNOUSERSITE": "1",
+        "PYTHONSAFEPATH": "1",
+    },
+    target_compatible_with = _LINUX_X86_64,
+    deps = [
+        ":acquire_cli",
+        ":au_inputs",
+        ":evidence_session",
+        ":fuzz_cli",
+        requirement("zstandard"),
+        ":amd64_state",
+        ":artifact",
+        ":concrete_eval",
+        ":evidence",
+        ":evidence_events",
+        ":evidence_recording",
+        ":evidence_reference_json",
+        ":extractor",
+        ":fuzzer",
+        ":operand_slots",
+        ":runtime",
+        ":unicorn_boundary",
+        ":z3_runtime",
+        "//antiunification:algebra",
+        requirement("hypothesis"),
+        requirement("pytest"),
+        requirement("unicorn"),
+    ],
+)
+
+py_test(
+    name = "prepared_encoding_test",
+    srcs = ["prepared_encoding_test.py"],
+    data = ["@nix_native_deps//:libstdcxx"],
+    env = {"GHOT_LIBSTDCXX_RLOCATION": "$(rlocationpath @nix_native_deps//:libstdcxx)"},
+    deps = [
+        ":amd64_state",
+        ":extractor",
+        ":fuzzer",
+        ":runtime",
+        ":xed",
+        ":z3_runtime",
+        requirement("hypothesis"),
+        requirement("pytest"),
+    ],
+)
+
+py_test(
+    name = "model_state_test",
+    srcs = ["model_state_test.py"],
+    data = ["@nix_native_deps//:libstdcxx"],
+    env = {"GHOT_LIBSTDCXX_RLOCATION": "$(rlocationpath @nix_native_deps//:libstdcxx)"},
+    deps = [
+        ":amd64_state",
+        ":extractor",
+        ":fuzzer",
+        ":runtime",
+        ":xed",
+        ":z3_runtime",
+        requirement("hypothesis"),
         requirement("pytest"),
     ],
 )

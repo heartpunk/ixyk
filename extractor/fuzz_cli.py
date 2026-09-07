@@ -13,6 +13,7 @@ from typing import Protocol, cast
 
 from extractor.z3_runtime import LIBSTDCXX
 from extractor.fuzz_runner import run_bounded
+from extractor.evidence_session import add_recording_arguments, recording_options
 
 
 class _Options(Protocol):
@@ -25,6 +26,11 @@ class _Options(Protocol):
     previous: Path | None
     max_executions: int | None
     seconds: int
+    fixed_inputs: bool
+    recording: str
+    evidence_output: Path | None
+    commit: str | None
+    invocation_id: str | None
 
 
 def _positive(value: str) -> int:
@@ -48,7 +54,10 @@ def main(arguments: Sequence[str] | None = None) -> None:
     _ = parser.add_argument("--previous", type=Path)
     _ = parser.add_argument("--max-executions", type=_positive)
     _ = parser.add_argument("--seconds", type=_positive, default=60)
+    _ = parser.add_argument("--fixed-inputs", action="store_true")
+    add_recording_arguments(parser)
     options = cast(_Options, cast(object, parser.parse_args(arguments)))
+    recording = recording_options(parser, options)
     try:
         instruction = bytes.fromhex(options.instruction_hex)
     except ValueError as error:
@@ -69,8 +78,17 @@ def main(arguments: Sequence[str] | None = None) -> None:
             raise ValueError("previous report belongs to a different instruction")
     if (options.stage == "discover") != (previous is None):
         parser.error("shrink/explain require --previous; discover does not accept it")
+    if recording is not None and options.stage != "discover":
+        parser.error("recording is currently supported for discover")
     status = acquisition.get("status")
-    if status == "pass":
+    if status not in {"pass", "unsupported", "acquisition_error"}:
+        raise ValueError(f"acquisition result has invalid status {status!r}")
+    if (
+        status == "pass"
+        or acquisition.get("model_route") == "direct"
+        or bool(acquisition.get("retained_models"))
+        or not options.fixed_inputs
+    ):
         if previous is not None and previous.get("status") != "mismatch":
             report = {
                 "schema": "ixyk.differential_fuzz.v1",
@@ -91,7 +109,7 @@ def main(arguments: Sequence[str] | None = None) -> None:
             )
         else:
             executions = options.max_executions or (
-                options.examples + 1 if options.stage == "discover" else 500
+                options.examples if options.stage == "discover" else 500
             )
             report = run_bounded(
                 options.model.read_text(encoding="utf-8"),
@@ -99,6 +117,10 @@ def main(arguments: Sequence[str] | None = None) -> None:
                 options.seconds,
                 examples=options.examples,
                 stage=options.stage,
+                vary_inputs=not options.fixed_inputs,
+                continue_on_findings=options.stage == "discover",
+                recording=recording,
+                acquisition=acquisition if options.stage == "discover" else None,
                 previous=previous,
                 max_executions=executions,
             )

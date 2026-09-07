@@ -1,0 +1,362 @@
+{
+  "host": "shire",
+  "runtime": "Linux; repository Bazel Python dependencies materialized in durable runfiles",
+  "tests": {
+    "pytest_passed": 35,
+    "standalone_suites": [
+      "fuzz_inputs",
+      "fuzz_stages",
+      "fuzz_bootstrap"
+    ]
+  },
+  "input_and_outcome_parity": "all four 100-sample recording off/on pairs plus JE 10K off/on",
+  "timings": "acquisition, preparation and execution included; fresh Python bootstrap excluded from case timings",
+  "baseline": "Previous varied-encoding discovery loop is a different workload; no same-workload speedup claim. User-reported historical campaign time: ~1500s/10K.",
+  "runs": [
+    {
+      "name": "final-ADD-off",
+      "opcode": "ADD",
+      "preparation_s": 0.19929254008457065,
+      "execution_s": 0.8960610753856599,
+      "total_s": 1.095913339,
+      "peak_rss_bytes": 207310848,
+      "executions": 100,
+      "agreements": 100,
+      "disagreements": 0,
+      "unusable": 0,
+      "acquisition_findings": 0,
+      "generation_findings": 0,
+      "prepared_models": [
+        {
+          "instruction_hex": "4801d8",
+          "source": 4194304,
+          "route": "generalized",
+          "model_sha256": "d1cac445c0f5423f5e7fca7c04267119a0672024d5e2403df6b7ed5d8a717eff"
+        }
+      ],
+      "fallback_allocations": {},
+      "planned_fallback_allocations": {},
+      "input_sha256": "afc3bb9a9c963a5085067cad70aa1ede5349680f9460123de8a4545e9c961317"
+    },
+    {
+      "name": "final-ADD-reference-json",
+      "opcode": "ADD",
+      "preparation_s": 0.20205396693199873,
+      "execution_s": 2.639352646190673,
+      "total_s": 2.847927066,
+      "peak_rss_bytes": 227205120,
+      "executions": 100,
+      "agreements": 100,
+      "disagreements": 0,
+      "unusable": 0,
+      "acquisition_findings": 0,
+      "generation_findings": 0,
+      "prepared_models": [
+        {
+          "instruction_hex": "4801d8",
+          "source": 4194304,
+          "route": "generalized",
+          "model_sha256": "d1cac445c0f5423f5e7fca7c04267119a0672024d5e2403df6b7ed5d8a717eff"
+        }
+      ],
+      "fallback_allocations": {},
+      "planned_fallback_allocations": {},
+      "input_sha256": "afc3bb9a9c963a5085067cad70aa1ede5349680f9460123de8a4545e9c961317"
+    },
+    {
+      "name": "final-JE-off",
+      "opcode": "JE",
+      "preparation_s": 0.2578646861948073,
+      "execution_s": 0.8851420320570469,
+      "total_s": 1.143274196,
+      "peak_rss_bytes": 230203392,
+      "executions": 100,
+      "agreements": 100,
+      "disagreements": 0,
+      "unusable": 0,
+      "acquisition_findings": 0,
+      "generation_findings": 0,
+      "prepared_models": [
+        {
+          "instruction_hex": "7400",
+          "source": 4194304,
+          "route": "generalized",
+          "model_sha256": "4087504769b33d6b09f9e1f8d3b7f7af8ce0ec3f5c1a04aa51699597f8a0efdb"
+        }
+      ],
+      "fallback_allocations": {},
+      "planned_fallback_allocations": {},
+      "input_sha256": "50994d891171c19d11c17b12342b065dd533246e16bb9856e9fa9034e9b38e08"
+    },
+    {
+      "name": "final-JE-reference-json",
+      "opcode": "JE",
+      "preparation_s": 0.25338153587654233,
+      "execution_s": 2.5543381492607296,
+      "total_s": 2.814040021,
+      "peak_rss_bytes": 250204160,
+      "executions": 100,
+      "agreements": 100,
+      "disagreements": 0,
+      "unusable": 0,
+      "acquisition_findings": 0,
+      "generation_findings": 0,
+      "prepared_models": [
+        {
+          "instruction_hex": "7400",
+          "source": 4194304,
+          "route": "generalized",
+          "model_sha256": "4087504769b33d6b09f9e1f8d3b7f7af8ce0ec3f5c1a04aa51699597f8a0efdb"
+        }
+      ],
+      "fallback_allocations": {},
+      "planned_fallback_allocations": {},
+      "input_sha256": "50994d891171c19d11c17b12342b065dd533246e16bb9856e9fa9034e9b38e08"
+    },
+    {
+      "name": "final-LEA-off",
+      "opcode": "LEA",
+      "preparation_s": 0.3463477180339396,
+      "execution_s": 0.9373083990067244,
+      "total_s": 1.283932239,
+      "peak_rss_bytes": 213721088,
+      "executions": 100,
+      "agreements": 100,
+      "disagreements": 0,
+      "unusable": 0,
+      "acquisition_findings": 0,
+      "generation_findings": 0,
+      "prepared_models": [
+        {
+          "instruction_hex": "488d444b08",
+          "source": 4194304,
+          "route": "generalized",
+          "model_sha256": "e4f3abf0cd92cbeb8d1be8d578afb29908ade0912016d6c80cc19ff5bbebb228"
+        }
+      ],
+      "fallback_allocations": {},
+      "planned_fallback_allocations": {},
+      "input_sha256": "c79ae956a3b1176719cacdea8f8512ee1ca45c4fc565df7d8618b7cd358efb1b"
+    },
+    {
+      "name": "final-LEA-reference-json",
+      "opcode": "LEA",
+      "preparation_s": 0.35107750818133354,
+      "execution_s": 2.611253180075437,
+      "total_s": 2.968733586,
+      "peak_rss_bytes": 233005056,
+      "executions": 100,
+      "agreements": 100,
+      "disagreements": 0,
+      "unusable": 0,
+      "acquisition_findings": 0,
+      "generation_findings": 0,
+      "prepared_models": [
+        {
+          "instruction_hex": "488d444b08",
+          "source": 4194304,
+          "route": "generalized",
+          "model_sha256": "e4f3abf0cd92cbeb8d1be8d578afb29908ade0912016d6c80cc19ff5bbebb228"
+        }
+      ],
+      "fallback_allocations": {},
+      "planned_fallback_allocations": {},
+      "input_sha256": "c79ae956a3b1176719cacdea8f8512ee1ca45c4fc565df7d8618b7cd358efb1b"
+    },
+    {
+      "name": "final-MOVSD-off",
+      "opcode": "MOVSD",
+      "preparation_s": 0.1422432172112167,
+      "execution_s": 0.8885425208136439,
+      "total_s": 1.031061062,
+      "peak_rss_bytes": 204070912,
+      "executions": 100,
+      "agreements": 100,
+      "disagreements": 0,
+      "unusable": 0,
+      "acquisition_findings": 0,
+      "generation_findings": 0,
+      "prepared_models": [
+        {
+          "instruction_hex": "f20f10c1",
+          "source": 4194304,
+          "route": "generalized",
+          "model_sha256": "6d643cff0e611f3f9c3a25cae59ac85508ca77eef31fc7760ad722f4a076ba2c"
+        }
+      ],
+      "fallback_allocations": {},
+      "planned_fallback_allocations": {},
+      "input_sha256": "af810bbdba0ae52f290b02fa05bba3386b9a2ca60f74912e066da8369186bcf3"
+    },
+    {
+      "name": "final-MOVSD-reference-json",
+      "opcode": "MOVSD",
+      "preparation_s": 0.14460254926234484,
+      "execution_s": 2.5804135547950864,
+      "total_s": 2.731427336,
+      "peak_rss_bytes": 229011456,
+      "executions": 100,
+      "agreements": 100,
+      "disagreements": 0,
+      "unusable": 0,
+      "acquisition_findings": 0,
+      "generation_findings": 0,
+      "prepared_models": [
+        {
+          "instruction_hex": "f20f10c1",
+          "source": 4194304,
+          "route": "generalized",
+          "model_sha256": "6d643cff0e611f3f9c3a25cae59ac85508ca77eef31fc7760ad722f4a076ba2c"
+        }
+      ],
+      "fallback_allocations": {},
+      "planned_fallback_allocations": {},
+      "input_sha256": "af810bbdba0ae52f290b02fa05bba3386b9a2ca60f74912e066da8369186bcf3"
+    },
+    {
+      "name": "final-add10k-fallback",
+      "opcode": "ADD",
+      "preparation_s": 0.19187776185572147,
+      "execution_s": 66.59075904916972,
+      "total_s": 66.782910532,
+      "peak_rss_bytes": 446386176,
+      "executions": 10000,
+      "agreements": 10000,
+      "disagreements": 0,
+      "unusable": 0,
+      "acquisition_findings": 1,
+      "generation_findings": 0,
+      "prepared_models": [
+        {
+          "instruction_hex": "4801d8",
+          "source": 4194304,
+          "route": "fallback",
+          "model_sha256": "ef08d15ed1f1dbddca0dd06e3341819664f7973e6efeb9fcaae5f9cd4669495b"
+        },
+        {
+          "instruction_hex": "4801c1",
+          "source": 4194304,
+          "route": "fallback",
+          "model_sha256": "86fd5b1e2de82bbd2916c3f851f795708e463e61b028ded14851ff562adcf763"
+        },
+        {
+          "instruction_hex": "4801c2",
+          "source": 4194304,
+          "route": "fallback",
+          "model_sha256": "1f7a0aa965246ecab2de2f0ab7986efbb709f9a5f417e2925d9e0d3a73fb123e"
+        },
+        {
+          "instruction_hex": "4801d1",
+          "source": 4194304,
+          "route": "fallback",
+          "model_sha256": "5172a09d26cb41a321ac520857f3f0470002f84b357d9832a2293e05f7b6e22c"
+        }
+      ],
+      "fallback_allocations": {
+        "4801d8": 2500,
+        "4801c1": 2500,
+        "4801c2": 2500,
+        "4801d1": 2500
+      },
+      "planned_fallback_allocations": {
+        "4801d8": 2500,
+        "4801c1": 2500,
+        "4801c2": 2500,
+        "4801d1": 2500
+      },
+      "input_sha256": "2d5ca0901d8708de998e7a64c7828afc3b17c4872959aae4ef919a3eb75c3d5a"
+    },
+    {
+      "name": "je10k-json",
+      "opcode": "JE",
+      "preparation_s": 0.250927418936044,
+      "execution_s": 262.66640282515436,
+      "total_s": 262.923808112,
+      "peak_rss_bytes": 533663744,
+      "executions": 10000,
+      "agreements": 10000,
+      "disagreements": 0,
+      "unusable": 0,
+      "acquisition_findings": 0,
+      "generation_findings": 0,
+      "prepared_models": [
+        {
+          "instruction_hex": "7400",
+          "source": 4194304,
+          "route": "generalized"
+        }
+      ],
+      "fallback_allocations": {},
+      "planned_fallback_allocations": {},
+      "input_sha256": "fa9f3352e7afd1cd701e298f2e6208d525d47749e8adff86fdebd98f66db33d6"
+    },
+    {
+      "name": "je10k-off",
+      "opcode": "JE",
+      "preparation_s": 0.2543817809782922,
+      "execution_s": 63.297043565195054,
+      "total_s": 63.551702785,
+      "peak_rss_bytes": 476053504,
+      "executions": 10000,
+      "agreements": 10000,
+      "disagreements": 0,
+      "unusable": 0,
+      "acquisition_findings": 0,
+      "generation_findings": 0,
+      "prepared_models": [
+        {
+          "instruction_hex": "7400",
+          "source": 4194304,
+          "route": "generalized"
+        }
+      ],
+      "fallback_allocations": {},
+      "planned_fallback_allocations": {},
+      "input_sha256": "fa9f3352e7afd1cd701e298f2e6208d525d47749e8adff86fdebd98f66db33d6"
+    },
+    {
+      "name": "lea10k-json",
+      "opcode": "LEA",
+      "preparation_s": 0.35815510572865605,
+      "execution_s": 286.95009965309873,
+      "total_s": 287.315679409,
+      "peak_rss_bytes": 522846208,
+      "executions": 10000,
+      "agreements": 10000,
+      "disagreements": 0,
+      "unusable": 0,
+      "acquisition_findings": 0,
+      "generation_findings": 0,
+      "prepared_models": [
+        {
+          "instruction_hex": "488d444b08",
+          "source": 4194304,
+          "route": "generalized"
+        }
+      ],
+      "fallback_allocations": {},
+      "planned_fallback_allocations": {},
+      "input_sha256": "a46773ecc4ef38453f34d982cd48481e4a8e1f3f5ec349ed41df5424ed95ee92"
+    }
+  ],
+  "evidence_audit": {
+    "streams_passed": 6,
+    "inputs": 20400,
+    "comparisons": 20400,
+    "checks": [
+      "input digest",
+      "outcome counts",
+      "model references",
+      "no model expansion during sampling"
+    ]
+  },
+  "evidence_sha256": {
+    "results/final-LEA-reference-json/LEA.evidence.zst": "abe2a98b9caad668c2a2f725130da8837bc0fe24aad9d8fb22beb5a8ade207bb",
+    "results/final-JE-reference-json/JE.evidence.zst": "e7d9c117142ee49fa1be40a2ef4fef94db39d23f56d0a6aa7be2d4a4a5c9cfa5",
+    "results/final-MOVSD-reference-json/MOVSD.evidence.zst": "1c5e10311926196b9d42b84c2170f008cd41e68fbae4c4910346fd9ee3d7e0e7",
+    "results/je10k-json/JE.evidence.zst": "4d621d90c4251971d00b590ad6b89ae17179e755f2e98a42c864bae83d4dd127",
+    "results/final-ADD-reference-json/ADD.evidence.zst": "da0d7de8bf6f0156ee3ed3fe31dcd259d3d1e1cde2a1930848c84e1c2f6d67ac",
+    "results/lea10k-json/LEA.evidence.zst": "9aa6ac3d4a4820c9830ca2b15e5b32a16277bba57426d3c263e8b9862fc8c931"
+  },
+  "validation_exit_status": 0
+}
