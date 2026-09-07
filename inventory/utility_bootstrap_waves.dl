@@ -1,0 +1,62 @@
+.decl Mode(m:symbol)
+.input Mode
+.decl Group(m:symbol,g:number,n:number)
+.input Group
+.decl Req(m:symbol,g:number,p:number,op:symbol)
+.input Req
+.decl Supply(g:number,op:symbol)
+.input Supply
+.decl Seed(op:symbol)
+.input Seed
+.decl Scenario(s:symbol)
+.input Scenario
+.decl Extra(s:symbol,op:symbol)
+.input Extra
+.decl Known(s:symbol,m:symbol,op:symbol)
+Known(s,m,op) :- Scenario(s),Mode(m),Seed(op).
+Known(s,m,op) :- Extra(s,op),Mode(m).
+.decl Prefix(s:symbol,m:symbol,g:number,p:number)
+Prefix(s,m,g,0) :- Scenario(s),Group(m,g,_).
+Prefix(s,m,g,p+1) :- Prefix(s,m,g,p),Req(m,g,p,op),Known(s,m,op).
+.decl Complete(s:symbol,m:symbol,g:number)
+Complete(s,m,g) :- Group(m,g,n),Prefix(s,m,g,n).
+Known(s,m,op) :- Complete(s,m,g),Supply(g,op).
+.output Known
+.output Complete
+.decl Residual(s:symbol,m:symbol,g:number,op:symbol)
+Residual(s,m,g,op) :- Scenario(s),Req(m,g,_,op),!Known(s,m,op).
+.output Residual
+.decl Wave(w:number)
+Wave(0).
+Wave(w+1) :- Wave(w),w<128.
+.decl At(s:symbol,m:symbol,op:symbol,w:number)
+At(s,m,op,0) :- Scenario(s),Mode(m),Seed(op).
+At(s,m,op,0) :- Extra(s,op),Mode(m).
+At(s,m,op,w+1) :- At(s,m,op,w),Wave(w+1).
+.decl Step(s:symbol,m:symbol,g:number,p:number,w:number)
+Step(s,m,g,0,w) :- Scenario(s),Group(m,g,_),Wave(w).
+Step(s,m,g,p+1,w) :- Step(s,m,g,p,w),Req(m,g,p,op),At(s,m,op,w).
+.decl DoneAt(s:symbol,m:symbol,g:number,w:number)
+DoneAt(s,m,g,w+1) :- Group(m,g,n),Step(s,m,g,n,w),Wave(w+1).
+At(s,m,op,w) :- DoneAt(s,m,g,w),Supply(g,op).
+.decl FirstOpcode(s:symbol,m:symbol,op:symbol,w:number)
+FirstOpcode(s,m,op,w) :- Known(s,m,op),w=min n:{At(s,m,op,n)}.
+.output FirstOpcode
+.decl FirstGroup(s:symbol,m:symbol,g:number,w:number)
+FirstGroup(s,m,g,w) :- Complete(s,m,g),w=min n:{DoneAt(s,m,g,n)}.
+.output FirstGroup
+.decl LastAt(s:symbol,m:symbol,op:symbol)
+LastAt(s,m,op) :- At(s,m,op,128).
+.output LastAt
+
+// Cycles in the residual alternative-handler graph are candidates, not proofs
+// that every implementation is blocked by the same cycle.
+.decl Depends(s:symbol,m:symbol,op:symbol,need:symbol)
+Depends(s,m,op,need) :- Residual(s,m,g,need),Supply(g,op),!Known(s,m,op).
+.output Depends
+.decl Path(s:symbol,m:symbol,a:symbol,b:symbol)
+Path(s,m,a,b) :- Depends(s,m,a,b).
+Path(s,m,a,c) :- Path(s,m,a,b),Depends(s,m,b,c).
+.decl CycleMember(s:symbol,m:symbol,op:symbol)
+CycleMember(s,m,op) :- Path(s,m,op,op).
+.output CycleMember
