@@ -14,6 +14,19 @@ class ArgumentsTest(unittest.TestCase):
             {'kind':'direct','target':40}]}
         self.assertEqual(retained_successors(node),[20,40])
 
+    def test_sidecar_relations_are_explicit_and_complete(self):
+        import tempfile
+        from pathlib import Path
+        from inventory.utility_facts import sidecar_relations
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp);(root/'disassembly').mkdir()
+            (root/'disassembly/instruction.facts').write_text('1\tNOP\n')
+            with self.assertRaisesRegex(ValueError,'code_in_refined_block'):sidecar_relations(root)
+            (root/'disassembly/code_in_refined_block.csv').write_text('1\t1\n')
+            data,provenance=sidecar_relations(root)
+            self.assertEqual(data['disassembly.instruction'][1],'1\tNOP\n')
+            self.assertEqual(len(provenance['instruction']['sha256']),64)
+
     def test_alias_partition(self):
         case={'form':{'args':[{'name':'reg0','kind':'gpr64'},{'name':'reg1','kind':'gpr64'}]},'domains':[{'register':True,'choices':[98,99],'low':0,'high':0}]*2,'groups':[[0],[1]]}
         def reg(value,parent): return {'visibility':'EXPLICIT','register':{'value':value,'name':parent,'parent':parent}}

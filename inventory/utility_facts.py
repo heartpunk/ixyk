@@ -10,6 +10,18 @@ def retained_successors(node):
     return [other for other in node['successors'] if other not in restored]
 
 
+def sidecar_relations(directory):
+    result={};provenance={}
+    for name in ('instruction','code_in_refined_block'):
+        candidates=[directory/'disassembly'/(name+suffix) for suffix in ('.csv','.facts')]
+        path=next((p for p in candidates if p.is_file()),None)
+        if path is None:raise ValueError('missing Ddisasm sidecar: '+name)
+        contents=path.read_text()
+        result['disassembly.'+name]=('',contents)
+        provenance[name]={'path':str(path),'sha256':hashlib.sha256(path.read_bytes()).hexdigest()}
+    return result,provenance
+
+
 def main():
     import gtirb
     from elftools.elf.elffile import ELFFile
@@ -18,7 +30,9 @@ def main():
     p.add_argument('--module', action='append', required=True, help='NAME=ELF=GTIRB')
     p.add_argument('--out', type=Path, required=True)
     p.add_argument('--root', action='append', default=[], help='UTILITY=SYMBOL')
+    p.add_argument('--relations',type=Path,help='Ddisasm debug directory for a single module')
     args = p.parse_args()
+    if args.relations and len(args.module)!=1:raise ValueError('sidecars require exactly one module')
     args.out.mkdir(parents=True, exist_ok=True)
     roots = dict(x.split('=',1)[::-1] for x in args.root) if args.root else {'single_binary_main_sort':'sort','single_binary_main_chroot':'chroot'}
     facts = {k: [] for k in ('Edge','Insn','Root','Import','Export','Unknown','Function','Member','Module')}
@@ -28,6 +42,10 @@ def main():
         shift = index << 40
         ir = gtirb.IR.load_protobuf(irpath)
         module = ir.modules[0]
+        relation_provenance={}
+        if args.relations:
+            data,relation_provenance=sidecar_relations(args.relations)
+            module.aux_data['souffleOutputs']=gtirb.AuxData(data,'mapping<string,tuple<string,string>>')
         nodes, symbols = read_binary(Path(irpath), Path(elfpath), ir_override=ir)
         entries = module.aux_data.get('functionEntries')
         members = module.aux_data.get('functionBlocks')
@@ -78,7 +96,7 @@ def main():
             for src,dst in forwarding.data.items():
                 if isinstance(src.referent,gtirb.CodeBlock) and src.referent.address is not None:
                     facts['Import'].append((src.referent.address+shift,name,dst.name))
-        manifest['modules'].append({'name':name,'elf':elfpath,'gtirb':irpath,'shift':shift,'blocks':len(nodes),'needed':needed,'elf_sha256':hashlib.sha256(Path(elfpath).read_bytes()).hexdigest(),'gtirb_sha256':hashlib.sha256(Path(irpath).read_bytes()).hexdigest()})
+        manifest['modules'].append({'name':name,'relations':relation_provenance,'elf':elfpath,'gtirb':irpath,'shift':shift,'blocks':len(nodes),'needed':needed,'elf_sha256':hashlib.sha256(Path(elfpath).read_bytes()).hexdigest(),'gtirb_sha256':hashlib.sha256(Path(irpath).read_bytes()).hexdigest()})
     for name,rows in facts.items():
         with (args.out/(name+'.facts')).open('w') as f:
             for row in sorted(set(rows)):
