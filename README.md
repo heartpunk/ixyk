@@ -5,7 +5,7 @@
 
 ## Abstract
 
-a proof of concept of the core of a symbolic-execution and anti-unification oriented technique [[1]](#ref-1) for extracting symbolic state transformers with guards and updates expressed as satisfiability modulo theories (smt) [[3]](#ref-3) using smt-lib [[4]](#ref-4) fragments interpreted with z3 [[6]](#ref-6). 81/100 opcodes get models from angr [[5]](#ref-5), 76/100 pass the full 10k sample hypothesis [[9]](#ref-9) differential fuzz pass [[8]](#ref-8) comparing extracted models to unicorn [[7]](#ref-7) behavior. tl;dr: it subtracts the old state from the new state, and that's the whole thing. just takes the definitions seriously.
+a proof of concept of the core of a symbolic-execution and anti-unification oriented technique [[1]](#ref-1) for extracting symbolic state transformers with guards and updates expressed as satisfiability modulo theories (smt) [[3]](#ref-3) using smt-lib [[4]](#ref-4) fragments interpreted with z3 [[6]](#ref-6). the v0.0.2 release-tag campaign retained 765,233 hypothesis [[9]](#ref-9) differential-fuzz executions [[8]](#ref-8) comparing extracted models to unicorn [[7]](#ref-7) behavior across 98 of the 100 highest-frequency normalized x86-64 instruction families. tl;dr: it subtracts the old state from the new state, and that's the whole thing. just takes the definitions seriously.
 
 ## Status
 
@@ -66,10 +66,11 @@ most work has been done on osx and all build and test done on linux by way of li
 
 ### Evidence outputs
 
-the committed golden artifacts preserve the existing completed REAPI run at
-`94a99a9`, invocation `d7f32572-64dd-4474-8475-0fe7f735dac5`. they are observations
-from that revision, not a claim that the latest source has been revalidated.
-an updated run will be posted shortly after v0.0.2's announcement pending compute.
+the committed golden artifacts preserve the completed v0.0.2 release-tag REAPI
+run at `a8a60a9`, invocation `60862885-a2cf-4240-8fdc-0ce5a595e35f`. they are
+observations from that revision. the corpus contains the 98 model and acquisition
+report pairs completed by that run; `sar` and `imul` are omitted for the scaling
+limitation described below.
 
 - `*.model.json.zst`: losslessly compressed instruction models
   (`ixyk.qf_abv.instruction.v1`), or structured unavailable-model records.
@@ -106,58 +107,49 @@ context links, and decoded values.
 ## Validation
 
 the abstract and tables below report the completed linux/remote execution api
-(reapi) [[18]](#ref-18) campaign from 2026-09-06, using source revision
-[`94a99a9`](https://github.com/heartpunk/ixyk/commit/94a99a9dfdc7dec295c3231465d4ae7a6e9626f0)
-and invocation `d7f32572-64dd-4474-8475-0fe7f735dac5`. it ran from 09:18 to 10:01 PDT,
-starting from one representative encoding for each of the 100 highest-frequency
-normalized x86-64 instruction families in the source catalog and requesting
-10,000 deterministic hypothesis examples per family. these measurements predate
-the final constructor/source-variation and flag-state changes; a fresh campaign
-on the current stack is pending.
+(reapi) [[18]](#ref-18) campaign from 2026-09-06, using the exact v0.0.2 source
+revision [`a8a60a9`](https://github.com/heartpunk/ixyk/commit/a8a60a997ddeb19f2a7428e859d05e23592aaa27)
+and invocation `60862885-a2cf-4240-8fdc-0ce5a595e35f`. the 10,000-example run
+completed in 34m38s wall time. it exercised the current constructor/source
+variation, nine-flag state model, and varied initial memory with recording enabled
+and shrinking disabled.
 
-| Campaign outcome | Families | Actual executions | Share of top-100 occurrence mass | Interpretation |
-|---|---:|---:|---:|---|
-| pass | 76 | 760,000 | 89.942282% | every requested model-versus-unicorn comparison agreed |
-| mismatch | 4 | 40,000 | 1.109504% | completed all 10,000 executions while retaining disagreements |
-| incomplete (CALL) | 1 | 4,629 | 8.004567% | the fuzz worker exited without a final result; partial observations were retained |
-| unsupported | 18 | 0 | 0.883665% | preparation produced no executable models across a declared theory, state, or outcome boundary |
-| no liftable model (UD2) | 1 | 0 | 0.059982% | acquisition failed and no executable fallback was available |
-| **total** | **100** | **804,629** | **100.000000%** | **1,000,000 examples were requested across the campaign** |
+the campaign produced reports for 98 of the 100 highest-frequency normalized
+x86-64 instruction families. `sar` and `imul` were deliberately omitted after the
+preceding 100-example run exposed pathological expression-DAG traversal and
+tree-expanding serialization. those scaling bugs are tracked in
+[#60](https://github.com/heartpunk/ixyk/issues/60) and
+[#61](https://github.com/heartpunk/ixyk/issues/61); their omission is incomplete
+coverage, not a semantic result.
 
-81 families had executable models. raw acquisition statuses were 80 pass,
-18 unsupported, and 2 acquisition errors: CMPXCHG retained four concrete fallback
-models and passed 2,500 comparisons per model, while UD2 had no executable model.
-the table separates the 20 incomplete fuzz reports into CALL's partial run and
-the 19 families with no executable model; it does not count them as passing.
+| Profile | Reports | Requested per report | Full budget | Partial | Zero execution | Actual executions | Agreements | Disagreements | Unusable |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 100-example qualification | 98 | 100 | 82 | 0 | 16 | 8,200 | 7,753 | 426 | 21 |
+| 10,000-example campaign | 98 | 10,000 | 71 | 11 | 16 | 765,233 | 723,041 | 40,694 | 1,498 |
 
-the following are recorded discovery findings, not minimized witnesses or a
-claim that each difference is a defect in the extracted instruction semantics:
+| 10,000-example report status | Reports | Meaning |
+|---|---:|---|
+| pass | 44 | every usable comparison agreed |
+| mismatch | 26 | at least one concrete disagreement was retained |
+| incomplete | 28 | the requested work could not all be completed; completed evidence was retained |
+| **total** | **98** | **980,000 examples requested** |
 
-| Probe | Recorded disagreements | Actual executions | First recorded difference / completion status |
-|---|---:|---:|---|
-| `ret` | 334 | 10,000 | RIP and mirrored PC differ |
-| `bt rax, rbx` | 8,121 | 10,000 | ZF differs |
-| `bsr rax, rbx` | 5,792 | 10,000 | PF differs |
-| `leave` | 394 | 10,000 | RBP differs |
-| `call` | 378 | 4,629 | incomplete; worker exited without a final result, with 412 unusable observations also retained |
+these statuses describe reports, not instruction correctness. a mismatch is a
+recorded model-versus-emulator difference for later classification; an incomplete
+report preserves the work established before a tool, generation, or resource
+boundary. failures do not erase independently acquired models or completed
+comparisons, and discovery continues through expected findings.
 
-this run froze its prepared models before sampling. each concrete execution
-initialized all 16 64-bit general-purpose registers, all 16 256-bit YMM registers,
-six modeled status flags, RIP, and sparse zero-default byte memory. unicorn
-executed exactly one instruction, and the checker compared the modeled outcome
-and complete modeled post-state. generation used a fixed seed and an
-action-local replay database. discovery continued through findings; separate
-shrinking and explanation stages are not included in these counts. the current
-implementation additionally models DF, AC, and ID, for nine flags in total;
-that expansion is not covered by this earlier measurement.
+the committed corpus contains 98 compressed models, 98 compressed acquisition
+reports, and a SHA-256 manifest. detailed fuzz reports and event streams are not
+committed. complete replay support across every randomness boundary remains tracked
+in [#62](https://github.com/heartpunk/ixyk/issues/62).
 
-the 89.942282% figure is occurrence-weighted **within these top 100 families**,
-using their combined 27,933,247,943 source-catalog occurrences as the denominator.
-it is not a claim that every encoding or operand form—or the same share of all
-dynamically executed instructions—has been validated. the existing
+these measurements cover the current top-100 source catalog except for the two
+explicit omissions above. they do not claim coverage of every byte encoding or
+every dynamically executed x86-64 instruction. the existing
 [`validation-notes.md`](validation-notes.md) ledger preserves the earlier v0.0.1
-campaign and its witness classifications; it is historical evidence, not the
-ledger for the 2026-09-06 run summarized here.
+campaign and its witness classifications as historical evidence.
 
 ## Reference Artifacts
 
