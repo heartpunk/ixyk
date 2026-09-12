@@ -11,6 +11,7 @@ NEWCOMER_INPUTS = {
     "flake.lock",
     "nix/dev-environment.nix",
     "tools/xed_enc2.nix",
+    "tools/xed_no_checked_enc2.patch",
     "tools/xed_enc2_dispatch.py",
     "tools/dev_check.py",
     "tools/dev_smoke.py",
