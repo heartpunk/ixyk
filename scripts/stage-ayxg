@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+set -euo pipefail
+# Supply the owning AYXG clone root, not a linked JJ workspace.
+source_root="${1:?usage: scripts/stage-ayxg AYXG_CLONE_ROOT}"
+revision=280bc8939d623d640df50c5abd10b0dd924ae2dd
+repo_root="$(cd "$(dirname "$0")/.." && pwd)"
+archive="$(mktemp -t ixyk-ayxg.XXXXXX)"
+trap 'rm -f "$archive"' EXIT
+# Frozen committed source only; never copy AYXG working-copy/build state.
+git -C "$source_root" archive -o "$archive" "$revision"
+mkdir -p "$repo_root/.dependencies"
+if [[ -e "$repo_root/.dependencies/ayxg" ]]; then
+  printf '%s\n' 'AYXG stage already exists; use that frozen stage or remove it explicitly before restaging.' >&2
+  exit 2
+fi
+stage="$(mktemp -d "$repo_root/.dependencies/ayxg-stage.XXXXXX")"
+trap 'rm -f "$archive"; rm -rf "$stage"' EXIT
+tar -xf "$archive" -C "$stage"
+mv "$stage" "$repo_root/.dependencies/ayxg"
+printf '%s\n' "$revision" > "$repo_root/.dependencies/ayxg-revision"

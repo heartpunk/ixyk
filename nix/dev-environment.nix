@@ -1,12 +1,13 @@
 # SPDX-FileCopyrightText: 2026 Sophie Smithburg
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-{ nixpkgs, angr-nix, system }:
+{ nixpkgs, angr-nix, lean4-nix, ayxg-source, system }:
 let
   pkgs = import nixpkgs {
     inherit system;
     overlays = [
       angr-nix.overlays.default
+      (lean4-nix.readToolchainFile ../lean-toolchain)
       (final: prev: {
         python312 = prev.python312.override (old: {
           packageOverrides = nixpkgs.lib.composeExtensions
@@ -67,6 +68,7 @@ let
       if pkgs.stdenv.isLinux then "${pkgs.stdenv.cc.cc.lib}" else "";
     PYTHONNOUSERSITE = "1";
     PYTHONSAFEPATH = "1";
+    PYTHONPATH = "${ayxg-source}/python";
   };
   devCheck = pkgs.writeShellScriptBin "ixyk-dev-check" ''
     exec ${python}/bin/python ${../tools/dev_check.py} "$@"
@@ -84,7 +86,7 @@ let
     pkgs.gnugrep
     pkgs.git
     pkgs.jujutsu
-    pkgs.lean4
+    pkgs.lean
     pkgs.ruff
     pkgs.stdenv.cc
     pkgs.zstd
@@ -104,7 +106,7 @@ let
   '';
 in
 assert pkgs.bazel_9.version == bazelVersion;
-assert pkgs.lean4.version == leanVersion;
+assert pkgs.lean.version == leanVersion;
 {
   shell = pkgs.mkShell (environment // { inherit packages; });
   package = pkgs.buildEnv {

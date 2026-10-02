@@ -94,6 +94,7 @@ py_library(
     srcs = ["lean_differential.py"],
     visibility = ["//visibility:public"],
     deps = [
+        "@ayxg//:ayxg",
         "//extractor:artifact",
         "//extractor:normalization",
         "//extractor:typed_z3",

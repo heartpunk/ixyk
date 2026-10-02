@@ -23,6 +23,7 @@ py_test(
     name = "evidence_test",
     srcs = ["evidence_test.py"],
     deps = [
+        "@ayxg//:ayxg",
         ":artifact",
         ":evidence",
         ":evidence_reference_json",
@@ -62,7 +63,8 @@ py_test(
 py_library(
     name = "normalization",
     srcs = ["normalization.py"],
-    deps = [":artifact"],
+    deps = [
+        "@ayxg//:ayxg",":artifact"],
 )
 
 py_test(
@@ -70,6 +72,7 @@ py_test(
     srcs = ["normalization_test.py"],
     data = ["@nix_native_deps//:libstdcxx"],
     deps = [
+        "@ayxg//:ayxg",
         ":artifact",
         ":model_syntax",
         ":normalization",
@@ -99,6 +102,7 @@ py_test(
         "@nix_native_deps//:libstdcxx",
     ],
     deps = [
+        "@ayxg//:ayxg",
         ":artifact",
         ":au_inputs",
         ":model_syntax",
@@ -154,7 +158,8 @@ py_library(
 py_library(
     name = "artifact",
     srcs = ["artifact.py"],
-    deps = [":package"],
+    deps = [
+        "@ayxg//:ayxg",":package"],
 )
 
 py_library(
@@ -172,6 +177,7 @@ py_library(
     srcs = ["typed_z3.py"],
     target_compatible_with = _LINUX_X86_64,
     deps = [
+        "@ayxg//:ayxg",
         ":artifact",
         ":z3_boundary",
         requirement("z3-solver"),
@@ -234,6 +240,7 @@ py_library(
     srcs = ["amd64_state.py"],
     target_compatible_with = _LINUX_X86_64,
     deps = [
+        "@ayxg//:ayxg",
         ":angr_boundary",
         ":artifact",
         ":z3_boundary",
@@ -271,6 +278,7 @@ py_test(
     srcs = ["n_plus_one_test.py"],
     data = ["@nix_native_deps//:libstdcxx"],
     deps = [
+        "@ayxg//:ayxg",
         ":extractor",
         ":fuzz_runner",
         ":normalization",
@@ -284,7 +292,8 @@ py_test(
 py_library(
     name = "concrete_eval",
     srcs = ["concrete_eval.py"],
-    deps = [":artifact"],
+    deps = [
+        "@ayxg//:ayxg",":artifact"],
 )
 
 py_library(
@@ -298,6 +307,7 @@ py_library(
     ],
     target_compatible_with = _LINUX_X86_64,
     deps = [
+        "@ayxg//:ayxg",
         ":acquisition_errors",
         ":amd64_state",
         ":artifact",
@@ -594,6 +604,7 @@ py_test(
     },
     target_compatible_with = _LINUX_X86_64,
     deps = [
+        "@ayxg//:ayxg",
         ":artifact",
         ":typed_z3",
         ":z3_boundary",
@@ -608,6 +619,7 @@ py_library(
     srcs = ["model_syntax.py"],
     target_compatible_with = _LINUX_X86_64,
     deps = [
+        "@ayxg//:ayxg",
         ":artifact",
         "//antiunification:algebra",
     ],
@@ -618,6 +630,7 @@ py_test(
     srcs = ["model_syntax_property_test.py"],
     target_compatible_with = _LINUX_X86_64,
     deps = [
+        "@ayxg//:ayxg",
         ":artifact",
         ":model_syntax",
         "//antiunification:algebra",
@@ -631,6 +644,7 @@ py_library(
     srcs = ["operand_slots.py"],
     target_compatible_with = _LINUX_X86_64,
     deps = [
+        "@ayxg//:ayxg",
         ":angr_boundary",
         ":artifact",
         ":au_inputs",
@@ -796,6 +810,7 @@ py_test(
     },
     target_compatible_with = _LINUX_X86_64,
     deps = [
+        "@ayxg//:ayxg",
         ":artifact",
         ":concrete_eval",
         ":evidence",
@@ -886,6 +901,7 @@ py_test(
     },
     target_compatible_with = _LINUX_X86_64,
     deps = [
+        "@ayxg//:ayxg",
         ":acquire_cli",
         ":au_inputs",
         ":evidence_session",

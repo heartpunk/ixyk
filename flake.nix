@@ -10,18 +10,26 @@
   };
 
   inputs = {
+    ayxg-source = {
+      url = "path:./.dependencies/ayxg";
+      flake = false;
+    };
     nixpkgs.url = "github:NixOS/nixpkgs/e7a3ca8092b61ff85b6a45bf863ea2b2d6a661b3";
+    lean4-nix = {
+      url = "github:heartpunk/lean4-nix/118d8caf67fbe0975ea014bcd6d501951219e6d8";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     angr-nix = {
       url = "github:heartpunk/angr-nix/3a7e87c627acdc1116e90892636b8e8d57d209d4";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
 
-  outputs = { nixpkgs, angr-nix, ... }:
+  outputs = { nixpkgs, angr-nix, lean4-nix, ayxg-source, ... }:
     let
       systems = [ "aarch64-darwin" "x86_64-linux" ];
       environments = nixpkgs.lib.genAttrs systems (system:
-        import ./nix/dev-environment.nix { inherit nixpkgs angr-nix system; });
+        import ./nix/dev-environment.nix { inherit nixpkgs angr-nix lean4-nix ayxg-source system; });
     in {
       devShells = nixpkgs.lib.mapAttrs (_: env: { default = env.shell; }) environments;
       packages = nixpkgs.lib.mapAttrs (system: env: let
