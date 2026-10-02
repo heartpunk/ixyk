@@ -18,7 +18,7 @@ structure RawExpr where
   amount? : Option Nat := none
   hi? : Option Nat := none
   lo? : Option Nat := none
-  deriving DecidableEq
+  deriving BEq
 
 instance : Inhabited RawExpr where
   default := { op := "", sort := .bool }
@@ -376,7 +376,7 @@ private def uniqueNames (context : Ctx) : Bool :=
 private def checkMirroredPc (step : RawStep) : Except String Unit :=
   match step.update.find? (·.name = "rip") with
   | some assignment =>
-      if assignment.value = step.mirroredPc then pure ()
+      if assignment.value == step.mirroredPc then pure ()
       else throw "mirrored_pc differs from the simultaneous rip update"
   | none => throw "simultaneous update has no rip assignment"
 
