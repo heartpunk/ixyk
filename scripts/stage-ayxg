@@ -2,7 +2,7 @@
 set -euo pipefail
 # Supply the owning AYXG clone root, not a linked JJ workspace.
 source_root="${1:?usage: scripts/stage-ayxg AYXG_CLONE_ROOT}"
-revision=280bc8939d623d640df50c5abd10b0dd924ae2dd
+revision=d516978f538e90c58ad547ecfb76a6db44d5623f
 repo_root="$(cd "$(dirname "$0")/.." && pwd)"
 archive="$(mktemp -t ixyk-ayxg.XXXXXX)"
 trap 'rm -f "$archive"' EXIT
