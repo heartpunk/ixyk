@@ -8,18 +8,8 @@ from __future__ import annotations
 from collections.abc import Mapping
 
 from antiunification import Correspondence, antiunify_values
-from extractor.artifact import (
-    BOOL,
-    BV64,
-    MEM64_8,
-    Assignment,
-    Declaration,
-    InstructionModel,
-    StepSummary,
-    Target,
-    TermSort,
-    TypedExpr,
-)
+from ayxg.expr import BOOL, Declaration, TermSort, TypedExpr
+from extractor.artifact import BV64, MEM64_8, Assignment, InstructionModel, StepSummary, Target
 from extractor.model_syntax import CanonicalVariable, QFAbvSyntax
 from hypothesis import given, settings
 from hypothesis import strategies as st

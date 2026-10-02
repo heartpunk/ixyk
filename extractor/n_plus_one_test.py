@@ -69,7 +69,7 @@ def test_extraction_rejects_inconsistent_au_inputs(monkeypatch, failure, message
     import antiunification.many as au
     import extractor.au_inputs as inputs
     import extractor.operand_slots as slots
-    from extractor.artifact import TermSort
+    from ayxg.expr import TermSort
     from extractor.model_syntax import CanonicalVariable
 
     code = bytes.fromhex("4801d8")

@@ -9,15 +9,8 @@ from dataclasses import dataclass
 from typing import cast
 
 from antiunification import AlgebraError, Application, Atom, FiniteMap, Layer
-from extractor.artifact import (
-    Assignment,
-    Declaration,
-    InstructionModel,
-    StepSummary,
-    Target,
-    TermSort,
-    TypedExpr,
-)
+from ayxg.expr import Declaration, TermSort, TypedExpr
+from extractor.artifact import Assignment, InstructionModel, StepSummary, Target
 
 
 @dataclass(frozen=True)

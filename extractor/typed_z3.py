@@ -13,17 +13,8 @@ from collections.abc import Mapping
 from typing import cast
 
 from extractor import z3_boundary as _z3
-from extractor.artifact import (
-    BOOL,
-    Assignment,
-    ArtifactError,
-    Declaration,
-    StepSummary,
-    Target,
-    TermSort,
-    TypedExpr,
-    UnsupportedTheoryError,
-)
+from ayxg.expr import BOOL, ArtifactError, Declaration, TermSort, TypedExpr
+from extractor.artifact import Assignment, StepSummary, Target, UnsupportedTheoryError
 import z3
 
 

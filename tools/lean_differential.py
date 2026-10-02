@@ -16,7 +16,7 @@ import traceback
 from hypothesis import given, settings, strategies as st
 import z3
 
-from extractor.artifact import BOOL, TermSort, TypedExpr as E
+from ayxg.expr import BOOL, TermSort, TypedExpr as E
 from extractor.normalization import normalize_expression
 from extractor.typed_z3 import expr_to_z3
 

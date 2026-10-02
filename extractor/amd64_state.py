@@ -23,7 +23,8 @@ from extractor.angr_boundary import (
     expect_state,
 )
 from extractor import z3_boundary as _z3
-from extractor.artifact import MEM64_8, Declaration, TermSort
+from ayxg.expr import Declaration, TermSort
+from extractor.artifact import MEM64_8
 
 from angr.engines.vex.claripy import ccall as _angr_ccall
 from claripy.backends.backend_z3 import BackendZ3

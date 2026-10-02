@@ -7,7 +7,8 @@ from dataclasses import replace
 from collections.abc import Mapping
 from typing import cast
 
-from extractor.artifact import Assignment, InstructionModel, TypedExpr
+from ayxg.expr import TypedExpr
+from extractor.artifact import Assignment, InstructionModel
 
 
 def normalize_expression(

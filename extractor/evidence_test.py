@@ -11,15 +11,8 @@ from unittest.mock import patch
 from hypothesis import given, settings, strategies as st
 import pytest
 
-from extractor.artifact import (
-    Assignment,
-    Declaration,
-    InstructionModel,
-    StepSummary,
-    Target,
-    TermSort,
-    TypedExpr,
-)
+from ayxg.expr import Declaration, TermSort, TypedExpr
+from extractor.artifact import Assignment, InstructionModel, StepSummary, Target
 from extractor.evidence import (
     EvidenceAdapter,
     EvidenceReader,

@@ -12,7 +12,8 @@ from typing import Protocol, cast
 import capstone  # pyright: ignore[reportMissingTypeStubs]
 
 from extractor.angr_boundary import Project, lift_block
-from extractor.artifact import Declaration, InstructionModel, TermSort
+from ayxg.expr import Declaration, TermSort
+from extractor.artifact import InstructionModel
 from extractor.model_syntax import (
     AddressAtom,
     BitVectorAtom,

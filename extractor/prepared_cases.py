@@ -8,7 +8,8 @@ from functools import cache
 from antiunification.algebra import AlgebraError
 from antiunification.many import antiunify_many
 from extractor.acquisition_errors import EXPECTED_ACQUISITION
-from extractor.artifact import InstructionModel, TermSort
+from ayxg.expr import TermSort
+from extractor.artifact import InstructionModel
 from extractor.constructor_inputs import (
     ArgumentCase,
     Domain,

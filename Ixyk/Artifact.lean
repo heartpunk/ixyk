@@ -6,10 +6,7 @@ import Lean.Data.Json
 
 namespace Ixyk.Artifact
 
-open Lean Ixyk.QfAbv
-
-private inductive SomeExpr (context : Ctx) where
-  | mk (sort : TermSort) (expr : Expr context sort)
+open Lean Ayxg.QfAbv Ixyk.QfAbv
 
 structure RawExpr where
   op : String
@@ -21,7 +18,7 @@ structure RawExpr where
   amount? : Option Nat := none
   hi? : Option Nat := none
   lo? : Option Nat := none
-  deriving BEq
+  deriving DecidableEq
 
 instance : Inhabited RawExpr where
   default := { op := "", sort := .bool }
@@ -47,7 +44,7 @@ structure RawModel where
   steps : Array RawStep
 
 inductive Imported where
-  | model (system : STS)
+  | model (context : Ctx) (system : Ayxg.STS (Control × Env context) (Edge context))
   | unavailable (error : String)
 
 private def requireFields (json : Json) (expected : List String)
@@ -182,7 +179,7 @@ private def lookupVar : (context : Ctx) → (name : String) → (sort : TermSort
         .there <$> lookupVar rest name sort
 
 private def asSort (expected : TermSort) :
-    SomeExpr context → Except String (Expr context expected)
+    TypedExpr context → Except String (Expr context expected)
   | .mk actual expression =>
       if equal : actual = expected then pure (equal ▸ expression)
       else throw s!"expression sort mismatch: expected {repr expected}, got {repr actual}"
@@ -201,7 +198,7 @@ private def requireSome (value : Option α) (message : String) : Except String �
 mutual
   private partial def elaborateBoolBin (raw : RawExpr)
       (make : Expr context .bool → Expr context .bool → Expr context .bool) :
-      Except String (SomeExpr context) := do
+      Except String (TypedExpr context) := do
     requireArity raw 2
     requireSort raw .bool
     pure (.mk .bool (make
@@ -209,7 +206,7 @@ mutual
       (← asSort .bool (← elaborateExpr context raw.args[1]!))))
 
   private partial def elaborateBvBin (raw : RawExpr) (op : BvBinOp) :
-      Except String (SomeExpr context) := do
+      Except String (TypedExpr context) := do
     requireArity raw 2
     match ← elaborateExpr context raw.args[0]! with
     | .mk (.bv width) left =>
@@ -218,18 +215,19 @@ mutual
           (← asSort (.bv width) (← elaborateExpr context raw.args[1]!))))
     | _ => throw s!"{raw.op} requires bit-vector operands"
 
-  private partial def elaborateBvCmp (raw : RawExpr) (op : BvCmpOp) :
-      Except String (SomeExpr context) := do
+  private partial def elaborateBvCmp (raw : RawExpr)
+      (make : (width : Nat) → Expr context (.bv width) → Expr context (.bv width) → Expr context .bool) :
+      Except String (TypedExpr context) := do
     requireArity raw 2
     requireSort raw .bool
     match ← elaborateExpr context raw.args[0]! with
     | .mk (.bv width) left =>
-        pure (.mk .bool (.bvCmp op width left
+        pure (.mk .bool (make width left
           (← asSort (.bv width) (← elaborateExpr context raw.args[1]!))))
     | _ => throw s!"{raw.op} requires bit-vector operands"
 
   partial def elaborateExpr (context : Ctx) (raw : RawExpr) :
-      Except String (SomeExpr context) := do
+      Except String (TypedExpr context) := do
     match raw.op with
     | "var" =>
         requireArity raw 0
@@ -308,9 +306,9 @@ mutual
         | .mk (.bv width) value =>
             if high : hi < width then
               if low : lo ≤ hi then
-                let spec : ExtractSpec width := { hi, lo, hiLtWidth := high, loLeHi := low }
-                requireSort raw (.bv spec.resultWidth)
-                pure (.mk (.bv spec.resultWidth) (.extract spec value))
+                let spec : ExtractSpec width := { hi, lo, hi_lt_width := high, lo_le_hi := low }
+                requireSort raw (.bv spec.width)
+                pure (.mk (.bv spec.width) (.extract spec value))
               else throw "extract low bound exceeds high bound"
             else throw "extract high bound exceeds operand width"
         | _ => throw "extract requires a bit-vector"
@@ -341,10 +339,10 @@ mutual
               (← asSort (.bv indexWidth) (← elaborateExpr context raw.args[1]!))
               (← asSort (.bv valueWidth) (← elaborateExpr context raw.args[2]!))))
         | _ => throw "store requires an array"
-    | "bv_ult" => elaborateBvCmp raw .ult
-    | "bv_ule" => elaborateBvCmp raw .ule
-    | "bv_slt" => elaborateBvCmp raw .slt
-    | "bv_sle" => elaborateBvCmp raw .sle
+    | "bv_ult" => elaborateBvCmp raw .bvUlt
+    | "bv_ule" => elaborateBvCmp raw .bvUle
+    | "bv_slt" => elaborateBvCmp raw .bvSlt
+    | "bv_sle" => elaborateBvCmp raw .bvSle
     | "eq" =>
         requireArity raw 2
         requireSort raw .bool
@@ -378,7 +376,7 @@ private def uniqueNames (context : Ctx) : Bool :=
 private def checkMirroredPc (step : RawStep) : Except String Unit :=
   match step.update.find? (·.name = "rip") with
   | some assignment =>
-      if assignment.value == step.mirroredPc then pure ()
+      if assignment.value = step.mirroredPc then pure ()
       else throw "mirrored_pc differs from the simultaneous rip update"
   | none => throw "simultaneous update has no rip assignment"
 
@@ -403,25 +401,29 @@ private def elaborateStep (context : Ctx) (source : Control) (raw : RawStep) :
     target := ← elaborateTarget context raw.target
   }
 
-private def elaborateModel (raw : RawModel) : Except String STS := do
+private def elaborateModel (raw : RawModel) :
+    Except String (Σ context : Ctx, Ayxg.STS (Control × Env context) (Edge context)) := do
   if raw.source ≥ 2 ^ 64 then throw "instruction source exceeds BV64"
   if raw.declarations.isEmpty then throw "declarations must be nonempty"
   if raw.steps.isEmpty then throw "instruction model must contain an edge"
   let context := raw.declarations.toList
   if !uniqueNames context then throw "declaration names must be unique"
   let source := Control.address (BitVec.ofNat 64 raw.source)
-  pure { context, edges := ← raw.steps.toList.mapM (elaborateStep context source) }
+  pure ⟨context, { steps := ← raw.steps.toList.mapM (elaborateStep context source) }⟩
 
 def parse (text : String) : Except String Imported := do
   let json ← Json.parse text
   match ← stringField json "schema" with
-  | "ixyk.qf_abv.instruction.v1" => .model <$> elaborateModel (← parseModel json)
+  | "ixyk.qf_abv.instruction.v1" => do
+      let ⟨context, system⟩ ← elaborateModel (← parseModel json)
+      pure (.model context system)
   | "ixyk.unavailable_instruction_model.v1" => .unavailable <$> parseUnavailable json
   | schema => throw s!"unknown instruction-model schema {schema}"
 
-def parseAndElaborate (text : String) : Except String STS := do
+def parseAndElaborate (text : String) :
+    Except String (Σ context : Ctx, Ayxg.STS (Control × Env context) (Edge context)) := do
   match ← parse text with
-  | .model system => pure system
+  | .model context system => pure ⟨context, system⟩
   | .unavailable error => throw s!"instruction model is unavailable: {error}"
 
 -- Executable semantic boundary used by the differential test driver. Binding
@@ -434,15 +436,15 @@ private def evalBindings : List Json → Except String (Σ context, Env context)
       let ⟨context, env⟩ ← evalBindings rest
       if context.any (fun declaration => declaration.name == name) then
         throw "duplicate binding"
-      pure ⟨{ name, sort } :: context, .cons (value.eval .nil) env⟩
+      pure ⟨{ name, sort } :: context, .cons (Eval.eval .nil value) env⟩
 
 def evalRequest (json : Json) : Except String Json := do
   let bindings ← (← field json "bindings").getArr?
   let ⟨context, env⟩ ← evalBindings bindings.toList
   let .mk sort expr ← elaborateExpr context (← parseExpr (← field json "expr"))
   match sort with
-  | .bool => pure (toJson (expr.eval env))
-  | .bv _ => pure (toJson (expr.eval env).toNat)
+  | .bool => pure (toJson (Eval.eval env expr))
+  | .bv _ => pure (toJson (Eval.eval env expr).toNat)
   | .array _ _ => throw "observe arrays through select"
 
 end Ixyk.Artifact

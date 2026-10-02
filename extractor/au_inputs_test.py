@@ -7,10 +7,10 @@ from pathlib import Path
 from antiunification.many import separating_inputs, antiunify_many
 from extractor.au_inputs import instruction_inputs, parameters
 from extractor.model_syntax import BitVectorAtom, QFAbvSyntax
-from extractor.artifact import TermSort
+from ayxg.expr import TermSort
 from extractor.xed import decode
 from extractor.operand_slots import canonical_bindings
-from extractor.artifact import Declaration
+from ayxg.expr import Declaration
 
 
 @pytest.mark.parametrize(
