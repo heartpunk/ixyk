@@ -159,7 +159,7 @@ def test_z3_bridge_rejects_unsupported_sort() -> None:
 
 
 def test_boolean_expression_requires_boolean_sort() -> None:
-    with pytest.raises(ArtifactError, match="operand sorts"):
+    with pytest.raises(ArtifactError, match="operand or result sorts disagree"):
         _ = TypedExpr(
             "bool_and",
             BOOL,
