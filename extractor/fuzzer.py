@@ -25,7 +25,9 @@ from extractor.amd64_state import (
     YMM256,
 )
 from extractor.artifact import InstructionModel
-from extractor.concrete_eval import ConcreteArray, evaluator, share_expressions
+from extractor.concrete_eval import memory_value, share_expressions
+from ayxg.eval import equal_valuations, eval_exprs
+from ayxg.qfabv import QFAbvContext, QFAbvValuation, decode_sort
 from extractor.unicorn_boundary import (
     Emulator,
     amd64_emulator,
@@ -601,6 +603,19 @@ class CompiledModel:
         memory = next(d for d in artifact.declarations if d.name == MEMORY_NAME)
         if memory.sort.require_array_widths() != (64, 8):
             raise TypeError("input memory is not a BV64-to-BV8 array")
+        self.context = QFAbvContext(self.artifact.declarations)
+        self.memory_context = QFAbvContext((memory,))
+        self.guards = tuple(
+            self.context.expression(step.guard, decode_sort(step.guard.sort))
+            for step in self.steps
+        )
+        self.outputs = tuple(
+            tuple(self.context.expression(node, decode_sort(node.sort)) for node in (
+                *(assignment.value for assignment in step.simultaneous_update),
+                step.mirrored_pc,
+            ))
+            for step in self.steps
+        )
 
     def differences(
         self,
@@ -618,30 +633,40 @@ class CompiledModel:
             for name, value in before.scalars.items()
             if name in self.scalar_widths
         }
-        environment[MEMORY_NAME] = ConcreteArray.memory(before.memory)
-        evaluate = evaluator(environment)
-        enabled = tuple(step for step in self.steps if evaluate(step.guard))
+        environment[MEMORY_NAME] = memory_value(before.memory)
+        state = QFAbvValuation(self.context, tuple(
+            environment[declaration.name] for declaration in self.context.declarations
+        ))
+        enabled = tuple(
+            index for index, guard in enumerate(eval_exprs(self.guards, state)) if guard
+        )
         if len(enabled) != 1:
             if require_outcome:
                 raise ComparisonUnavailable(
                     f"enabled edges: {len(enabled)}; expected exactly one"
                 )
             return (f"enabled edges: {len(enabled)}; expected exactly one",)
-        step = enabled[0]
-        updates = {a.name: a.value for a in step.simultaneous_update}
+        index = enabled[0]
+        step = self.steps[index]
+        values = eval_exprs(self.outputs[index], state)
+        updates = {
+            assignment.name: value
+            for assignment, value in zip(step.simultaneous_update, values[:-1])
+        }
+        mirrored_pc = values[-1]
         if on_prediction is not None:
             from extractor.evidence_events import MemorySnapshot, ModelPrediction
 
             def prediction():
                 return ModelPrediction(
                     tuple(
-                        (name, evaluate(value))
+                        (name, value)
                         for name, value in updates.items()
                         if name != MEMORY_NAME
                     ),
-                    MemorySnapshot.capture(evaluate(updates[MEMORY_NAME]), 8),
+                    MemorySnapshot.capture(updates[MEMORY_NAME]),
                     step.target.kind,
-                    evaluate(step.mirrored_pc),
+                    mirrored_pc,
                 )
 
             on_prediction(prediction)
@@ -660,14 +685,16 @@ class CompiledModel:
             for name, expected in after.scalars.items()
             if name in updates
             and name != MEMORY_NAME
-            and (actual := evaluate(updates[name])) != expected
+            and (actual := updates[name]) != expected
         ]
-        mirrored_pc = evaluate(step.mirrored_pc)
         if mirrored_pc != after.scalars["rip"]:
             differences.append(
                 f"mirrored_pc: model={mirrored_pc:#x}, emulator="
                 + f"{after.scalars['rip']:#x}"
             )
-        if evaluate(updates[MEMORY_NAME]) != ConcreteArray.memory(after.memory):
+        if not equal_valuations(
+            QFAbvValuation(self.memory_context, (updates[MEMORY_NAME],)),
+            QFAbvValuation(self.memory_context, (memory_value(after.memory),)),
+        ):
             differences.append("memory differs")
         return tuple(differences)

@@ -4,16 +4,11 @@ from dataclasses import replace
 from unittest.mock import patch
 
 from extractor import z3_runtime as _z3_runtime  # noqa: F401
-from extractor.concrete_eval import ConcreteArray, evaluator, share_expressions
-from extractor.artifact import (
-    InstructionModel,
-    Declaration,
-    Assignment,
-    StepSummary,
-    Target,
-    TypedExpr as E,
-    TermSort,
-)
+from extractor.concrete_eval import share_expressions
+from ayxg.eval import equal_valuations, eval_expr, eval_exprs
+from ayxg.qfabv import ArraySort, QFAbvArrayValue, QFAbvContext, QFAbvValuation, decode_sort
+from ayxg.expr import Declaration, TypedExpr as E, TermSort
+from extractor.artifact import InstructionModel, Assignment, StepSummary, Target
 from extractor.fuzzer import ComparisonUnavailable, CompiledModel, ConcreteState
 from extractor.typed_z3 import expr_to_z3
 from tools.lean_differential import OPS, cases
@@ -33,10 +28,21 @@ def test_operators():
             counts[op] += 1
             expr, bindings = case
             context = z3.Context()
-            native_env = {k: evaluator({})(v) for k, v in bindings.items()}
+            empty = QFAbvContext(())
+            names = tuple(bindings)
+            values = eval_exprs(tuple(
+                empty.expression(bindings[name], decode_sort(bindings[name].sort))
+                for name in names
+            ), QFAbvValuation(empty, ()))
+            native_context = QFAbvContext(tuple(
+                Declaration(name, bindings[name].sort) for name in names
+            ))
             z3_env = {k: expr_to_z3(v, {}, context) for k, v in bindings.items()}
             expected = z3.simplify(expr_to_z3(expr, z3_env, context))
-            actual = evaluator(native_env)(expr)
+            actual = eval_expr(
+                native_context.expression(expr, decode_sort(expr.sort)),
+                QFAbvValuation(native_context, values),
+            )
             reference = (
                 z3.is_true(expected) if expr.sort.kind == "bool" else expected.as_long()
             )
@@ -64,19 +70,33 @@ def test_operators():
 )
 @settings(max_examples=100, deadline=None, phases=[Phase.generate])
 def test_arrays(width, d1, d2, writes1, writes2):
-    left, right = ConcreteArray(width, d1, {}), ConcreteArray(width, d2, {})
+    sort = ArraySort(width, 8)
+    left_entries, right_entries = {}, {}
     mask = (1 << width) - 1
     for k, v in writes1:
-        left = left.store(k & mask, v)
+        left_entries[k & mask] = v
     for k, v in writes2:
-        right = right.store(k & mask, v)
-    assert (left == right) == all(
-        left.select(k) == right.select(k) for k in range(1 << width)
+        right_entries[k & mask] = v
+    left = QFAbvArrayValue(sort, d1, tuple(sorted(
+        (k, v) for k, v in left_entries.items() if v != d1
+    )))
+    right = QFAbvArrayValue(sort, d2, tuple(sorted(
+        (k, v) for k, v in right_entries.items() if v != d2
+    )))
+    context = QFAbvContext((Declaration("memory", sort.encode()),))
+    assert equal_valuations(
+        QFAbvValuation(context, (left,)), QFAbvValuation(context, (right,))
+    ) == all(
+        left_entries.get(k, d1) == right_entries.get(k, d2) for k in range(1 << width)
     )
-    assert left == ConcreteArray(
-        width,
-        d2,
-        {k: left.select(k) for k in range(1 << width) if left.select(k) != d2},
+    other_encoding = QFAbvArrayValue(
+        sort, d2, tuple(
+            (k, left_entries.get(k, d1)) for k in range(1 << width)
+            if left_entries.get(k, d1) != d2
+        ),
+    )
+    assert equal_valuations(
+        QFAbvValuation(context, (left,)), QFAbvValuation(context, (other_encoding,))
     )
 
 

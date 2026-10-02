@@ -5,6 +5,7 @@
 
 from dataclasses import dataclass
 from typing import Literal
+from ayxg.qfabv import QFAbvArrayValue
 
 from extractor.artifact import InstructionModel
 from extractor.evidence import TypeRegistry
@@ -141,8 +142,9 @@ class MemorySnapshot:
     entries: tuple[tuple[int, int], ...]
 
     @classmethod
-    def capture(cls, memory, value_width):
-        return cls(memory.width, value_width, memory.default, tuple(memory.values.items()))
+    def capture(cls, memory: QFAbvArrayValue):
+        return cls(memory.sort.index_width, memory.sort.value_width,
+                   memory.default, memory.entries)
 
 
 @dataclass(frozen=True)

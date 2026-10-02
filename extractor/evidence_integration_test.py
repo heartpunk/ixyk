@@ -12,15 +12,8 @@ import pytest
 import zstandard
 
 from extractor import acquire_cli, extractor as extraction
-from extractor.artifact import (
-    InstructionModel,
-    Declaration,
-    Assignment,
-    StepSummary,
-    Target,
-    TermSort,
-    TypedExpr as E,
-)
+from ayxg.expr import Declaration, TermSort, TypedExpr as E
+from extractor.artifact import InstructionModel, Assignment, StepSummary, Target
 from extractor.evidence import EvidenceReader
 from extractor.evidence_events import Finding, evidence_types
 from extractor.evidence_reference_json import ReferenceJSONBackend
@@ -357,12 +350,14 @@ if __name__ == "__main__":
 @settings(deadline=None)
 def test_sparse_prediction_roundtrip(default, entries, probe, scalar):
     from io import BytesIO
-    from extractor.concrete_eval import ConcreteArray
+    from ayxg.qfabv import ArraySort, QFAbvArrayValue
     from extractor.evidence import EvidenceAdapter, RunContext
     from extractor.evidence_events import Comparison, MemorySnapshot, ModelPrediction
 
-    memory = ConcreteArray(64, default, dict(entries))
-    snapshot = MemorySnapshot.capture(memory, 8)
+    memory = QFAbvArrayValue(ArraySort(64, 8), default, tuple(sorted(
+        (index, value) for index, value in entries.items() if value != default
+    )))
+    snapshot = MemorySnapshot.capture(memory)
     prediction = ModelPrediction((("ymm0", scalar),), snapshot, "address", probe)
     value = Comparison("agreement", prediction, None, "continued", ())
     stream = BytesIO()
@@ -376,11 +371,13 @@ def test_sparse_prediction_roundtrip(default, entries, probe, scalar):
     restored = list(reader)[0].value
     assert restored == value
     encoded_memory = restored.model_after.memory
-    decoded = ConcreteArray(encoded_memory.index_width, encoded_memory.default,
-                            dict(encoded_memory.entries))
+    decoded = QFAbvArrayValue(
+        ArraySort(encoded_memory.index_width, encoded_memory.value_width),
+        encoded_memory.default, encoded_memory.entries,
+    )
     assert encoded_memory.value_width == 8
     assert decoded == memory
-    assert decoded.select(probe) == memory.select(probe)
-    # Capturing evidence must not retain an alias to mutable evaluator memory.
-    memory.values[probe] = (memory.select(probe) + 1) % 256
-    assert dict(snapshot.entries) == entries
+    assert dict(decoded.entries).get(probe, decoded.default) == dict(memory.entries).get(probe, memory.default)
+    # Source machine memory may mutate; captured canonical values are immutable.
+    entries[probe] = (entries.get(probe, default) + 1) % 256
+    assert snapshot.entries == memory.entries

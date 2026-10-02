@@ -36,6 +36,7 @@ py_library(
     name = "evidence_events",
     srcs = ["evidence_events.py"],
     deps = [
+        "@ayxg//:ayxg",
         ":artifact",
         ":evidence",
     ],
