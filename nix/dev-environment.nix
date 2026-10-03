@@ -13,6 +13,7 @@ let
           packageOverrides = nixpkgs.lib.composeExtensions
             (old.packageOverrides or (_: _: { }))
             (pyFinal: pyPrev: {
+              z3-solver = import "${ayxg-source}/nix/z3-python.nix" { pkgs = final; };
               bitstring = pyPrev.bitstring.overridePythonAttrs (attrs: {
                 # Keep correctness tests without the benchmark plugin's
                 # unrelated Elasticsearch/notebook test dependencies.

@@ -10,4 +10,4 @@ let
     build-system = [ pkgs.python312Packages.setuptools ];
     doCheck = false;
   };
-in pkgs.python312.withPackages (ps: [ ps.hypothesis ps.z3-solver ayxg ])
+in pkgs.python312.withPackages (ps: [ ps.hypothesis (import ../.dependencies/ayxg/nix/z3-python.nix { inherit pkgs; }) ayxg ])

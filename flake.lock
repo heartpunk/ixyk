@@ -25,7 +25,7 @@
       "flake": false,
       "locked": {
         "lastModified": 1,
-        "narHash": "sha256-dGkLun74UCfAg2LHdwOAPx5qWuZUNruZNCAbFYB/lvA=",
+        "narHash": "sha256-Kn/UX4wWFWQRRZb79u4Ju/ytw6muHboPBUcycEvb/YI=",
         "path": "./.dependencies/ayxg",
         "type": "path"
       },
