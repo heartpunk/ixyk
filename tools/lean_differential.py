@@ -18,7 +18,7 @@ import z3
 
 from ayxg.expr import BOOL, TermSort, TypedExpr as E
 from extractor.normalization import normalize_expression
-from extractor.typed_z3 import expr_to_z3
+from ayxg.z3 import expr_to_z3
 
 
 BINARY = (

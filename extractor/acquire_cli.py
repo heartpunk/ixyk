@@ -14,7 +14,7 @@ from typing import Literal, Protocol, TypedDict, cast
 
 from extractor.acquisition_errors import EXPECTED_ACQUISITION
 from extractor.amd64_state import Amd64AdapterError
-from extractor.artifact import UnsupportedTheoryError
+from ayxg.expr import UnsupportedTheoryError
 from extractor.evidence_session import (
     add_recording_arguments,
     recording_options,

@@ -16,8 +16,6 @@ from typing import ClassVar, cast
 from ayxg.expr import ArtifactError, BOOL, Declaration, TermSort, TypedExpr
 
 
-class UnsupportedTheoryError(ArtifactError):
-    """An otherwise valid expression escapes the admitted QF_ABV theory."""
 
 
 def _object(value: object, field: str) -> dict[str, object]:

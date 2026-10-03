@@ -73,7 +73,7 @@ py_test(
     srcs = ["normalization_test.py"],
     data = ["@nix_native_deps//:libstdcxx"],
     deps = [
-        "@ayxg//:ayxg",
+        "@ayxg//:ayxg", "@ayxg//:z3",
         ":artifact",
         ":model_syntax",
         ":normalization",
@@ -178,7 +178,7 @@ py_library(
     srcs = ["typed_z3.py"],
     target_compatible_with = _LINUX_X86_64,
     deps = [
-        "@ayxg//:ayxg",
+        "@ayxg//:ayxg", "@ayxg//:z3",
         ":artifact",
         ":z3_boundary",
         requirement("z3-solver"),
@@ -605,7 +605,7 @@ py_test(
     },
     target_compatible_with = _LINUX_X86_64,
     deps = [
-        "@ayxg//:ayxg",
+        "@ayxg//:ayxg", "@ayxg//:z3",
         ":artifact",
         ":typed_z3",
         ":z3_boundary",
@@ -811,7 +811,7 @@ py_test(
     },
     target_compatible_with = _LINUX_X86_64,
     deps = [
-        "@ayxg//:ayxg",
+        "@ayxg//:ayxg", "@ayxg//:z3",
         ":artifact",
         ":concrete_eval",
         ":evidence",

@@ -8,7 +8,7 @@ from ayxg.expr import Declaration, TermSort, TypedExpr
 from extractor.artifact import Assignment, InstructionModel, StepSummary, Target
 from extractor.model_syntax import QFAbvSyntax
 from extractor.normalization import normalize_expression, normalize_model
-from extractor.typed_z3 import expr_to_z3
+from ayxg.z3 import expr_to_z3
 from hypothesis import Phase, given, settings, strategies as st
 import pytest
 import z3

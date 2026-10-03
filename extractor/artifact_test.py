@@ -11,7 +11,8 @@ from extractor import z3_runtime as _z3_runtime
 from extractor import z3_boundary as _z3
 from ayxg.expr import BOOL, ArtifactError, Declaration, TypedExpr
 from extractor.artifact import BV64, Assignment, InstructionModel, StepSummary, Target
-from extractor.typed_z3 import expr_from_z3, step_summary_from_z3
+from ayxg.z3 import expr_from_z3
+from extractor.typed_z3 import step_summary_from_z3
 import z3
 
 

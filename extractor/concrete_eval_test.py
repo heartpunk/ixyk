@@ -10,7 +10,7 @@ from ayxg.qfabv import ArraySort, QFAbvArrayValue, QFAbvContext, QFAbvValuation,
 from ayxg.expr import Declaration, TypedExpr as E, TermSort
 from extractor.artifact import InstructionModel, Assignment, StepSummary, Target
 from extractor.fuzzer import ComparisonUnavailable, CompiledModel, ConcreteState
-from extractor.typed_z3 import expr_to_z3
+from ayxg.z3 import expr_to_z3
 from tools.lean_differential import OPS, cases
 from hypothesis import given, settings, Phase, strategies as st
 import pytest

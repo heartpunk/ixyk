@@ -4,7 +4,7 @@
 
 from antiunification.many import IncompatibleShapes
 from extractor.amd64_state import Amd64AdapterError
-from extractor.artifact import UnsupportedTheoryError
+from ayxg.expr import UnsupportedTheoryError
 from extractor.operand_slots import OperandDecodeError
 from extractor.tool_errors import AngrOperationError, ShellcodeLoadError
 from extractor.xed import EncodingError
