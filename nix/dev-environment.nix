@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2026 Sophie Smithburg
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-{ nixpkgs, angr-nix, system }:
+{ nixpkgs, angr-nix, ifrl, system }:
 let
   pkgs = import nixpkgs {
     inherit system;
@@ -106,7 +106,10 @@ in
 assert pkgs.bazel_9.version == bazelVersion;
 assert pkgs.lean4.version == leanVersion;
 {
-  shell = pkgs.mkShell (environment // { inherit packages; });
+  shell = pkgs.mkShell (environment // {
+    inputsFrom = [ ifrl.devShells.${system}.default ];
+    inherit packages;
+  });
   package = pkgs.buildEnv {
     name = "ixyk-dev-environment";
     meta.mainProgram = "ixyk-dev";

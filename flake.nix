@@ -10,23 +10,31 @@
   };
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/e7a3ca8092b61ff85b6a45bf863ea2b2d6a661b3";
+    ifrl.url = "git+ssh://git@github.com/heartpunk/ifrl.git?rev=04f9fb38cf205ab091cb690b6b58f711b65edf54";
+    nixpkgs.follows = "ifrl/nixpkgs";
     angr-nix = {
-      url = "github:heartpunk/angr-nix/3a7e87c627acdc1116e90892636b8e8d57d209d4";
-      inputs.nixpkgs.follows = "nixpkgs";
+      follows = "ifrl/angr-nix";
     };
   };
 
-  outputs = { nixpkgs, angr-nix, ... }:
+  outputs = { nixpkgs, angr-nix, ifrl, ... }:
     let
       systems = [ "aarch64-darwin" "x86_64-linux" ];
       environments = nixpkgs.lib.genAttrs systems (system:
-        import ./nix/dev-environment.nix { inherit nixpkgs angr-nix system; });
+        import (ifrl.outPath + "/nix/clients/ixyk/nix/dev-environment.nix") { inherit nixpkgs angr-nix ifrl system; });
     in {
       devShells = nixpkgs.lib.mapAttrs (_: env: { default = env.shell; }) environments;
       packages = nixpkgs.lib.mapAttrs (system: env: let
         pkgs = import nixpkgs { inherit system; };
-        reapi = import ./nix/reapi.nix { inherit pkgs; development = env.package; };
+        reapi = ifrl.lib.worker {
+          inherit pkgs;
+          python = pkgs.python312;
+          developmentEnvironment = env.package;
+          component = "ixyk";
+          workerContract = "ixyk-e7a3ca80-python312-lean430-procns-v1";
+          clientDependencies = env.package;
+          contractProperty = "ixyk-nix-contract";
+        };
       in {
         default = env.package;
         dev-environment = env.package;
