@@ -21,7 +21,7 @@ python = use_extension(
 python.defaults(python_version = "3.12")
 python.toolchain(python_version = "3.12")
 
-nix_python = use_extension("//tools:nix_python.bzl", "nix_python")
+nix_python = use_extension("@ifrl//bazel/ixyk/tools:nix_python.bzl", "nix_python")
 use_repo(nix_python, "nix_python_toolchains")
 
 register_toolchains("@nix_python_toolchains//:all")
@@ -98,7 +98,7 @@ override_repo(
 use_repo(pip, "ixyk_pypi")
 
 nix_native_deps = use_extension(
-    "//tools:nix_native_deps.bzl",
+    "@ifrl//bazel/ixyk/tools:nix_native_deps.bzl",
     "nix_native_deps",
 )
 use_repo(nix_native_deps, "nix_native_deps")

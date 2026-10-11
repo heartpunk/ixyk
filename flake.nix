@@ -19,15 +19,26 @@
 
   outputs = { nixpkgs, ifrl, ... }:
     let
-      lean4-nix = ifrl.lib.lean4-nix;
       systems = [ "aarch64-darwin" "x86_64-linux" ];
       environments = nixpkgs.lib.genAttrs systems (system:
-        import ./nix/dev-environment.nix { inherit nixpkgs ifrl lean4-nix system; });
+        import ./nix/dev-environment.nix { inherit nixpkgs ifrl system; });
     in {
-      devShells = nixpkgs.lib.mapAttrs (_: env: { default = env.shell; }) environments;
+      devShells = nixpkgs.lib.mapAttrs (_: env: {
+        default = env.shell.overrideAttrs (old: {
+          IFRL_ANGR_ENVIRONMENT = old.IXYK_NIX_PYTHON_ROOT;
+        });
+      }) environments;
       packages = nixpkgs.lib.mapAttrs (system: env: let
         pkgs = import nixpkgs { inherit system; };
-        reapi = import ./nix/reapi.nix { inherit pkgs; development = env.package; };
+        reapi = ifrl.lib.worker {
+          inherit pkgs;
+          python = pkgs.python312;
+          developmentEnvironment = env.package;
+          component = "ixyk";
+          workerContract = "ixyk-e79d204d-python312-lean434-procns-v1";
+          clientDependencies = env.package;
+          contractProperty = "ixyk-nix-contract";
+        };
       in {
         default = env.package;
         dev-environment = env.package;
