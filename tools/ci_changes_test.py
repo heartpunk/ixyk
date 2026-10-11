@@ -62,7 +62,7 @@ class SelectionTest(unittest.TestCase):
                 )
 
     def test_cache_selection(self):
-        for path in ("nix/dev-environment.nix", "nix/reapi.nix", "tools/xed_enc2.nix",
+        for path in ("flake.nix", "flake.lock", "tools/xed_enc2.nix",
                      ".github/workflows/cachix.yml", "tools/ci_cachix_restore.py"):
             self.assertIn("cache", affected([path]))
         for path in ("README.md", "extractor/xed.py", "compose.reapi.yaml",
@@ -71,7 +71,7 @@ class SelectionTest(unittest.TestCase):
 
     def test_newcomer_exact_inputs(self):
         inputs = {
-            "flake.nix", "flake.lock", "nix/dev-environment.nix",
+            "flake.nix", "flake.lock",
             "tools/xed_enc2.nix", "tools/xed_enc2_dispatch.py",
             "tools/dev_check.py", "tools/dev_smoke.py", ".bazelversion",
             "lean-toolchain", ".github/workflows/dev-environment.yml",
@@ -90,7 +90,7 @@ class SelectionTest(unittest.TestCase):
             "tools/ci_lean.py", "tools/lean_fuzz_env.nix",
             "tools/ci_changes_test.py", ".github/workflows/ci.yml",
             ".github/workflows/attic-publish.yml", "MODULE.bazel",
-            "MODULE.bazel.lock", ".bazelrc", "tools/nix_python.bzl",
+            "MODULE.bazel.lock", ".bazelrc",
             "README.md", ".envrc", "unknown/new-input.json",
         ):
             with self.subTest(path=path):
@@ -100,7 +100,7 @@ class SelectionTest(unittest.TestCase):
     def test_blank_vm_exact_inputs(self):
         self.assertEqual(BLANK_VM_INPUTS, NEWCOMER_INPUTS | {
             ".bazelrc", "tools/reapi_platform.bzl",
-            "nix/reapi.nix", "tools/reapi.py", "tools/reapi_smoke.py",
+            "tools/reapi.py", "tools/reapi_smoke.py",
             "tools/ci_blank_vm.sh", "tools/ci_blank_guest.sh",
         })
         for path in BLANK_VM_INPUTS:
