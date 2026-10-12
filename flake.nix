@@ -12,7 +12,7 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/e7a3ca8092b61ff85b6a45bf863ea2b2d6a661b3";
     angr-nix = {
-      url = "github:heartpunk/angr-nix/angr-release-upgrade-prototype";
+      url = "github:heartpunk/angr-nix/ca288bef3145174ae8385004e2cbcf6caabb9a76";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     lean4-nix = {

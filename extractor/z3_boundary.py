@@ -5,7 +5,8 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable
+from collections.abc import Callable, Iterable
+from typing import cast
 
 import z3
 
@@ -249,6 +250,10 @@ def check_status(result: z3.CheckSatResult) -> int:
     return status
 
 
-def translate(backend: object, ast: object, ctx: z3.Context) -> z3.ExprRef:
-    converted = _method(backend, "convert")(ast)
-    return _expect(_method(converted, "translate")(ctx), z3.ExprRef, "translate")
+def parse_smt2_string(source: str, ctx: z3.Context) -> tuple[z3.ExprRef, ...]:
+    parsed = _function("parse_smt2_string")(source, ctx=ctx)
+    assertions = tuple(cast(Iterable[object], parsed))
+    return tuple(
+        _expect(assertion, z3.ExprRef, "parse_smt2_string")
+        for assertion in assertions
+    )

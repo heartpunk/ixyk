@@ -31,11 +31,9 @@ _EXPECTED_TOP_LEVEL_VERSIONS = {
     "mutmut": "3.6.0",
     "pytest": "9.1.1",
     "unicorn": "2.1.4",
-    "z3-solver": "5.1.0.0",
 }
 _REQUIRED_MODULES = (
     "angr",
-    "angr.rustylib",
     "archinfo",
     "capstone",
     "cle",
@@ -101,7 +99,7 @@ class _SymbolicValue(Protocol):
 class _Solver(Protocol):
     def add(self, constraint: object) -> object: ...
 
-    def eval(self, expression: object, count: int) -> tuple[int, ...]: ...
+    def eval(self, expression: object, count: int) -> list[int]: ...
 
 
 class _BVS(Protocol):
@@ -251,8 +249,8 @@ def run_probe() -> _ProbeResult:
     symbolic = claripy_api.BVS("e1_smoke_value", 64)
     solver = claripy_api.Solver()
     _ = solver.add(symbolic + 1 == _EXPECTED_SOLVED_VALUE + 1)
-    solved = tuple(solver.eval(symbolic, 1))
-    if solved != (_EXPECTED_SOLVED_VALUE,):
+    solved = solver.eval(symbolic, 1)
+    if solved != [_EXPECTED_SOLVED_VALUE]:
         _fail(f"unexpected Claripy result: {solved!r}")
 
     return {

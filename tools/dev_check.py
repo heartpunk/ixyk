@@ -25,13 +25,9 @@ def check() -> None:
             raise ValueError(f"missing {name}; enter nix develop or use ixyk-dev")
     python_root = os.environ.get("IXYK_NIX_PYTHON_ROOT", "")
     if not python_root.startswith("/nix/store/"):
-        raise ValueError(
-            "IXYK_NIX_PYTHON_ROOT is missing; enter nix develop or use ixyk-dev"
-        )
+        raise ValueError("IXYK_NIX_PYTHON_ROOT is missing; enter nix develop or use ixyk-dev")
     runtime_root = os.environ.get("IXYK_NIX_PYTHON_RUNTIME", "")
-    if not runtime_root.startswith("/nix/store/") or not Path(
-        runtime_root, "bin/python3.12"
-    ).is_file():
+    if not runtime_root.startswith("/nix/store/") or not Path(runtime_root, "bin/python3.12").is_file():
         raise ValueError("IXYK_NIX_PYTHON_RUNTIME must identify the Nix Python runtime")
     if sys.version_info[:2] != (3, 12):
         raise ValueError(f"expected Python 3.12, got {sys.version}")
@@ -41,21 +37,11 @@ def check() -> None:
     if Path(selected_python).resolve() != Path(python_root, "bin/python").resolve():
         raise ValueError("python on PATH differs from the declared Nix environment")
     for name, command, expected, pattern in (
-        (
-            "Bazel",
-            ["bazel", "--version"],
-            (root / ".bazelversion").read_text().strip(),
-            r"bazel (\d+\.\d+\.\d+)(?:- \(@non-git\))?\s*$",
-        ),
-        (
-            "Lean",
-            ["lean", "--version"],
-            (root / "lean-toolchain")
-            .read_text()
-            .strip()
-            .removeprefix("leanprover/lean4:v"),
-            r"Lean \(version ([^,\s]+)",
-        ),
+        ("Bazel", ["bazel", "--version"], (root / ".bazelversion").read_text().strip(),
+         r"bazel (\d+\.\d+\.\d+)(?:- \(@non-git\))?\s*$"),
+        ("Lean", ["lean", "--version"],
+         (root / "lean-toolchain").read_text().strip().removeprefix("leanprover/lean4:v"),
+         r"Lean \(version ([^,\s]+)"),
     ):
         output = subprocess.check_output(command, text=True)
         match = re.search(pattern, output)
@@ -71,13 +57,13 @@ def check() -> None:
         ctypes.CDLL(str(Path(library_root) / "lib/libstdc++.so.6"))
 
     import angr
+    from angr import claripy
     import coverage
     import hypothesis
     import ipykernel
     import pytest
     import unicorn
     import z3
-    claripy = angr.claripy
 
     # Import developer dependencies and exercise the native engines with tiny,
     # deterministic inputs. No repository imports or Bazel downloads are needed.
@@ -85,7 +71,7 @@ def check() -> None:
     x = claripy.BVS("dev_check", 8)
     solver = claripy.Solver()
     solver.add(x + 1 == 2)
-    if tuple(solver.eval(x, 1)) != (1,):
+    if solver.eval(x, 1) != (1,):
         raise ValueError("Claripy solver smoke check failed")
     if not z3.is_true(z3.simplify(z3.BitVecVal(1, 8) + 1 == 2)):
         raise ValueError("Z3 smoke check failed")
@@ -99,15 +85,9 @@ def check() -> None:
     print("Python dependencies, native libraries, lifting and emulation: OK")
     if (platform.system(), platform.machine()) == ("Linux", "x86_64"):
         print("Linux x86-64 development environment: ready.")
-        print(
-            "Bazel REAPI tests require a compatible executor; "
-            "none was started or checked."
-        )
+        print("Bazel REAPI tests additionally require a compatible executor; none was started or checked.")
     else:
-        print(
-            "Development tools: ready. Bazel validation requires a Linux x86-64 "
-            "client and executor."
-        )
+        print("Development tools: ready. Bazel validation requires a Linux x86-64 client and executor.")
 
 
 if __name__ == "__main__":

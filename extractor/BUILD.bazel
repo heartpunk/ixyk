@@ -216,6 +216,10 @@ py_library(
         ":native_runtime",
         ":tool_errors",
         requirement("angr"),
+        requirement("coverage"),
+        requirement("hypothesis"),
+        requirement("mutmut"),
+        requirement("pytest"),
     ],
 )
 
@@ -238,6 +242,23 @@ py_library(
         ":artifact",
         ":z3_boundary",
         requirement("angr"),
+        requirement("z3-solver"),
+    ],
+)
+
+py_test(
+    name = "angr_public_smt_test",
+    srcs = ["angr_public_smt_test.py"],
+    data = ["@nix_native_deps//:libstdcxx"],
+    env = {
+        "GHOT_LIBSTDCXX_RLOCATION": "$(rlocationpath @nix_native_deps//:libstdcxx)",
+        "PYTHONNOUSERSITE": "1",
+        "PYTHONSAFEPATH": "1",
+    },
+    target_compatible_with = _LINUX_X86_64,
+    deps = [
+        ":amd64_state",
+        requirement("pytest"),
         requirement("z3-solver"),
     ],
 )
