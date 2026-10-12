@@ -1,11 +1,12 @@
 # SPDX-FileCopyrightText: 2026 Sophie Smithburg
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-{ nixpkgs, angr-nix, system }:
+{ nixpkgs, angr-nix, lean4-nix, system }:
 let
   pkgs = import nixpkgs {
     inherit system;
     overlays = [
+      (lean4-nix.readToolchainFile ../lean-toolchain)
       angr-nix.overlays.default
       (final: prev: {
         python312 = prev.python312.override (old: {
@@ -17,7 +18,7 @@ let
                 # unrelated Elasticsearch/notebook test dependencies.
                 nativeCheckInputs = builtins.filter
                   (dep: nixpkgs.lib.getName dep != "pytest-benchmark")
-                  attrs.nativeCheckInputs;
+                  (attrs.nativeCheckInputs or [ ]);
                 pytestFlags = builtins.filter
                   (flag: flag != "--benchmark-disable")
                   (attrs.pytestFlags or [ ]);
@@ -84,7 +85,7 @@ let
     pkgs.gnugrep
     pkgs.git
     pkgs.jujutsu
-    pkgs.lean4
+    pkgs.lean
     pkgs.ruff
     pkgs.stdenv.cc
     pkgs.zstd
@@ -104,7 +105,7 @@ let
   '';
 in
 assert pkgs.bazel_9.version == bazelVersion;
-assert pkgs.lean4.version == leanVersion;
+assert pkgs.lean.version == leanVersion;
 {
   shell = pkgs.mkShell (environment // { inherit packages; });
   package = pkgs.buildEnv {

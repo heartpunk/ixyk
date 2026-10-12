@@ -15,13 +15,17 @@
       url = "github:heartpunk/angr-nix/angr-release-upgrade-prototype";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    lean4-nix = {
+      url = "github:heartpunk/lean4-nix/c118a8ef6162f286bdaecfeba73f7f42d26e0103";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs = { nixpkgs, angr-nix, ... }:
+  outputs = { nixpkgs, angr-nix, lean4-nix, ... }:
     let
       systems = [ "aarch64-darwin" "x86_64-linux" ];
       environments = nixpkgs.lib.genAttrs systems (system:
-        import ./nix/dev-environment.nix { inherit nixpkgs angr-nix system; });
+        import ./nix/dev-environment.nix { inherit nixpkgs angr-nix lean4-nix system; });
     in {
       devShells = nixpkgs.lib.mapAttrs (_: env: { default = env.shell; }) environments;
       packages = nixpkgs.lib.mapAttrs (system: env: let
