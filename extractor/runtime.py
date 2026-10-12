@@ -25,18 +25,19 @@ _EXPECTED_PYTHON = (3, 12, 13)
 _EXPECTED_SOLVED_VALUE = 0x1234
 _EXPECTED_VEX_INSTRUCTIONS = 2
 _EXPECTED_TOP_LEVEL_VERSIONS = {
-    "angr": "9.2.214",
+    "angr": "10.0.1",
     "coverage": "7.15.2",
     "hypothesis": "6.160.0",
     "mutmut": "3.6.0",
     "pytest": "9.1.1",
     "unicorn": "2.1.4",
+    "z3-solver": "5.1.0.0",
 }
 _REQUIRED_MODULES = (
     "angr",
+    "angr.rustylib",
     "archinfo",
     "capstone",
-    "claripy",
     "cle",
     "coverage",
     "hypothesis",
@@ -137,7 +138,7 @@ class _ProbeResult(TypedDict):
 _LIBSTDCXX = _preload_libstdcxx()
 
 angr = importlib.import_module("angr")
-claripy = importlib.import_module("claripy")
+claripy = getattr(angr, "claripy")
 
 __all__ = ["angr", "claripy"]
 
@@ -250,7 +251,7 @@ def run_probe() -> _ProbeResult:
     symbolic = claripy_api.BVS("e1_smoke_value", 64)
     solver = claripy_api.Solver()
     _ = solver.add(symbolic + 1 == _EXPECTED_SOLVED_VALUE + 1)
-    solved = solver.eval(symbolic, 1)
+    solved = tuple(solver.eval(symbolic, 1))
     if solved != (_EXPECTED_SOLVED_VALUE,):
         _fail(f"unexpected Claripy result: {solved!r}")
 

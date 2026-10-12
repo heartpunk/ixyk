@@ -16,6 +16,9 @@ class Ast(Protocol):
     op: str
     args: tuple[object, ...]
 
+    def smtlib(self) -> str:
+        ...
+
     def __getitem__(self, key: int | slice) -> Ast:
         ...
 
@@ -156,6 +159,11 @@ class Claripy(Protocol):
 
     def If(self, condition: object, then: Ast, otherwise: Ast) -> Ast:
         ...
+
+    class _AstNamespace(Protocol):
+        Base: type
+
+    ast: _AstNamespace
 
 
 angr = cast(Angr, cast(object, runtime.angr))

@@ -26,7 +26,6 @@ from extractor import z3_boundary as _z3
 from extractor.artifact import MEM64_8, Declaration, TermSort
 
 from angr.engines.vex.claripy import ccall as _angr_ccall
-from claripy.backends.backend_z3 import BackendZ3
 import z3
 
 
@@ -59,7 +58,6 @@ REGISTER_WIDTH = {name: 64 for name in (*GPR64, "rip")} | {name: 256 for name in
 MEMORY_NAME = "mem"
 
 LTS_EXTRACTION_CONTEXT = z3.Context()
-_BZ3 = BackendZ3()
 _U64_MAX = (1 << 64) - 1
 _NO_STATEMENTS: frozenset[int] = frozenset()
 
@@ -206,13 +204,74 @@ def canonical_memory() -> z3.ArrayRef:
 
 
 def claripy_to_z3(ast: object) -> z3.ExprRef:
-    """Cross the Angr boundary into the dedicated extraction context."""
+    """Parse Angr 10's integrated Claripy AST into the extraction context."""
 
-    return _z3.translate(
-        _BZ3,
-        expect_ast(ast, "Claripy expression"),
-        LTS_EXTRACTION_CONTEXT,
+    expression = expect_ast(ast, "Claripy expression")
+    declarations: dict[str, str] = {}
+    pending = [expression]
+    seen: set[int] = set()
+    base_type = _claripy.ast.Base
+
+    while pending:
+        node = pending.pop()
+        if id(node) in seen:
+            continue
+        seen.add(id(node))
+        arguments = node.args
+
+        if node.op == "BVS":
+            name, width = arguments
+            if not isinstance(name, str) or type(width) is not int or width <= 0:
+                raise Amd64AdapterError(
+                    "Claripy bit-vector variable has invalid metadata"
+                )
+            sort = f"(_ BitVec {width})"
+            previous_sort = declarations.setdefault(name, sort)
+            if previous_sort != sort:
+                raise Amd64AdapterError(
+                    f"Claripy variable {name!r} has inconsistent sorts"
+                )
+        elif node.op == "BoolS":
+            (name,) = arguments
+            if not isinstance(name, str):
+                raise Amd64AdapterError("Claripy Boolean variable has invalid metadata")
+            previous_sort = declarations.setdefault(name, "Bool")
+            if previous_sort != "Bool":
+                raise Amd64AdapterError(
+                    f"Claripy variable {name!r} has inconsistent sorts"
+                )
+
+        pending.extend(
+            argument for argument in arguments if isinstance(argument, base_type)
+        )
+
+    def smtlib_symbol(name: str) -> str:
+        alphabet = "~!@$%^&*_-+=<>.?/"
+        first_is_valid = bool(name) and not name[0].isdigit()
+        if first_is_valid and all(
+            char.isascii() and (char.isalnum() or char in alphabet) for char in name
+        ):
+            return name
+        escaped = name.replace("\\", "\\\\").replace("|", "\\|")
+        return f"|{escaped}|"
+
+    declarations_smt = "\n".join(
+        f"(declare-fun {smtlib_symbol(name)} () {sort})"
+        for name, sort in sorted(declarations.items())
     )
+    serialized = expression.smtlib()
+    script = f"{declarations_smt}\n(assert (= {serialized} {serialized}))"
+    try:
+        assertions = z3.parse_smt2_string(script, ctx=LTS_EXTRACTION_CONTEXT)
+    except z3.Z3Exception as error:
+        raise Amd64AdapterError(
+            "Angr 10 Claripy SMT-LIB expression could not be translated"
+        ) from error
+    if len(assertions) != 1 or not z3.is_eq(assertions[0]):
+        raise Amd64AdapterError(
+            "Claripy SMT-LIB translation did not produce one equality"
+        )
+    return assertions[0].arg(0)
 
 
 def load_le(
