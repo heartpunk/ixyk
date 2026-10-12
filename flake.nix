@@ -11,18 +11,16 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/e7a3ca8092b61ff85b6a45bf863ea2b2d6a661b3";
-    angr-nix = {
-      url = "github:heartpunk/angr-nix/ca288bef3145174ae8385004e2cbcf6caabb9a76";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-    lean4-nix = {
-      url = "github:heartpunk/lean4-nix/c118a8ef6162f286bdaecfeba73f7f42d26e0103";
+    ifrl = {
+      url = "github:heartpunk/ifrl/5592161bc01eab29892ab32e8639c7ab318bd9f4";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
 
-  outputs = { nixpkgs, angr-nix, lean4-nix, ... }:
+  outputs = { nixpkgs, ifrl, ... }:
     let
+      angr-nix = ifrl.lib.angr-nix;
+      lean4-nix = ifrl.lib.lean4-nix;
       systems = [ "aarch64-darwin" "x86_64-linux" ];
       environments = nixpkgs.lib.genAttrs systems (system:
         import ./nix/dev-environment.nix { inherit nixpkgs angr-nix lean4-nix system; });
