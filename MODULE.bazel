@@ -10,6 +10,12 @@ bazel_dep(name = "platforms", version = "1.1.0")
 bazel_dep(name = "rules_cc", version = "0.2.17")
 bazel_dep(name = "rules_python", version = "1.7.0")
 bazel_dep(name = "ixyk_vendored_arpy", version = "1.1.1")
+bazel_dep(name = "ifrl", version = "0.1.0")
+git_override(
+    module_name = "ifrl",
+    remote = "git@github.com:heartpunk/ifrl.git",
+    commit = "04f9fb38cf205ab091cb690b6b58f711b65edf54",
+)
 bazel_dep(name = "ixyk_vendored_mulpyplexer", version = "0.9")
 
 local_path_override(
@@ -29,7 +35,7 @@ python = use_extension(
 python.defaults(python_version = "3.12")
 python.toolchain(python_version = "3.12")
 
-nix_python = use_extension("//tools:nix_python.bzl", "nix_python")
+nix_python = use_extension("@ifrl//bazel/ixyk/tools:nix_python.bzl", "nix_python")
 use_repo(nix_python, "nix_python_toolchains")
 
 register_toolchains("@nix_python_toolchains//:all")
@@ -56,7 +62,7 @@ override_repo(
 use_repo(pip, "ixyk_pypi")
 
 nix_native_deps = use_extension(
-    "//tools:nix_native_deps.bzl",
+    "@ifrl//bazel/ixyk/tools:nix_native_deps.bzl",
     "nix_native_deps",
 )
 use_repo(nix_native_deps, "nix_native_deps")
