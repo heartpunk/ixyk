@@ -13,6 +13,18 @@ let
           packageOverrides = nixpkgs.lib.composeExtensions
             (old.packageOverrides or (_: _: { }))
             (pyFinal: pyPrev: {
+              angr = pyPrev.angr.overridePythonAttrs (attrs: {
+                # The prebuilt Darwin wheel has no Mach-O header padding for
+                # an absolute Nix-store dependency path. Keep the z3 dylib
+                # beside rustylib through a short loader-relative symlink.
+                preFixup = if final.stdenv.isDarwin then ''
+                  angrSitePackages="$out/${pyPrev.python.sitePackages}/angr"
+                  ln -s "${pyPrev.z3-solver}/${pyPrev.python.sitePackages}/z3/lib/libz3.dylib" \
+                    "$angrSitePackages/a"
+                  install_name_tool -change libz3.dylib @loader_path/a \
+                    "$angrSitePackages/rustylib.abi3.so"
+                '' else (attrs.preFixup or "");
+              });
               bitstring = pyPrev.bitstring.overridePythonAttrs (attrs: {
                 # Keep correctness tests without the benchmark plugin's
                 # unrelated Elasticsearch/notebook test dependencies.

@@ -439,10 +439,9 @@ private def evalBindings : List Json → Except String (Σ context, Env context)
 def evalRequest (json : Json) : Except String Json := do
   let bindings ← (← field json "bindings").getArr?
   let ⟨context, env⟩ ← evalBindings bindings.toList
-  let .mk sort expr ← elaborateExpr context (← parseExpr (← field json "expr"))
-  match sort with
-  | .bool => pure (toJson (expr.eval env))
-  | .bv _ => pure (toJson (expr.eval env).toNat)
-  | .array _ _ => throw "observe arrays through select"
+  match (← elaborateExpr context (← parseExpr (← field json "expr"))) with
+  | .mk .bool expr => pure (toJson (expr.eval env))
+  | .mk (.bv _) expr => pure (toJson (expr.eval env).toNat)
+  | .mk (.array _ _) _ => throw "observe arrays through select"
 
 end Ixyk.Artifact
