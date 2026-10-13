@@ -1,23 +1,36 @@
 # SPDX-FileCopyrightText: 2026 Sophie Smithburg
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-{ nixpkgs, angr-nix, system }:
+{ nixpkgs, angr-nix, lean4-nix, system }:
 let
   pkgs = import nixpkgs {
     inherit system;
     overlays = [
+      (lean4-nix.readToolchainFile ../lean-toolchain)
       angr-nix.overlays.default
       (final: prev: {
         python312 = prev.python312.override (old: {
           packageOverrides = nixpkgs.lib.composeExtensions
             (old.packageOverrides or (_: _: { }))
             (pyFinal: pyPrev: {
+              angr = pyPrev.angr.overridePythonAttrs (attrs: {
+                # The prebuilt Darwin wheel has no Mach-O header padding for
+                # an absolute Nix-store dependency path. Keep the z3 dylib
+                # beside rustylib through a short loader-relative symlink.
+                preFixup = if final.stdenv.isDarwin then ''
+                  angrSitePackages="$out/${pyPrev.python.sitePackages}/angr"
+                  ln -s "${pyPrev.z3-solver}/${pyPrev.python.sitePackages}/z3/lib/libz3.dylib" \
+                    "$angrSitePackages/a"
+                  install_name_tool -change libz3.dylib @loader_path/a \
+                    "$angrSitePackages/rustylib.abi3.so"
+                '' else (attrs.preFixup or "");
+              });
               bitstring = pyPrev.bitstring.overridePythonAttrs (attrs: {
                 # Keep correctness tests without the benchmark plugin's
                 # unrelated Elasticsearch/notebook test dependencies.
                 nativeCheckInputs = builtins.filter
                   (dep: nixpkgs.lib.getName dep != "pytest-benchmark")
-                  attrs.nativeCheckInputs;
+                  (attrs.nativeCheckInputs or [ ]);
                 pytestFlags = builtins.filter
                   (flag: flag != "--benchmark-disable")
                   (attrs.pytestFlags or [ ]);
@@ -31,7 +44,6 @@ let
   };
   python = pkgs.python312.withPackages (ps: [
     ps.angr
-    ps.claripy
     ps.coverage
     ps.hypothesis
     ps.ipykernel
@@ -84,7 +96,7 @@ let
     pkgs.gnugrep
     pkgs.git
     pkgs.jujutsu
-    pkgs.lean4
+    pkgs.lean
     pkgs.ruff
     pkgs.stdenv.cc
     pkgs.zstd
@@ -104,7 +116,7 @@ let
   '';
 in
 assert pkgs.bazel_9.version == bazelVersion;
-assert pkgs.lean4.version == leanVersion;
+assert pkgs.lean.version == leanVersion;
 {
   shell = pkgs.mkShell (environment // { inherit packages; });
   package = pkgs.buildEnv {

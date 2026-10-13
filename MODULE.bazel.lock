@@ -191,6 +191,116 @@
   },
   "selectedYankedVersions": {},
   "moduleExtensions": {
+    "//tools:nix_native_deps.bzl%nix_native_deps": {
+      "os:linux,arch:amd64": {
+        "bzlTransitiveDigest": "G87DWlnvIbeFVN8fhZOgVKJD4PeeRqRn/w+YkVJYRwc=",
+        "usagesDigest": "8WPmSfUDrq4e2VUl3le3Q5P7466kAvCsC9CDxRKd1zg=",
+        "recordedInputs": [],
+        "generatedRepoSpecs": {
+          "nix_native_deps": {
+            "repoRuleId": "@@//tools:nix_native_deps.bzl%_repository",
+            "attributes": {}
+          }
+        }
+      },
+      "os:osx,arch:aarch64": {
+        "bzlTransitiveDigest": "G87DWlnvIbeFVN8fhZOgVKJD4PeeRqRn/w+YkVJYRwc=",
+        "usagesDigest": "8WPmSfUDrq4e2VUl3le3Q5P7466kAvCsC9CDxRKd1zg=",
+        "recordedInputs": [],
+        "generatedRepoSpecs": {
+          "nix_native_deps": {
+            "repoRuleId": "@@//tools:nix_native_deps.bzl%_repository",
+            "attributes": {}
+          }
+        }
+      }
+    },
+    "//tools:nix_python.bzl%nix_python": {
+      "os:linux,arch:amd64": {
+        "bzlTransitiveDigest": "lShy+IvF6fywqJRT908CkqBxvo8Uo30jbr/12VqcIcA=",
+        "usagesDigest": "gep+xQT0YW/XQ/jnAqD3dLEK06sxQavoHzHM/Dp9gUw=",
+        "recordedInputs": [
+          "REPO_MAPPING:,rules_python rules_python+",
+          "REPO_MAPPING:rules_python+,rules_python rules_python+",
+          "ENV:IXYK_NIX_PYTHON_RUNTIME /nix/store/3jm89jy56cprn52iw8vanpav58hlcj1v-python3-3.12.13"
+        ],
+        "generatedRepoSpecs": {
+          "nix_python_3_12": {
+            "repoRuleId": "@@rules_python+//python/private:local_runtime_repo.bzl%local_runtime_repo",
+            "attributes": {
+              "interpreter_path": "/nix/store/3jm89jy56cprn52iw8vanpav58hlcj1v-python3-3.12.13/bin/python3.12",
+              "on_failure": "fail"
+            }
+          },
+          "nix_python_toolchains": {
+            "repoRuleId": "@@rules_python+//python/private:local_runtime_toolchains_repo.bzl%local_runtime_toolchains_repo",
+            "attributes": {
+              "runtimes": [
+                "nix_python_3_12"
+              ],
+              "target_compatible_with": {
+                "nix_python_3_12": [
+                  "HOST_CONSTRAINTS"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "os:osx,arch:aarch64": {
+        "bzlTransitiveDigest": "lShy+IvF6fywqJRT908CkqBxvo8Uo30jbr/12VqcIcA=",
+        "usagesDigest": "gep+xQT0YW/XQ/jnAqD3dLEK06sxQavoHzHM/Dp9gUw=",
+        "recordedInputs": [
+          "REPO_MAPPING:,rules_python rules_python+",
+          "REPO_MAPPING:rules_python+,rules_python rules_python+",
+          "ENV:IXYK_NIX_PYTHON_RUNTIME /nix/store/h2vxf9d0mwgc7gcxm8m468gv9zdyl4da-python3-3.12.13"
+        ],
+        "generatedRepoSpecs": {
+          "nix_python_3_12": {
+            "repoRuleId": "@@rules_python+//python/private:local_runtime_repo.bzl%local_runtime_repo",
+            "attributes": {
+              "interpreter_path": "/nix/store/h2vxf9d0mwgc7gcxm8m468gv9zdyl4da-python3-3.12.13/bin/python3.12",
+              "on_failure": "fail"
+            }
+          },
+          "nix_python_toolchains": {
+            "repoRuleId": "@@rules_python+//python/private:local_runtime_toolchains_repo.bzl%local_runtime_toolchains_repo",
+            "attributes": {
+              "runtimes": [
+                "nix_python_3_12"
+              ],
+              "target_compatible_with": {
+                "nix_python_3_12": [
+                  "HOST_CONSTRAINTS"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "@@pybind11_bazel+//:internal_configure.bzl%internal_configure_extension": {
+      "general": {
+        "bzlTransitiveDigest": "b+RP7Sgl8KN0VHamrgTqzGLuYPcQ/Mo4ptNkkHUIIlA=",
+        "usagesDigest": "D1r3lfzMuUBFxgG8V6o0bQTLMk3GkaGOaPzw53wrwyw=",
+        "recordedInputs": [
+          "REPO_MAPPING:pybind11_bazel+,bazel_tools bazel_tools",
+          "FILE:@@pybind11_bazel+//MODULE.bazel e6f4c20442eaa7c90d7190d8dc539d0ab422f95c65a57cc59562170c58ae3d34"
+        ],
+        "generatedRepoSpecs": {
+          "pybind11": {
+            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
+            "attributes": {
+              "build_file": "@@pybind11_bazel+//:pybind11-BUILD.bazel",
+              "strip_prefix": "pybind11-2.12.0",
+              "urls": [
+                "https://github.com/pybind/pybind11/archive/v2.12.0.zip"
+              ]
+            }
+          }
+        }
+      }
+    },
     "@@rules_kotlin+//src/main/starlark/core/repositories:bzlmod_setup.bzl%rules_kotlin_extensions": {
       "general": {
         "bzlTransitiveDigest": "Ga4z8lQy1YQ5rAMy+dOl0dqcCEBnYNCXku8x3YQmDZI=",

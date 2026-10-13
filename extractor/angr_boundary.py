@@ -5,8 +5,14 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable, Mapping, MutableMapping, MutableSet, Sequence
-from typing import Protocol, cast
+from collections.abc import (
+    Callable,
+    Mapping,
+    MutableMapping,
+    MutableSet,
+    Sequence,
+)
+from typing import AbstractSet, Protocol, cast
 
 from extractor import runtime
 from extractor.tool_errors import AngrOperationError
@@ -15,6 +21,19 @@ from extractor.tool_errors import AngrOperationError
 class Ast(Protocol):
     op: str
     args: tuple[object, ...]
+    variables: AbstractSet[str]
+
+    def hash(self) -> int:
+        ...
+
+    def identical(self, other: Ast) -> bool:
+        ...
+
+    def size(self) -> int:
+        ...
+
+    def smtlib(self) -> str:
+        ...
 
     def __getitem__(self, key: int | slice) -> Ast:
         ...
@@ -145,6 +164,18 @@ class Claripy(Protocol):
     def BVS(self, name: str, size: int, *, explicit_name: bool) -> Ast:
         ...
 
+    def BoolS(self, name: str, *, explicit_name: bool) -> Ast:
+        ...
+
+    def BoolV(self, value: bool) -> Ast:
+        ...
+
+    def is_true(self, value: Ast) -> bool:
+        ...
+
+    def Solver(self) -> Solver:
+        ...
+
     def BVV(self, value: int, size: int) -> Ast:
         ...
 
@@ -155,6 +186,19 @@ class Claripy(Protocol):
         ...
 
     def If(self, condition: object, then: Ast, otherwise: Ast) -> Ast:
+        ...
+
+    class _AstNamespace(Protocol):
+        Base: type
+
+    ast: _AstNamespace
+
+
+class Solver(Protocol):
+    def add(self, constraint: object) -> object:
+        ...
+
+    def to_smt2(self) -> str:
         ...
 
 

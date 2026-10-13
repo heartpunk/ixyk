@@ -57,7 +57,7 @@ def check() -> None:
         ctypes.CDLL(str(Path(library_root) / "lib/libstdc++.so.6"))
 
     import angr
-    import claripy
+    from angr import claripy
     import coverage
     import hypothesis
     import ipykernel
@@ -71,7 +71,7 @@ def check() -> None:
     x = claripy.BVS("dev_check", 8)
     solver = claripy.Solver()
     solver.add(x + 1 == 2)
-    if solver.eval(x, 1) != (1,):
+    if solver.eval(x, 1) != [1]:
         raise ValueError("Claripy solver smoke check failed")
     if not z3.is_true(z3.simplify(z3.BitVecVal(1, 8) + 1 == 2)):
         raise ValueError("Z3 smoke check failed")

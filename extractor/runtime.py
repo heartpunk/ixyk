@@ -25,7 +25,7 @@ _EXPECTED_PYTHON = (3, 12, 13)
 _EXPECTED_SOLVED_VALUE = 0x1234
 _EXPECTED_VEX_INSTRUCTIONS = 2
 _EXPECTED_TOP_LEVEL_VERSIONS = {
-    "angr": "9.2.214",
+    "angr": "10.0.0",
     "coverage": "7.15.2",
     "hypothesis": "6.160.0",
     "mutmut": "3.6.0",
@@ -36,7 +36,6 @@ _REQUIRED_MODULES = (
     "angr",
     "archinfo",
     "capstone",
-    "claripy",
     "cle",
     "coverage",
     "hypothesis",
@@ -100,7 +99,7 @@ class _SymbolicValue(Protocol):
 class _Solver(Protocol):
     def add(self, constraint: object) -> object: ...
 
-    def eval(self, expression: object, count: int) -> tuple[int, ...]: ...
+    def eval(self, expression: object, count: int) -> list[int]: ...
 
 
 class _BVS(Protocol):
@@ -137,7 +136,7 @@ class _ProbeResult(TypedDict):
 _LIBSTDCXX = _preload_libstdcxx()
 
 angr = importlib.import_module("angr")
-claripy = importlib.import_module("claripy")
+claripy = getattr(angr, "claripy")
 
 __all__ = ["angr", "claripy"]
 
@@ -251,7 +250,7 @@ def run_probe() -> _ProbeResult:
     solver = claripy_api.Solver()
     _ = solver.add(symbolic + 1 == _EXPECTED_SOLVED_VALUE + 1)
     solved = solver.eval(symbolic, 1)
-    if solved != (_EXPECTED_SOLVED_VALUE,):
+    if solved != [_EXPECTED_SOLVED_VALUE]:
         _fail(f"unexpected Claripy result: {solved!r}")
 
     return {

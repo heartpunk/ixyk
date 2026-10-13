@@ -26,7 +26,6 @@ from extractor import z3_boundary as _z3
 from extractor.artifact import MEM64_8, Declaration, TermSort
 
 from angr.engines.vex.claripy import ccall as _angr_ccall
-from claripy.backends.backend_z3 import BackendZ3
 import z3
 
 
@@ -59,7 +58,7 @@ REGISTER_WIDTH = {name: 64 for name in (*GPR64, "rip")} | {name: 256 for name in
 MEMORY_NAME = "mem"
 
 LTS_EXTRACTION_CONTEXT = z3.Context()
-_BZ3 = BackendZ3()
+_CLARIPY_TO_Z3_CACHE: dict[tuple[type, int], tuple[Ast, z3.ExprRef]] = {}
 _U64_MAX = (1 << 64) - 1
 _NO_STATEMENTS: frozenset[int] = frozenset()
 
@@ -208,11 +207,62 @@ def canonical_memory() -> z3.ArrayRef:
 def claripy_to_z3(ast: object) -> z3.ExprRef:
     """Cross the Angr boundary into the dedicated extraction context."""
 
-    return _z3.translate(
-        _BZ3,
-        expect_ast(ast, "Claripy expression"),
-        LTS_EXTRACTION_CONTEXT,
-    )
+    claripy_ast = expect_ast(ast, "Claripy expression")
+    key = (type(claripy_ast), claripy_ast.hash())
+    cached = _CLARIPY_TO_Z3_CACHE.get(key)
+    if cached is not None and claripy_ast.identical(cached[0]):
+        return cached[1]
+
+    if claripy_ast.op == "BoolV":
+        expression = _z3.bool_val(
+            _claripy.is_true(claripy_ast),
+            LTS_EXTRACTION_CONTEXT,
+        )
+        _CLARIPY_TO_Z3_CACHE[key] = (claripy_ast, expression)
+        return expression
+
+    result_name = "__ixyk_smt_result"
+    while result_name in claripy_ast.variables:
+        result_name += "_"
+    claripy_ast_types = getattr(_claripy, "ast", None)
+    boolean_ast_type = getattr(claripy_ast_types, "Bool", None)
+    if not isinstance(boolean_ast_type, type):
+        raise Amd64AdapterError("Angr does not expose its public Boolean AST type")
+    if isinstance(claripy_ast, boolean_ast_type):
+        result = _claripy.BoolS(result_name, explicit_name=True)
+    else:
+        bit_vector_ast_type = getattr(claripy_ast_types, "BV", None)
+        if not isinstance(bit_vector_ast_type, type) or not isinstance(
+            claripy_ast, bit_vector_ast_type
+        ):
+            raise Amd64AdapterError("Claripy expression has an unsupported sort")
+        width = claripy_ast.size()
+        if type(width) is not int or width <= 0:
+            raise Amd64AdapterError("Claripy expression has no supported sort")
+        result = _claripy.BVS(result_name, width, explicit_name=True)
+
+    solver = _claripy.Solver()
+    _ = solver.add(result == claripy_ast)
+    smt = solver.to_smt2()
+    try:
+        assertions = _z3.parse_smt2_string(smt, LTS_EXTRACTION_CONTEXT)
+    except z3.Z3Exception as error:
+        raise Amd64AdapterError(
+            f"public Angr SMT export failed to parse: {error}\n{smt}"
+        ) from error
+    if len(assertions) != 1 or not z3.is_eq(assertions[0]):
+        raise Amd64AdapterError(
+            "public Angr SMT export did not retain the result equality"
+        )
+    left, right = assertions[0].children()
+    if str(left) == result_name:
+        expression = right
+    elif str(right) == result_name:
+        expression = left
+    else:
+        raise Amd64AdapterError("public Angr SMT export lost the result symbol")
+    _CLARIPY_TO_Z3_CACHE[key] = (claripy_ast, expression)
+    return expression
 
 
 def load_le(
