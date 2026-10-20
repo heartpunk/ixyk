@@ -102,10 +102,15 @@ use_repo(nix_native_deps, "nix_native_deps")
 bazel_dep(name = "ifrl", version = "0.1.0")
 git_override(
     module_name = "ifrl",
-    commit = "aee884bfc890f05c655b491677c0687b6ee1510c",
+    commit = "252efa2acc88d8e537de86dfdb2abebd1586cd14",
     remote = "https://github.com/heartpunk/ifrl.git",
 )
 
 angr_environment_repository = use_repo_rule("@ifrl//bazel/angr:repository.bzl", "angr_environment_repository")
 
 angr_environment_repository(name = "shared_angr")
+
+# Used only by the CI coverage command; ordinary builds retain their toolchains.
+coverage_runtime = use_repo_rule("//.ci:coverage.bzl", "coverage_runtime")
+
+coverage_runtime(name = "ci_coverage_runtime")
