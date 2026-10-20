@@ -49,6 +49,7 @@ pip.parse(
 
 override_repo(
     pip,
+    ixyk_pypi_312_angr = "shared_angr",
     ixyk_pypi_312_arpy = "ixyk_vendored_arpy",
     ixyk_pypi_312_mulpyplexer = "ixyk_vendored_mulpyplexer",
 )
@@ -60,3 +61,41 @@ nix_native_deps = use_extension(
     "nix_native_deps",
 )
 use_repo(nix_native_deps, "nix_native_deps")
+
+bazel_dep(name = "ifrl", version = "0.1.0")
+git_override(
+    module_name = "ifrl",
+    remote = "https://github.com/heartpunk/ifrl.git",
+    commit = "0eeb6ac73ee585ccdf746ba4f2c6e62291da930a",
+)
+
+angr_repository = use_repo_rule("@ifrl//bazel/angr:repository.bzl", "angr_repository")
+angr_repository(
+    name = "shared_angr",
+    deps = [
+        "@ixyk_pypi//angr_data:pkg",
+        "@ixyk_pypi//archinfo:pkg",
+        "@ixyk_pypi//pyvex:pkg",
+        "@ixyk_pypi//cle:pkg",
+        "@ixyk_pypi//pypcode:pkg",
+        "@ixyk_pypi//capstone:pkg",
+        "@ixyk_pypi//networkx:pkg",
+        "@ixyk_pypi//sympy:pkg",
+        "@ixyk_pypi//cachetools:pkg",
+        "@ixyk_pypi//sortedcontainers:pkg",
+        "@ixyk_pypi//protobuf:pkg",
+        "@ixyk_pypi//psutil:pkg",
+        "@ixyk_pypi//cffi:pkg",
+        "@ixyk_pypi//pycparser:pkg",
+        "@ixyk_pypi//rich:pkg",
+        "@ixyk_pypi//gitpython:pkg",
+        "@ixyk_pypi//lmdb:pkg",
+        "@ixyk_pypi//mulpyplexer:pkg",
+        "@ixyk_pypi//msgspec:pkg",
+        "@ixyk_pypi//pydemumble:pkg",
+        "@ixyk_pypi//typing_extensions:pkg",
+        "@ixyk_pypi//cxxheaderparser:pkg",
+        "@ixyk_pypi//platformdirs:pkg",
+        "@ixyk_pypi//z3_solver:pkg",
+    ],
+)

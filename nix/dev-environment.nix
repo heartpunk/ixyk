@@ -71,6 +71,7 @@ let
   } else pkgs.bazel_9;
   environment = {
     ELAN = "";
+    IFRL_ANGR_ROOT = "${pkgs.python312Packages.angr}";
     IXYK_NIX_PYTHON_ROOT = "${python}";
     IXYK_NIX_XED_ROOT = if pkgs.stdenv.isLinux then
       "${import ../tools/xed_enc2.nix { inherit pkgs; }}" else "";
