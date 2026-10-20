@@ -36,6 +36,7 @@ jobs:
         run: |
           nix develop --print-build-logs --command true
           nix build .#dev-environment --out-link "$RUNNER_TEMP/ixyk-dev"
+          nix develop --command python tools/check_bazel_environment.py
       - name: Check shell and materialized environment with fresh homes
         if: steps.changes.outputs.newcomer == 'true'
         shell: bash

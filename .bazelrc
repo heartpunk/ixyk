@@ -25,4 +25,4 @@ build:reapi-common --jobs=48
 
 try-import %workspace%/.bazelrc.local
 
-common --repo_env=IFRL_ANGR_ROOT
+common --repo_env=IFRL_ANGR_ENVIRONMENT
