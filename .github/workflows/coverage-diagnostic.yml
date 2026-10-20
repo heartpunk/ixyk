@@ -1,0 +1,53 @@
+name: Isolated coverage diagnostic
+on:
+  push:
+    branches: [ci-coverage-diagnostic]
+permissions:
+  contents: read
+defaults:
+  run:
+    shell: bash
+jobs:
+  observe:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 65
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          persist-credentials: false
+      - uses: cachix/install-nix-action@b85815f71a6de0ddee80b8a80a98d43f4bcc66c7 # v31
+        with:
+          github_access_token: ${{ github.token }}
+          extra_nix_config: |
+            accept-flake-config = true
+            max-jobs = 2
+            cores = 2
+      - name: Preserve source identity
+        run: |
+          mkdir -p ci-probe-reports
+          git rev-parse HEAD > ci-probe-reports/revision.txt
+          git rev-parse HEAD^ > ci-probe-reports/source-revision.txt
+          git config --global --add url.https://github.com/.insteadOf ssh://git@github.com/
+          git config --global --add url.https://github.com/.insteadOf git@github.com:
+      - name: Observe unchanged acquisition test under branch coverage
+        run: |
+          nix develop --no-write-lock-file --command \
+            bazel coverage --jobs=2 --local_resources=memory=6000 \
+            --spawn_strategy=local --strategy=TestRunner=local \
+            --extra_toolchains=@ci_coverage_runtime//:toolchain \
+            --combined_report=lcov --nocache_test_results \
+            --test_timeout=0,0,2400,0 \
+            --test_env="PYTHONPATH=$PWD/.ci/coverage-observer" \
+            --test_env="IXYK_CI_DIAGNOSTICS=$PWD/ci-probe-reports" \
+            --test_env=COVERAGE_DEBUG=core,sys,config \
+            --build_event_json_file=ci-probe-reports/build-events.json \
+            --instrumentation_filter='^//(antiunification|extractor|tools)' \
+            --test_output=all //extractor:acquire_cli_test \
+            2>&1 | tee ci-probe-reports/test.log
+      - name: Preserve diagnostic reports
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: coverage-diagnostic-${{ github.run_id }}
+          path: ci-probe-reports
+          retention-days: 90
