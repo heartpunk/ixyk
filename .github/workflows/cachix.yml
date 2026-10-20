@@ -51,6 +51,7 @@ jobs:
       - uses: cachix/cachix-action@38b082610b782e7e93e209c35fd730d399dee866 # v17
         with:
           name: ixyk
+          extraPullNames: ifrl
           skipPush: true
       - name: Realize and test explicit publication roots
         shell: bash
