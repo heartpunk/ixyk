@@ -10,7 +10,7 @@ if [[ "${1:-}" != run ]]; then
   if [[ "${IFRL_MUTATION_PHASE:-}" == baseline ]]; then limit=1180; fi
   environment=()
   for name in PATH HOME IXYK_NIX_PYTHON_RUNTIME IXYK_NIX_PYTHON_ROOT \
-      IXYK_NIX_LIBSTDCXX_ROOT IXYK_NIX_XED_ROOT IFRL_ANGR_ROOT \
+      IXYK_NIX_LIBSTDCXX_ROOT IXYK_NIX_XED_ROOT IFRL_ANGR_ENVIRONMENT \
       PYTHONNOUSERSITE PYTHONSAFEPATH PYTHONDONTWRITEBYTECODE; do
     if [[ -n "${!name-}" ]]; then environment+=("--setenv=$name=${!name}"); fi
   done
@@ -35,6 +35,7 @@ if [[ "${1:-}" != run ]]; then
     exit 125
   elif [[ "$status" -ne 0 && "$status" -ne 1 && "$status" -ne 3 ]]; then
     echo "IFRL_MUTATION_INFRASTRUCTURE: service=$result exit=$status"
+    exit 125
   fi
   exit "$status"
 fi
