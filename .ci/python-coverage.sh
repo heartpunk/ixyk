@@ -14,6 +14,8 @@ bazel coverage --jobs=2 --local_resources=memory=6000 \
   --spawn_strategy=local --strategy=TestRunner=local \
   --extra_toolchains=@ci_coverage_runtime//:toolchain \
   --combined_report=lcov --nocache_test_results \
+  --test_timeout=0,0,2400,0 \
+  --build_event_json_file=ci-reports/bazel-coverage/build-events.json \
   --instrumentation_filter='^//(antiunification|extractor|tools)' \
   --test_output=errors "${targets[@]}" 2>&1 | tee ci-reports/bazel-coverage/tests.log
 bazel_status=${PIPESTATUS[0]}
