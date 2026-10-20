@@ -14,18 +14,25 @@ if [[ "${1:-}" != run ]]; then
       PYTHONNOUSERSITE PYTHONSAFEPATH PYTHONDONTWRITEBYTECODE; do
     if [[ -n "${!name-}" ]]; then environment+=("--setenv=$name=${!name}"); fi
   done
+  printf 'Mutation service: %s; memory=12G; swap=0; CPU=200%%; deadline=%ss\n' "$unit" "$limit"
   set +e
-  sudo systemd-run --quiet --wait --pipe --unit="$unit" \
+  # --wait retains exit-time accounting before successful units are unloaded.
+  sudo systemd-run --wait --pipe --unit="$unit" \
     --uid="$(id -u)" --gid="$(id -g)" --working-directory="$PWD" \
     --property="RuntimeMaxSec=${limit}s" --property=TimeoutStopSec=5s \
     --property=KillMode=control-group --property=MemoryMax=12G \
     --property=MemorySwapMax=0 --property=CPUQuota=200% \
+    --property=MemoryAccounting=yes --property=CPUAccounting=yes \
     "${environment[@]}" "$(command -v bash)" "$PWD/.ci/python-mutation.sh" run
   status=$?
-  result=$(sudo systemctl show "$unit" --property=Result --value 2>/dev/null)
-  sudo systemctl show "$unit" --property=Result,MemoryPeak,CPUUsageNSec \
-    --property=MemoryMax,MemorySwapMax,CPUQuotaPerSecUSec 2>/dev/null
-  sudo systemctl reset-failed "$unit" 2>/dev/null
+  result=success
+  if [[ "$status" -ne 0 ]]; then
+    # Failed units remain loaded until reset, so their detailed result is available.
+    result=$(sudo systemctl show "$unit" --property=Result --value 2>/dev/null)
+    sudo systemctl show "$unit" --property=Result,MemoryPeak,CPUUsageNSec \
+      --property=MemoryMax,MemorySwapMax,CPUQuotaPerSecUSec 2>/dev/null
+    sudo systemctl reset-failed "$unit" 2>/dev/null
+  fi
   set -e
   if [[ "$result" == timeout ]]; then
     echo IFRL_MUTATION_TIMEOUT
