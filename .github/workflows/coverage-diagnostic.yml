@@ -26,7 +26,7 @@ jobs:
         run: |
           mkdir -p ci-probe-reports
           git rev-parse HEAD > ci-probe-reports/revision.txt
-          git rev-parse HEAD^ > ci-probe-reports/source-revision.txt
+          git ls-tree -r --full-tree HEAD extractor antiunification tools > ci-probe-reports/production-tree.txt
           git config --global --add url.https://github.com/.insteadOf ssh://git@github.com/
           git config --global --add url.https://github.com/.insteadOf git@github.com:
       - name: Observe unchanged acquisition test under branch coverage
