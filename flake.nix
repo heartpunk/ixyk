@@ -12,7 +12,7 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/e7a3ca8092b61ff85b6a45bf863ea2b2d6a661b3";
     ifrl = {
-      url = "github:heartpunk/ifrl/4091e4ab9822be73e63a5f1253099b497f39852f";
+      url = "github:heartpunk/ifrl/e598fc4c7380091d539177b547f2edcc4f6ba672";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
