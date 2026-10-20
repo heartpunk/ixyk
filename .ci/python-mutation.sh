@@ -17,11 +17,13 @@ if [[ "${1:-}" != run ]]; then
   sudo systemd-run --quiet --wait --pipe --unit="$unit" \
     --uid="$(id -u)" --gid="$(id -g)" --working-directory="$PWD" \
     --property="RuntimeMaxSec=${limit}s" --property=TimeoutStopSec=5s \
-    --property=KillMode=control-group --property=MemoryMax=6G \
+    --property=KillMode=control-group --property=MemoryMax=12G \
     --property=MemorySwapMax=0 --property=CPUQuota=200% \
     "${environment[@]}" "$(command -v bash)" "$PWD/.ci/python-mutation.sh" run
   status=$?
   result=$(sudo systemctl show "$unit" --property=Result --value 2>/dev/null)
+  sudo systemctl show "$unit" --property=Result,MemoryPeak,CPUUsageNSec \
+    --property=MemoryMax,MemorySwapMax,CPUQuotaPerSecUSec 2>/dev/null
   sudo systemctl reset-failed "$unit" 2>/dev/null
   set -e
   if [[ "$result" == timeout ]]; then
@@ -37,7 +39,7 @@ if [[ "${1:-}" != run ]]; then
 fi
 mapfile -t targets < .ci/python-targets.txt
 set +e
-bazel --batch test --jobs=2 --local_resources=memory=6000 \
+bazel --batch --host_jvm_args=-Xmx2g test --jobs=2 --local_resources=memory=12000 \
   --spawn_strategy=local --strategy=TestRunner=local \
   --nocache_test_results --test_output=errors "${targets[@]}"
 status=$?
