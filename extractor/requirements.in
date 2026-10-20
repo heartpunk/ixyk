@@ -1,4 +1,4 @@
-angr[unicorn]==10.0.0
+angr[unicorn]==10.0.1
 coverage==7.15.2
 hypothesis==6.160.0
 mutmut==3.6.0
