@@ -1,11 +1,3 @@
-load(":coverage.bzl", "coverage_entrypoint")
-
 package(default_visibility = ["//visibility:public"])
-
-# Select the wheel's own entry point so the bootstrap finds site-packages.
-coverage_entrypoint(
-    name = "coverage_tool",
-    package = "@ixyk_pypi//coverage:extracted_whl_files",
-)
 
 exports_files(["coverage.bzl"])
