@@ -24,6 +24,6 @@
     "tools"
   ],
   "mutation_command": "bash .ci/python-mutation.sh",
-  "mutation_baseline_timeout": 600,
-  "mutation_timeout": 90
+  "mutation_baseline_timeout": 1200,
+  "mutation_timeout": 375
 }

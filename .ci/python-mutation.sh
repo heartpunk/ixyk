@@ -5,8 +5,9 @@ set -euo pipefail
 # source is restored or another mutant is attempted.
 if [[ "${1:-}" != run ]]; then
   unit="ixyk-mutation-${BASHPID}-${RANDOM}"
-  limit=80
-  if [[ "${IFRL_MUTATION_PHASE:-}" == baseline ]]; then limit=580; fi
+  # The unchanged suite takes about four minutes after the native build.
+  limit=360
+  if [[ "${IFRL_MUTATION_PHASE:-}" == baseline ]]; then limit=1180; fi
   environment=()
   for name in PATH HOME IXYK_NIX_PYTHON_RUNTIME IXYK_NIX_PYTHON_ROOT \
       IXYK_NIX_LIBSTDCXX_ROOT IXYK_NIX_XED_ROOT IFRL_ANGR_ROOT \
