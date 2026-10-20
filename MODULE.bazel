@@ -65,7 +65,7 @@ use_repo(nix_native_deps, "nix_native_deps")
 bazel_dep(name = "ifrl", version = "0.1.0")
 git_override(
     module_name = "ifrl",
-    commit = "57edc5144c506bd5a13028738e6df057528f402c",
+    commit = "9aa5e2953b840c3ec0879c2c4fa068dee3348498",
     remote = "https://github.com/heartpunk/ifrl.git",
 )
 
