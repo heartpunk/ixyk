@@ -4,36 +4,13 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
-    inputs:
-      mutation:
-        description: Run the bounded daily mutation campaign
-        type: boolean
-        default: false
   schedule:
     - cron: '49 4 * * *'
 permissions:
   contents: read
 jobs:
-  python:
-    if: github.event_name != 'schedule'
-    uses: heartpunk/ifrl/.github/workflows/python-baseline.yml@ci-baselines # zizmor: ignore[unpinned-uses] -- IFRL PR #3 bookmark during stacked review
+  baselines:
+    uses: heartpunk/ifrl/.github/workflows/suite-baselines.yml@ci-baselines # zizmor: ignore[unpinned-uses] -- IFRL PR #3 bookmark during stacked review
     with:
-      baseline-ref: ci-baselines
-      lint-base-sha: ${{ github.event.pull_request.base.sha || github.event.before || github.sha }}
-      nix-shell: '.'
-  mutation:
-    if: github.event_name == 'schedule' || inputs.mutation == true || (github.event_name == 'pull_request' && github.head_ref == 'ci-baselines')
-    uses: heartpunk/ifrl/.github/workflows/python-baseline.yml@ci-baselines # zizmor: ignore[unpinned-uses] -- IFRL PR #3 bookmark during stacked review
-    with:
-      baseline-ref: ci-baselines
-      nix-shell: '.'
-      mutation: true
-  actions:
-    if: github.event_name != 'schedule'
-    uses: heartpunk/ifrl/.github/workflows/actions-audit.yml@ci-baselines # zizmor: ignore[unpinned-uses] -- IFRL PR #3 bookmark during stacked review
-  lean:
-    if: github.event_name != 'schedule'
-    uses: heartpunk/ifrl/.github/workflows/lean-baseline.yml@ci-baselines # zizmor: ignore[unpinned-uses] -- IFRL PR #3 bookmark during stacked review
-    with:
-      baseline-ref: ci-baselines
-      nix-shell: '.'
+      python-nix-shell: '.'
+      lean-nix-shell: '.'
