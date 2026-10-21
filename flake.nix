@@ -12,7 +12,7 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/e7a3ca8092b61ff85b6a45bf863ea2b2d6a661b3";
     ifrl = {
-      url = "github:heartpunk/ifrl/1c30d79c68280e1beaec9a557ee1332e07caa7ba";
+      url = "github:heartpunk/ifrl/8a8f54ebf16e02527a8b546b94d852fff7d9b112";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
@@ -36,7 +36,7 @@
           python = pkgs.python312;
           developmentEnvironment = env.package;
           component = "ixyk";
-          workerContract = "ixyk-e7a3ca80-python312-lean430-procns-v1";
+          workerContract = "ixyk-e7a3ca80-python312-lean434-procns-v1";
           clientDependencies = env.package;
           contractProperty = "ixyk-nix-contract";
         };
