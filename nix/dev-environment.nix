@@ -8,38 +8,7 @@ let
     overlays = [
       (lean4-nix.readToolchainFile ../lean-toolchain)
       angr-nix.overlays.default
-      (final: prev: {
-        python312 = prev.python312.override (old: {
-          packageOverrides = nixpkgs.lib.composeExtensions
-            (old.packageOverrides or (_: _: { }))
-            (pyFinal: pyPrev: {
-              angr = pyPrev.angr.overridePythonAttrs (attrs: {
-                # The prebuilt Darwin wheel has no Mach-O header padding for
-                # an absolute Nix-store dependency path. Keep the z3 dylib
-                # beside rustylib through a short loader-relative symlink.
-                preFixup = if final.stdenv.isDarwin then ''
-                  angrSitePackages="$out/${pyPrev.python.sitePackages}/angr"
-                  ln -s "${pyPrev.z3-solver}/${pyPrev.python.sitePackages}/z3/lib/libz3.dylib" \
-                    "$angrSitePackages/a"
-                  install_name_tool -change libz3.dylib @loader_path/a \
-                    "$angrSitePackages/rustylib.abi3.so"
-                '' else (attrs.preFixup or "");
-              });
-              bitstring = pyPrev.bitstring.overridePythonAttrs (attrs: {
-                # Keep correctness tests without the benchmark plugin's
-                # unrelated Elasticsearch/notebook test dependencies.
-                nativeCheckInputs = builtins.filter
-                  (dep: nixpkgs.lib.getName dep != "pytest-benchmark")
-                  (attrs.nativeCheckInputs or [ ]);
-                pytestFlags = builtins.filter
-                  (flag: flag != "--benchmark-disable")
-                  (attrs.pytestFlags or [ ]);
-                disabledTestPaths = (attrs.disabledTestPaths or [ ])
-                  ++ [ "tests/test_benchmarks.py" ];
-              });
-            });
-        });
-      })
+
     ];
   };
   python = pkgs.python312.withPackages (ps: [
@@ -71,6 +40,7 @@ let
   } else pkgs.bazel_9;
   environment = {
     ELAN = "";
+    IFRL_ANGR_ENVIRONMENT = "${python}";
     IXYK_NIX_PYTHON_ROOT = "${python}";
     IXYK_NIX_XED_ROOT = if pkgs.stdenv.isLinux then
       "${import ../tools/xed_enc2.nix { inherit pkgs; }}" else "";
