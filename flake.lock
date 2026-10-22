@@ -1,27 +1,5 @@
 {
   "nodes": {
-    "angr-nix": {
-      "inputs": {
-        "nixpkgs": [
-          "ifrl",
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1792535546,
-        "narHash": "sha256-M43QqWw9m0rgeFN5bceTw428RdcsTLu7Ggi59at93uk=",
-        "owner": "heartpunk",
-        "repo": "angr-nix",
-        "rev": "14ae4f79e7e694bdd2c25624c119897480ce1348",
-        "type": "github"
-      },
-      "original": {
-        "owner": "heartpunk",
-        "repo": "angr-nix",
-        "rev": "14ae4f79e7e694bdd2c25624c119897480ce1348",
-        "type": "github"
-      }
-    },
     "flake-parts": {
       "inputs": {
         "nixpkgs-lib": "nixpkgs-lib"
@@ -42,7 +20,6 @@
     },
     "ifrl": {
       "inputs": {
-        "angr-nix": "angr-nix",
         "lean4-nix": "lean4-nix",
         "nixpkgs": [
           "nixpkgs"
@@ -50,17 +27,17 @@
         "rust-overlay": "rust-overlay"
       },
       "locked": {
-        "lastModified": 1792605122,
-        "narHash": "sha256-f47nG/co6/s6GcPdanht70xjtYA4dA1rpTk1+VwX7rU=",
+        "lastModified": 1792672499,
+        "narHash": "sha256-eEVT+txbaGDZdzb2qnwGux3S2salvhoqDRi4soqUVK0=",
         "owner": "heartpunk",
         "repo": "ifrl",
-        "rev": "1c30d79c68280e1beaec9a557ee1332e07caa7ba",
+        "rev": "d4fdac39e0cfe916cc6d4edcd8043ce9d08cdda4",
         "type": "github"
       },
       "original": {
         "owner": "heartpunk",
         "repo": "ifrl",
-        "rev": "1c30d79c68280e1beaec9a557ee1332e07caa7ba",
+        "rev": "d4fdac39e0cfe916cc6d4edcd8043ce9d08cdda4",
         "type": "github"
       }
     },
@@ -82,24 +59,24 @@
       },
       "original": {
         "owner": "heartpunk",
+        "ref": "main",
         "repo": "lean4-nix",
-        "rev": "016ac348e901dc8d924c0d768a5ca9aee86e1763",
         "type": "github"
       }
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1783776592,
-        "narHash": "sha256-UgCQzxeWI75XM8G+hPrPh+MKzEPjG3SpAj7dtqSbksA=",
+        "lastModified": 1792639085,
+        "narHash": "sha256-cQ0kF9ap1THu88jUtj5j589q8jsZJ13KF+E6BjOLiQw=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "e7a3ca8092b61ff85b6a45bf863ea2b2d6a661b3",
+        "rev": "e79d204daf01f8a877f7b2ce7324874ce9c84676",
         "type": "github"
       },
       "original": {
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "e7a3ca8092b61ff85b6a45bf863ea2b2d6a661b3",
+        "rev": "e79d204daf01f8a877f7b2ce7324874ce9c84676",
         "type": "github"
       }
     },

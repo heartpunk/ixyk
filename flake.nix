@@ -10,20 +10,19 @@
   };
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/e7a3ca8092b61ff85b6a45bf863ea2b2d6a661b3";
+    nixpkgs.url = "github:NixOS/nixpkgs/e79d204daf01f8a877f7b2ce7324874ce9c84676";
     ifrl = {
-      url = "github:heartpunk/ifrl/1c30d79c68280e1beaec9a557ee1332e07caa7ba";
+      url = "github:heartpunk/ifrl/d4fdac39e0cfe916cc6d4edcd8043ce9d08cdda4";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
 
   outputs = { nixpkgs, ifrl, ... }:
     let
-      angr-nix = ifrl.lib.angr-nix;
       lean4-nix = ifrl.lib.lean4-nix;
       systems = [ "aarch64-darwin" "x86_64-linux" ];
       environments = nixpkgs.lib.genAttrs systems (system:
-        import ./nix/dev-environment.nix { inherit nixpkgs angr-nix lean4-nix system; });
+        import ./nix/dev-environment.nix { inherit nixpkgs ifrl lean4-nix system; });
     in {
       devShells = nixpkgs.lib.mapAttrs (_: env: { default = env.shell; }) environments;
       packages = nixpkgs.lib.mapAttrs (system: env: let

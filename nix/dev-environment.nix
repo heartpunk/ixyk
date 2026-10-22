@@ -1,14 +1,13 @@
 # SPDX-FileCopyrightText: 2026 Sophie Smithburg
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-{ nixpkgs, angr-nix, lean4-nix, system }:
+{ nixpkgs, ifrl, lean4-nix, system }:
 let
   pkgs = import nixpkgs {
     inherit system;
     overlays = [
-      (lean4-nix.readToolchainFile ../lean-toolchain)
-      angr-nix.overlays.default
-
+      (lean4-nix.readToolchainFile { toolchain = ../lean-toolchain; binary = true; })
+      ifrl.overlays.angr
     ];
   };
   python = pkgs.python312.withPackages (ps: [
@@ -30,7 +29,7 @@ let
     version = bazelVersion;
     src = pkgs.fetchurl {
       url = "https://github.com/bazelbuild/bazel/releases/download/${bazelVersion}/bazel-${bazelVersion}-darwin-arm64";
-      hash = "sha256-LbiDcYRT8EN6e8tAjoidv4U5zcTWHI68OAehqI0C/wg=";
+      hash = "sha256-3UZjUqPk01gbiJh0DuH/IIhmzL4l+NNnxdy5UCGVh+Y=";
     };
     dontUnpack = true;
     dontFixup = true;
@@ -87,6 +86,9 @@ let
 in
 assert pkgs.bazel_9.version == bazelVersion;
 assert pkgs.lean.version == leanVersion;
+assert nixpkgs.lib.assertMsg
+  (nixpkgs.lib.versionAtLeast pkgs.python312Packages.angr.version "10.0")
+  "IXYK requires Angr >= 10.0; found ${pkgs.python312Packages.angr.version}.";
 {
   shell = pkgs.mkShell (environment // { inherit packages; });
   package = pkgs.buildEnv {
