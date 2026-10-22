@@ -24,6 +24,12 @@ CASES = (
     ("xadd", "4d0fc1c8"),
     ("inc", "49ffc0"),
     ("lea", "4f8d444c08"),
+    ("push-rax", "50"),
+    ("push-r8", "4150"),
+    ("pop-rax", "58"),
+    ("pop-r8", "4158"),
+    ("not-rax", "48f7d0"),
+    ("not-r8", "49f7d0"),
 )
 SOURCE = 0x400000
 
