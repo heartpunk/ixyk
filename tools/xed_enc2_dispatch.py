@@ -3,8 +3,8 @@
 
 """Generate the runtime bridge while XED's ENC2 operand metadata is live."""
 
-from collections import defaultdict
 import json
+from collections import defaultdict
 from pathlib import Path
 
 
@@ -148,9 +148,9 @@ def emit_fuzz(directory, records):
                 values.append("&request")
             else:
                 values.append(f"({ctype})values[{len(args)}]")
-                args.append(dict(name=name, kind=kind, ctype=ctype))
+                args.append({"name": name, "kind": kind, "ctype": ctype})
         metadata.append(
-            dict(id=index, iclass=record.iclass, form=record.iform, args=args)
+            {"id": index, "iclass": record.iclass, "form": record.iform, "args": args}
         )
         lines.extend(
             [

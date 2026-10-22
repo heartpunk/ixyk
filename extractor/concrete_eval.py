@@ -3,7 +3,8 @@
 """Concrete evaluation of the admitted typed QF_ABV operations."""
 
 from dataclasses import dataclass, replace
-from extractor.artifact import TypedExpr, TermSort
+
+from extractor.artifact import TermSort, TypedExpr
 
 
 @dataclass(eq=False)

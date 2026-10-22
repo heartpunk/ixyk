@@ -3,10 +3,10 @@
 import copy
 import hashlib
 import json
-from pathlib import Path, PurePosixPath
 import subprocess
 import tempfile
 import unittest
+from pathlib import Path, PurePosixPath
 
 from ci_golden import verify
 from golden import _artifact_contents, _check, _update

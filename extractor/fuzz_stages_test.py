@@ -10,12 +10,12 @@ from unittest.mock import patch
 
 from hypothesis import strategies as st
 
-from extractor.runtime import load_shellcode
+from extractor.amd64_state import GPR64, YMM256
 from extractor.extractor import extract
 from extractor.fuzz_cli import main as fuzz_main
-from extractor.fuzzer import fuzz
-from extractor.amd64_state import GPR64, YMM256
 from extractor.fuzz_runner import run_bounded
+from extractor.fuzzer import fuzz
+from extractor.runtime import load_shellcode
 
 BSR = bytes.fromhex("480fbdc3")
 SOURCE = 0x400000

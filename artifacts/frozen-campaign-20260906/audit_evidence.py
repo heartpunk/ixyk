@@ -2,11 +2,13 @@ import hashlib
 import json
 from collections import Counter
 from pathlib import Path
+
 import zstandard
-from extractor.evidence import EvidenceReader
-from extractor.evidence_reference_json import ReferenceJSONBackend
-from extractor.evidence_events import evidence_types, Acquisition, FuzzInput, Comparison
+
 from extractor.artifact import InstructionModel
+from extractor.evidence import EvidenceReader
+from extractor.evidence_events import Acquisition, Comparison, FuzzInput, evidence_types
+from extractor.evidence_reference_json import ReferenceJSONBackend
 
 audits = []
 for path in sorted(Path("results").glob("*/*.evidence.zst")):
@@ -56,12 +58,12 @@ for path in sorted(Path("results").glob("*/*.evidence.zst")):
     for name in ["agreement", "disagreement", "unusable"]:
         assert outcomes[name] == report[name if name == "unusable" else name + "s"]
     audits.append(
-        dict(
-            path=str(path),
-            records=dict(counts),
-            outcomes=dict(outcomes),
-            input_sha256=digest.hexdigest(),
-        )
+        {
+            "path": str(path),
+            "records": dict(counts),
+            "outcomes": dict(outcomes),
+            "input_sha256": digest.hexdigest(),
+        }
     )
 Path("evidence-audit.json").write_text(json.dumps(audits, indent=2) + "\n")
-print(json.dumps(dict(evidence_streams_validated=len(audits))), flush=True)
+print(json.dumps({"evidence_streams_validated": len(audits)}), flush=True)

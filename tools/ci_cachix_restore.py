@@ -1,14 +1,13 @@
 """Restore non-upstream members of a published development closure without builds."""
 
-from concurrent.futures import ThreadPoolExecutor
 import json
 import os
-from pathlib import Path
 import re
 import subprocess
+from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
 from urllib.error import HTTPError
 from urllib.request import urlopen
-
 
 UPSTREAM = "https://cache.nixos.org"
 CACHIX = "https://ixyk.cachix.org"

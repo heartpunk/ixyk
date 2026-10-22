@@ -4,22 +4,23 @@ from __future__ import annotations
 
 import argparse
 import atexit
-from builtins import ExceptionGroup
-from functools import cache
 import json
-from pathlib import Path
 import select
 import subprocess
 import tempfile
 import traceback
+from builtins import ExceptionGroup
+from functools import cache
+from pathlib import Path
 
-from hypothesis import given, settings, strategies as st
 import z3
+from hypothesis import given, settings
+from hypothesis import strategies as st
 
-from extractor.artifact import BOOL, TermSort, TypedExpr as E
+from extractor.artifact import BOOL, TermSort
+from extractor.artifact import TypedExpr as E
 from extractor.normalization import normalize_expression
 from extractor.typed_z3 import expr_to_z3
-
 
 BINARY = (
     "bv_add",

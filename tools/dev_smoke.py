@@ -3,9 +3,9 @@
 
 """Exercise the development environment independently of project sources."""
 
-from pathlib import Path
 import subprocess
 import tempfile
+from pathlib import Path
 
 
 def check() -> None:

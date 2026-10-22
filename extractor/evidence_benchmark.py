@@ -4,18 +4,17 @@
 """The same four-opcode fuzz workload with recording off or a selected codec."""
 
 import argparse
-from dataclasses import asdict
 import importlib
 import json
-from pathlib import Path
 import resource
 import sys
+from dataclasses import asdict
+from pathlib import Path
 from time import perf_counter_ns
 
 from extractor.evidence import RunContext
 from extractor.evidence_events import EvidenceHooks, evidence_types
 from extractor.evidence_recording import BackgroundRecorder
-
 
 CASES = (
     ("ADD", "4801d8"),

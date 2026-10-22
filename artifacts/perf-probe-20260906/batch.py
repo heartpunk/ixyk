@@ -1,7 +1,7 @@
+import json
+import pathlib
 import subprocess
 import sys
-import pathlib
-import json
 
 root = pathlib.Path(__file__).resolve().parent
 cases = [
@@ -48,4 +48,4 @@ for variant, profiled, rep, name, code, mode in jobs:
     )
     if result.returncode:
         sys.exit(result.returncode)
-print(json.dumps(dict(event="batch_done", phase=phase)), flush=True)
+print(json.dumps({"event": "batch_done", "phase": phase}), flush=True)

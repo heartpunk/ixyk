@@ -9,6 +9,8 @@ import logging
 from collections.abc import Callable, Sequence
 from typing import ClassVar, cast, override
 
+import z3
+
 from extractor import z3_boundary as _z3
 from extractor.amd64_state import (
     AMD64_FLAG_BIT,
@@ -20,8 +22,8 @@ from extractor.amd64_state import (
     Amd64AdapterError,
     MemoryReads,
     architectural_memory_expression,
-    canonical_flag,
     canonical_declarations,
+    canonical_flag,
     canonical_register,
     claripy_to_z3,
     fresh_instruction_state,
@@ -33,15 +35,15 @@ from extractor.amd64_state import (
 )
 from extractor.angr_boundary import (
     State,
-    claripy as _claripy,
     execute_successors,
     expect_project,
     lift_block,
 )
+from extractor.angr_boundary import (
+    claripy as _claripy,
+)
 from extractor.artifact import InstructionModel, StepSummary
 from extractor.typed_z3 import step_summary_from_z3
-
-import z3
 
 
 class _ExpectedSymbolicExitFilter(logging.Filter):
@@ -220,9 +222,9 @@ def extract(
     from extractor.model_syntax import QFAbvSyntax
     from extractor.normalization import normalize_model
     from extractor.operand_slots import (
+        OperandDecodeError,
         canonical_bindings,
         normalization_labels,
-        OperandDecodeError,
     )
     from extractor.runtime import load_shellcode
     from extractor.xed import decode

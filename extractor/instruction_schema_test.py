@@ -7,6 +7,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+import pytest
+
 from antiunification import antiunify_values
 from extractor import z3_runtime as _z3_runtime
 from extractor.angr_boundary import expect_project
@@ -21,7 +23,6 @@ from extractor.instruction_schema import (
 from extractor.model_syntax import QFAbvSyntax
 from extractor.operand_slots import decode_operand_slots
 from extractor.runtime import load_shellcode
-import pytest
 
 
 @dataclass(frozen=True)

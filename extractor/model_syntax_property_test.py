@@ -7,6 +7,10 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 
+import pytest
+from hypothesis import given, settings
+from hypothesis import strategies as st
+
 from antiunification import Correspondence, antiunify_values
 from extractor.artifact import (
     BOOL,
@@ -21,10 +25,6 @@ from extractor.artifact import (
     TypedExpr,
 )
 from extractor.model_syntax import CanonicalVariable, QFAbvSyntax
-from hypothesis import given, settings
-from hypothesis import strategies as st
-import pytest
-
 
 PARAMETERS = ("p0", "p1", "flag", "memory", "pc")
 DECLARATIONS = (

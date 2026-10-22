@@ -3,15 +3,17 @@
 
 """Exercise real XED variability and initial data memory."""
 
-from extractor import z3_runtime as _z3_runtime  # noqa: F401
-
 from unittest.mock import patch
-from hypothesis import find, settings, strategies as st
-from extractor.fuzz_inputs import instruction_strategy
-from extractor.xed import decode
+
+from hypothesis import find, settings
+from hypothesis import strategies as st
+
+from extractor import z3_runtime as _z3_runtime  # noqa: F401
 from extractor.extractor import extract
-from extractor.runtime import load_shellcode
+from extractor.fuzz_inputs import instruction_strategy
 from extractor.fuzzer import fuzz
+from extractor.runtime import load_shellcode
+from extractor.xed import decode
 
 
 def main():

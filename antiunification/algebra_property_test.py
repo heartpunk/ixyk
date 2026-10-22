@@ -8,6 +8,10 @@ from __future__ import annotations
 from dataclasses import dataclass
 from enum import Enum
 
+import pytest
+from hypothesis import given, settings
+from hypothesis import strategies as st
+
 from antiunification import (
     AlgebraError,
     Application,
@@ -17,10 +21,7 @@ from antiunification import (
     Layer,
     antiunify_values,
 )
-from hypothesis import given, settings
 from antiunification.many import antiunify_many, separating_inputs
-from hypothesis import strategies as st
-import pytest
 
 
 class Sort(Enum):

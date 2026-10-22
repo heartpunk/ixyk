@@ -1,14 +1,14 @@
-import pathlib
-import json
-import sys
-import struct
 import hashlib
-import statistics
 import io
+import json
+import pathlib
+import statistics
+import struct
+import sys
 
 root = pathlib.Path(__file__).resolve().parent
 sys.path.insert(0, str(root / "wheels"))
-import zstandard  # noqa: E402 -- load the probe-local wheel
+import zstandard
 
 results = {
     p.parent.name: json.loads(p.read_text())
@@ -18,16 +18,16 @@ results = {
 
 
 def semantic(d):
-    return dict(
-        report=d["report"],
-        generated_sha256=d["generated_sha256"],
-        samples=[
+    return {
+        "report": d["report"],
+        "generated_sha256": d["generated_sha256"],
+        "samples": [
             {k: v for k, v in s.items() if k not in ["select_s", "compare_s"]}
             for s in d["samples"]
         ],
-        progress_count=d["progress_count"],
-        xed_keys=d["xed_keys"],
-    )
+        "progress_count": d["progress_count"],
+        "xed_keys": d["xed_keys"],
+    }
 
 
 def evidence(label):
@@ -50,12 +50,12 @@ def evidence(label):
             body[24 + ncontext :].decode().replace(manifest["stream_id"], "STREAM")
         )
         records.append([kind, seq, context, payload])
-    canonical = dict(
-        manifest={
+    canonical = {
+        "manifest": {
             k: v for k, v in manifest.items() if k not in ["stream_id", "invocation_id"]
         },
-        records=records,
-    )
+        "records": records,
+    }
     return hashlib.sha256(
         json.dumps(canonical, sort_keys=True).encode()
     ).hexdigest(), len(records)
@@ -74,7 +74,7 @@ for name in ["ADD", "JE", "LEA", "MOVSD"]:
             continue
         values = [results[label] for label in labels]
         assert all(semantic(d) == semantic(values[0]) for d in values), labels
-        check = dict(opcode=name, mode=mode, semantic_equal=True)
+        check = {"opcode": name, "mode": mode, "semantic_equal": True}
         if mode == "json":
             ev = [evidence(label) for label in labels]
             assert len(set(ev)) == 1, (labels, ev)
@@ -83,24 +83,24 @@ for name in ["ADD", "JE", "LEA", "MOVSD"]:
         base = statistics.mean(d["wall_s"] for d in values[:2])
         cache = statistics.mean(d["wall_s"] for d in values[2:])
         rows.append(
-            dict(
-                opcode=name,
-                mode=mode,
-                baseline_s=base,
-                cache_s=cache,
-                speedup=base / cache,
-                baseline_xed=values[0]["xed_calls"],
-                cached_xed=values[2]["xed_calls"] - values[2]["xed_cache_hits"],
-                generated_sha256=values[0]["generated_sha256"],
-                routes=[s["route"] for s in values[0]["samples"]],
-                executions=values[0]["report"]["executions"],
-            )
+            {
+                "opcode": name,
+                "mode": mode,
+                "baseline_s": base,
+                "cache_s": cache,
+                "speedup": base / cache,
+                "baseline_xed": values[0]["xed_calls"],
+                "cached_xed": values[2]["xed_calls"] - values[2]["xed_cache_hits"],
+                "generated_sha256": values[0]["generated_sha256"],
+                "routes": [s["route"] for s in values[0]["samples"]],
+                "executions": values[0]["report"]["executions"],
+            }
         )
-summary = dict(
-    completed=len(results),
-    rows=rows,
-    checks=checks,
-    peak_rss_mib=max(d["peak_rss_kib"] for d in results.values()) / 1024,
-)
+summary = {
+    "completed": len(results),
+    "rows": rows,
+    "checks": checks,
+    "peak_rss_mib": max(d["peak_rss_kib"] for d in results.values()) / 1024,
+}
 (root / "summary.json").write_text(json.dumps(summary, indent=2))
 print(json.dumps(summary, indent=2))

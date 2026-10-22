@@ -1,7 +1,8 @@
-from unittest.mock import patch
 import runpy
-from extractor import z3_runtime  # noqa: F401 -- preload native runtime
+from unittest.mock import patch
+
 from antiunification.algebra import AlgebraError
+from extractor import z3_runtime  # noqa: F401 -- preload native runtime
 
 with patch(
     "antiunification.many.antiunify_many",

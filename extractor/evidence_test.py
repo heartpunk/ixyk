@@ -8,8 +8,9 @@ from dataclasses import dataclass
 from io import BytesIO
 from unittest.mock import patch
 
-from hypothesis import given, settings, strategies as st
 import pytest
+from hypothesis import given, settings
+from hypothesis import strategies as st
 
 from extractor.artifact import (
     Assignment,

@@ -1,13 +1,16 @@
 # SPDX-FileCopyrightText: 2026 Sophie Smithburg
 # SPDX-License-Identifier: GPL-3.0-or-later
 from functools import cache
-from hypothesis import given, settings, strategies as st
+
 import pytest
+from hypothesis import given, settings
+from hypothesis import strategies as st
+
 from extractor import z3_runtime as _runtime  # noqa: F401
-from extractor.amd64_state import GPR64, YMM256, FLAG_NAMES
+from extractor.amd64_state import FLAG_NAMES, GPR64, YMM256
 from extractor.extractor import _extract_concrete
+from extractor.fuzzer import CompiledModel, _input_state, emulate
 from extractor.runtime import load_shellcode
-from extractor.fuzzer import _input_state, CompiledModel, emulate
 
 
 @cache

@@ -3,12 +3,10 @@
 
 """Extract ADD once, then run the production differential fuzzer."""
 
-from extractor.runtime import load_shellcode
-
 from extractor.artifact import InstructionModel
 from extractor.extractor import extract
 from extractor.fuzzer import fuzz
-
+from extractor.runtime import load_shellcode
 
 SOURCE = 0x400000
 ADD_RAX_RBX = bytes.fromhex("4801d8")

@@ -4,7 +4,10 @@
 """Per-ICLASS strategies from XED's actual encoder argument lists."""
 
 import re
-from hypothesis import assume, strategies as st
+
+from hypothesis import assume
+from hypothesis import strategies as st
+
 from extractor.xed import EncodingError, _invoke, decode, registers
 
 

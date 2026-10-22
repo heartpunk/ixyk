@@ -5,14 +5,14 @@
 
 import json
 import os
+import signal
+import sys
+import traceback
 from multiprocessing import Pipe
 from multiprocessing.connection import Connection
 from subprocess import Popen, TimeoutExpired
-import sys
-import signal
 from tempfile import TemporaryFile
 from time import monotonic
-import traceback
 
 from extractor import z3_runtime as _z3_runtime  # noqa: F401
 from extractor.artifact import InstructionModel

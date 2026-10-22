@@ -3,10 +3,10 @@
 
 """Instruction-interface operations backed by XED, independent of model AU."""
 
-from collections.abc import Mapping
-from functools import cache
 import json
 import subprocess
+from collections.abc import Mapping
+from functools import cache
 from typing import TypedDict, cast
 
 from extractor.native_runtime import runfiles_root

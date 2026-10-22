@@ -1,19 +1,26 @@
 """Regression tests for the local REAPI launcher's execution boundaries."""
 
-from pathlib import Path
+import argparse
 import os
 import signal
 import subprocess
 import sys
 import tempfile
 import unittest
+from pathlib import Path
 from unittest.mock import patch
 
 from reapi import (
-    bazel_command, configuration, coordinator_configuration, endpoint, main,
-    process, state_directory, wait_ready, worker_configuration,
+    bazel_command,
+    configuration,
+    coordinator_configuration,
+    endpoint,
+    main,
+    process,
+    state_directory,
+    wait_ready,
+    worker_configuration,
 )
-import argparse
 
 
 class ReapiTest(unittest.TestCase):
@@ -87,18 +94,16 @@ class ReapiTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
             (root / 'work').mkdir()
-            with self.assertRaises(ValueError):
-                with state_directory(root):
-                    pass
+            with self.assertRaises(ValueError), state_directory(root):
+                pass
             self.assertTrue((root / 'work').is_dir())
 
     def test_state_lock_prevents_concurrent_workers_and_allows_reuse(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
-            with state_directory(root):
-                with self.assertRaises(ValueError):
-                    with state_directory(root):
-                        pass
+            with state_directory(root), self.assertRaises(ValueError):
+                with state_directory(root):
+                    pass
             with state_directory(root) as reopened:
                 self.assertEqual(reopened, root.resolve())
 

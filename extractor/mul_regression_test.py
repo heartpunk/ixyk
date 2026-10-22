@@ -8,7 +8,6 @@ from extractor.extractor import extract
 from extractor.fuzzer import CompiledModel, ConcreteState, emulate
 from extractor.runtime import load_shellcode
 
-
 SOURCE = 0x400000
 INSTRUCTION = bytes.fromhex("48f7e3")  # mul rbx
 

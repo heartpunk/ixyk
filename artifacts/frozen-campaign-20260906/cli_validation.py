@@ -1,8 +1,12 @@
 import json
 import pathlib
 from unittest.mock import patch
-from extractor import z3_runtime  # noqa: F401 -- preload native runtime
-from extractor import acquire_cli, fuzz_cli
+
+from extractor import (
+    acquire_cli,
+    fuzz_cli,
+    z3_runtime,  # noqa: F401 -- preload native runtime
+)
 from extractor.extractor import extract
 
 root = pathlib.Path("cli-results")

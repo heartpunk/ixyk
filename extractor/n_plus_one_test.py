@@ -3,14 +3,14 @@
 
 """Exercise the public extraction pipeline, not a separate AU implementation."""
 
-from extractor.runtime import load_shellcode
 import pytest
+
 import extractor.extractor as implementation
 from extractor.fuzz_runner import run_bounded
 from extractor.normalization import normalize_model
 from extractor.operand_slots import canonical_bindings, normalization_labels
+from extractor.runtime import load_shellcode
 from extractor.xed import decode
-
 
 CASES = (
     ("add", "4d01c8"),
@@ -66,6 +66,7 @@ def test_public_extraction(name, hexcode, monkeypatch):
 def test_extraction_rejects_inconsistent_au_inputs(monkeypatch, failure, message):
     from dataclasses import replace
     from types import SimpleNamespace
+
     import antiunification.many as au
     import extractor.au_inputs as inputs
     import extractor.operand_slots as slots

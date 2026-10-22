@@ -8,6 +8,7 @@ import subprocess
 from unittest.mock import Mock
 
 import pytest
+
 from extractor import fuzz_runner as runner
 
 
@@ -56,7 +57,7 @@ def test_child_failures_and_startup_are_bounded(monkeypatch, mode):
 
     monkeypatch.setattr(runner, "Popen", launch)
     # Much larger than a pipe buffer, and never read by the failing children.
-    options = dict(examples=1, stage="discover")
+    options = {"examples": 1, "stage": "discover"}
     if mode == "startup":
         options["previous"] = {
             "status": "mismatch",
@@ -117,6 +118,7 @@ def test_worker_reports_bootstrap_payload_errors():
 
 def test_recorded_worker_ignores_followup_signals_while_draining(monkeypatch):
     from contextlib import contextmanager
+
     from extractor import evidence_session
 
     handlers, drained = {}, []

@@ -20,11 +20,11 @@ def recording_options(parser, options):
         parser.error(
             "recording requires --evidence-output, --commit, and --invocation-id"
         )
-    return dict(
-        path=str(options.evidence_output.resolve()),
-        commit=options.commit,
-        invocation_id=options.invocation_id,
-    )
+    return {
+        "path": str(options.evidence_output.resolve()),
+        "commit": options.commit,
+        "invocation_id": options.invocation_id,
+    }
 
 
 @contextmanager
@@ -33,6 +33,7 @@ def recording_session(options):
         yield None
         return
     import zstandard
+
     from extractor.evidence import RunContext
     from extractor.evidence_events import EvidenceHooks, evidence_types
     from extractor.evidence_recording import BackgroundRecorder

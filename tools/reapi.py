@@ -4,18 +4,18 @@
 """Run a local, namespace-isolated NativeLink and optional Bazel command."""
 
 import argparse
-from contextlib import contextmanager
 import fcntl
-import json
 import ipaddress
+import json
 import os
-from pathlib import Path
 import signal
 import socket
 import subprocess
 import sys
 import tempfile
 import time
+from contextlib import contextmanager
+from pathlib import Path
 from urllib.parse import urlsplit
 
 

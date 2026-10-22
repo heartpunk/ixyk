@@ -8,9 +8,9 @@ from __future__ import annotations
 import argparse
 import hashlib
 import os
-from pathlib import Path, PurePosixPath
 import subprocess
 import sys
+from pathlib import Path, PurePosixPath
 from typing import Literal, Protocol, cast
 
 

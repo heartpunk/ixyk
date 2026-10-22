@@ -1,9 +1,8 @@
 """CI dependency map; unknown paths run project suites, newcomer has exact inputs."""
 
 import os
-from pathlib import Path
 import subprocess
-
+from pathlib import Path
 
 SUITES = {"lint", "golden", "lean", "differential", "au"}
 NEWCOMER_INPUTS = {

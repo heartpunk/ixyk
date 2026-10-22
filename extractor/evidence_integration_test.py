@@ -7,18 +7,22 @@ from tempfile import TemporaryDirectory
 from types import SimpleNamespace
 from unittest.mock import patch
 
-from hypothesis import given, settings, strategies as st
 import pytest
 import zstandard
+from hypothesis import given, settings
+from hypothesis import strategies as st
 
-from extractor import acquire_cli, extractor as extraction
+from extractor import acquire_cli
+from extractor import extractor as extraction
 from extractor.artifact import (
-    InstructionModel,
-    Declaration,
     Assignment,
+    Declaration,
+    InstructionModel,
     StepSummary,
     Target,
     TermSort,
+)
+from extractor.artifact import (
     TypedExpr as E,
 )
 from extractor.evidence import EvidenceReader
@@ -155,9 +159,9 @@ def test_unsupported_candidate_preserves_successful_siblings(supported):
 def test_interruption_drains_evidence_and_replay_preserves_ids(messages):
     with TemporaryDirectory() as temporary:
         path = Path(temporary) / "evidence.zst"
-        options = dict(
-            path=str(path), commit="a" * 40, invocation_id="test-interruption"
-        )
+        options = {
+            "path": str(path), "commit": "a" * 40, "invocation_id": "test-interruption"
+        }
         with pytest.raises(KeyboardInterrupt):
             with recording_session(options) as hooks:
                 for message in messages:
@@ -196,9 +200,9 @@ def test_unexpected_acquisition_exception_propagates():
 @given(st.integers(1, 3))
 @settings(max_examples=3, deadline=None)
 def test_fuzz_cli_records_subprocess_comparisons(samples):
+    from extractor.evidence_events import Comparison, FuzzInput
     from extractor.fuzz_cli import main as fuzz_main
     from extractor.runtime import load_shellcode
-    from extractor.evidence_events import Comparison, FuzzInput
 
     model = extraction.extract(load_shellcode(bytes.fromhex("4801d8"), 4096), 4096)
     with TemporaryDirectory() as temporary:
@@ -357,6 +361,7 @@ if __name__ == "__main__":
 @settings(deadline=None)
 def test_sparse_prediction_roundtrip(default, entries, probe, scalar):
     from io import BytesIO
+
     from extractor.concrete_eval import ConcreteArray
     from extractor.evidence import EvidenceAdapter, RunContext
     from extractor.evidence_events import Comparison, MemorySnapshot, ModelPrediction

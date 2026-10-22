@@ -1,7 +1,7 @@
 import os
 import pathlib
-import sys
 import runpy
+import sys
 
 base = pathlib.Path.home() / "workspaces/ixyk-perf"
 root = pathlib.Path(__file__).resolve().parent
@@ -15,8 +15,9 @@ sys.path[:0] = (
 os.environ["PYTHONPATH"] = os.pathsep.join(sys.path)
 module = sys.argv.pop(1)
 if module == "pytest":
-    from extractor import z3_runtime  # noqa: F401 -- preload native runtime
     import pytest
+
+    from extractor import z3_runtime  # noqa: F401 -- preload native runtime
 
     raise SystemExit(pytest.main(sys.argv[1:]))
 runpy.run_path(module, run_name="__main__")

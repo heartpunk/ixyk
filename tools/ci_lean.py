@@ -2,9 +2,9 @@
 
 import copy
 import json
-from pathlib import Path
 import subprocess
 import tempfile
+from pathlib import Path
 
 
 def read_model(path: Path) -> dict:

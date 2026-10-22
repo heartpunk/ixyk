@@ -5,17 +5,17 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable, Iterable, Mapping, Sequence
-from dataclasses import dataclass
-from typing import Literal, NotRequired, TypedDict
 import hashlib
 import json
+from collections.abc import Callable, Iterable, Mapping, Sequence
+from dataclasses import dataclass
 from time import perf_counter
+from typing import Literal, NotRequired, TypedDict
 
 import hypothesis
+from hypothesis import Phase, given, seed, settings
+from hypothesis import strategies as st
 from hypothesis.database import ExampleDatabase
-
-from hypothesis import Phase, given, seed, settings, strategies as st
 
 from extractor.amd64_state import (
     AMD64_FLAG_BIT,
