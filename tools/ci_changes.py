@@ -9,7 +9,6 @@ SUITES = {"lint", "golden", "lean", "differential", "au"}
 NEWCOMER_INPUTS = {
     "flake.nix",
     "flake.lock",
-    "nix/dev-environment.nix",
     "tools/xed_enc2.nix",
     "tools/xed_enc2_dispatch.py",
     "tools/dev_check.py",
@@ -23,7 +22,6 @@ NEWCOMER_INPUTS = {
 BLANK_VM_INPUTS = NEWCOMER_INPUTS | {
     ".bazelrc",
     "tools/reapi_platform.bzl",
-    "nix/reapi.nix",
     "tools/reapi.py",
     "tools/reapi_smoke.py",
     "tools/ci_blank_vm.sh",

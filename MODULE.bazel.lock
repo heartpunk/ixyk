@@ -191,36 +191,36 @@
   },
   "selectedYankedVersions": {},
   "moduleExtensions": {
-    "//tools:nix_native_deps.bzl%nix_native_deps": {
+    "@@ifrl+//bazel/ixyk/tools:nix_native_deps.bzl%nix_native_deps": {
       "os:linux,arch:amd64": {
         "bzlTransitiveDigest": "G87DWlnvIbeFVN8fhZOgVKJD4PeeRqRn/w+YkVJYRwc=",
-        "usagesDigest": "8WPmSfUDrq4e2VUl3le3Q5P7466kAvCsC9CDxRKd1zg=",
+        "usagesDigest": "SYUJd5moTbhem5gR/KeDIptiqzFJQ4T9ydFWQZ/HpIk=",
         "recordedInputs": [],
         "generatedRepoSpecs": {
           "nix_native_deps": {
-            "repoRuleId": "@@//tools:nix_native_deps.bzl%_repository",
+            "repoRuleId": "@@ifrl+//bazel/ixyk/tools:nix_native_deps.bzl%_repository",
             "attributes": {}
           }
         }
       },
       "os:osx,arch:aarch64": {
         "bzlTransitiveDigest": "G87DWlnvIbeFVN8fhZOgVKJD4PeeRqRn/w+YkVJYRwc=",
-        "usagesDigest": "8WPmSfUDrq4e2VUl3le3Q5P7466kAvCsC9CDxRKd1zg=",
+        "usagesDigest": "SYUJd5moTbhem5gR/KeDIptiqzFJQ4T9ydFWQZ/HpIk=",
         "recordedInputs": [],
         "generatedRepoSpecs": {
           "nix_native_deps": {
-            "repoRuleId": "@@//tools:nix_native_deps.bzl%_repository",
+            "repoRuleId": "@@ifrl+//bazel/ixyk/tools:nix_native_deps.bzl%_repository",
             "attributes": {}
           }
         }
       }
     },
-    "//tools:nix_python.bzl%nix_python": {
+    "@@ifrl+//bazel/ixyk/tools:nix_python.bzl%nix_python": {
       "os:linux,arch:amd64": {
         "bzlTransitiveDigest": "lShy+IvF6fywqJRT908CkqBxvo8Uo30jbr/12VqcIcA=",
-        "usagesDigest": "gep+xQT0YW/XQ/jnAqD3dLEK06sxQavoHzHM/Dp9gUw=",
+        "usagesDigest": "KmezR3s/02E2ei6eZch7J+3WY2kqOVaI1T8dV9tfOzc=",
         "recordedInputs": [
-          "REPO_MAPPING:,rules_python rules_python+",
+          "REPO_MAPPING:ifrl+,rules_python rules_python+",
           "REPO_MAPPING:rules_python+,rules_python rules_python+",
           "ENV:IXYK_NIX_PYTHON_RUNTIME /nix/store/3jm89jy56cprn52iw8vanpav58hlcj1v-python3-3.12.13"
         ],
@@ -249,9 +249,9 @@
       },
       "os:osx,arch:aarch64": {
         "bzlTransitiveDigest": "lShy+IvF6fywqJRT908CkqBxvo8Uo30jbr/12VqcIcA=",
-        "usagesDigest": "gep+xQT0YW/XQ/jnAqD3dLEK06sxQavoHzHM/Dp9gUw=",
+        "usagesDigest": "KmezR3s/02E2ei6eZch7J+3WY2kqOVaI1T8dV9tfOzc=",
         "recordedInputs": [
-          "REPO_MAPPING:,rules_python rules_python+",
+          "REPO_MAPPING:ifrl+,rules_python rules_python+",
           "REPO_MAPPING:rules_python+,rules_python rules_python+",
           "ENV:IXYK_NIX_PYTHON_RUNTIME /nix/store/h2vxf9d0mwgc7gcxm8m468gv9zdyl4da-python3-3.12.13"
         ],

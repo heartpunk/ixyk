@@ -1,102 +1,30 @@
 # SPDX-FileCopyrightText: 2026 Sophie Smithburg
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-{ nixpkgs, angr-nix, lean4-nix, system }:
+{ nixpkgs, angr-nix, ifrl, system }:
 let
-  pkgs = import nixpkgs {
-    inherit system;
-    overlays = [
-      (lean4-nix.readToolchainFile ../lean-toolchain)
-      angr-nix.overlays.default
-
-    ];
+  pkgs = import nixpkgs { inherit system; };
+  shared = import (ifrl.outPath + "/nix/clients/ixyk/nix/dev-environment.nix") {
+    inherit nixpkgs angr-nix ifrl system;
   };
-  python = pkgs.python312.withPackages (ps: [
-    ps.angr
-    ps.coverage
-    ps.hypothesis
-    ps.ipykernel
-    ps.pytest
-    ps.unicorn
-    ps.z3-solver
-  ]);
-  bazelVersion = nixpkgs.lib.removeSuffix "\n" (builtins.readFile ../.bazelversion);
-  leanVersion = nixpkgs.lib.removePrefix "leanprover/lean4:v"
-    (nixpkgs.lib.removeSuffix "\n" (builtins.readFile ../lean-toolchain));
-  # The pinned nixpkgs Bazel bootstrap fails in the Darwin linker. Materialize
-  # the official release that Bazelisk previously fetched at command runtime.
-  bazel = if pkgs.stdenv.isDarwin then pkgs.stdenvNoCC.mkDerivation {
-    pname = "bazel";
-    version = bazelVersion;
-    src = pkgs.fetchurl {
-      url = "https://github.com/bazelbuild/bazel/releases/download/${bazelVersion}/bazel-${bazelVersion}-darwin-arm64";
-      hash = "sha256-LbiDcYRT8EN6e8tAjoidv4U5zcTWHI68OAehqI0C/wg=";
-    };
-    dontUnpack = true;
-    dontFixup = true;
-    installPhase = ''
-      install -Dm755 "$src" "$out/bin/bazel"
-    '';
-  } else pkgs.bazel_9;
-  environment = {
-    ELAN = "";
-    IFRL_ANGR_ENVIRONMENT = "${python}";
-    IXYK_NIX_PYTHON_ROOT = "${python}";
-    IXYK_NIX_XED_ROOT = if pkgs.stdenv.isLinux then
-      "${import ../tools/xed_enc2.nix { inherit pkgs; }}" else "";
-    IXYK_NIX_PYTHON_RUNTIME = "${pkgs.python312}";
-    IXYK_NIX_LIBSTDCXX_ROOT =
-      if pkgs.stdenv.isLinux then "${pkgs.stdenv.cc.cc.lib}" else "";
-    PYTHONNOUSERSITE = "1";
-    PYTHONSAFEPATH = "1";
-  };
-  devCheck = pkgs.writeShellScriptBin "ixyk-dev-check" ''
-    exec ${python}/bin/python ${../tools/dev_check.py} "$@"
-  '';
-  packages = [
-    python
-    pkgs.actionlint
-    pkgs.basedpyright
-    pkgs.bashInteractive
-    bazel
-    pkgs.buildifier
-    pkgs.coreutils
-    # Bazel's version-selection launcher runs these before its binary wrapper.
-    pkgs.findutils
-    pkgs.gnugrep
-    pkgs.git
-    pkgs.jujutsu
-    pkgs.lean
-    pkgs.ruff
-    pkgs.stdenv.cc
-    pkgs.zstd
-    devCheck
-  ];
-  activation = pkgs.writeText "ixyk-dev-env.sh" (
-    nixpkgs.lib.concatStringsSep "\n" (nixpkgs.lib.mapAttrsToList
-      (name: value: "export ${name}=${nixpkgs.lib.escapeShellArg value}") environment)
-    + "\nexport PATH=${nixpkgs.lib.makeBinPath packages}:\"$PATH\"\n"
-  );
+  xedRoot = if pkgs.stdenv.isLinux then
+    toString (import ../tools/xed_enc2.nix { inherit pkgs; }) else "";
+  shell = shared.shell.overrideAttrs (_: { IXYK_NIX_XED_ROOT = xedRoot; });
   launcher = pkgs.writeShellScriptBin "ixyk-dev" ''
-    source ${activation}
+    source ${shared.package}/etc/ixyk-dev-env.sh
+    export IXYK_NIX_XED_ROOT=${pkgs.lib.escapeShellArg xedRoot}
     if [ "$#" -eq 0 ]; then
       exec ${pkgs.bashInteractive}/bin/bash --noprofile --norc
     fi
     exec "$@"
   '';
-in
-assert pkgs.bazel_9.version == bazelVersion;
-assert pkgs.lean.version == leanVersion;
-{
-  shell = pkgs.mkShell (environment // { inherit packages; });
-  package = pkgs.buildEnv {
+  package = pkgs.symlinkJoin {
     name = "ixyk-dev-environment";
-    meta.mainProgram = "ixyk-dev";
-    paths = packages ++ [ launcher ];
-    pathsToLink = [ "/bin" "/share" ];
+    paths = [ shared.package ];
     postBuild = ''
-      mkdir -p "$out/etc"
-      ln -s ${activation} "$out/etc/ixyk-dev-env.sh"
+      rm -f "$out/bin/ixyk-dev"
+      ln -s ${launcher}/bin/ixyk-dev "$out/bin/ixyk-dev"
     '';
+    meta.mainProgram = "ixyk-dev";
   };
-}
+in shared // { inherit shell package; }
