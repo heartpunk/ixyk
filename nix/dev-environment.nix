@@ -1,45 +1,13 @@
 # SPDX-FileCopyrightText: 2026 Sophie Smithburg
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-{ nixpkgs, angr-nix, lean4-nix, system }:
+{ nixpkgs, ifrl, lean4-nix, system }:
 let
   pkgs = import nixpkgs {
     inherit system;
     overlays = [
-      (lean4-nix.readToolchainFile ../lean-toolchain)
-      angr-nix.overlays.default
-      (final: prev: {
-        python312 = prev.python312.override (old: {
-          packageOverrides = nixpkgs.lib.composeExtensions
-            (old.packageOverrides or (_: _: { }))
-            (pyFinal: pyPrev: {
-              angr = pyPrev.angr.overridePythonAttrs (attrs: {
-                # The prebuilt Darwin wheel has no Mach-O header padding for
-                # an absolute Nix-store dependency path. Keep the z3 dylib
-                # beside rustylib through a short loader-relative symlink.
-                preFixup = if final.stdenv.isDarwin then ''
-                  angrSitePackages="$out/${pyPrev.python.sitePackages}/angr"
-                  ln -s "${pyPrev.z3-solver}/${pyPrev.python.sitePackages}/z3/lib/libz3.dylib" \
-                    "$angrSitePackages/a"
-                  install_name_tool -change libz3.dylib @loader_path/a \
-                    "$angrSitePackages/rustylib.abi3.so"
-                '' else (attrs.preFixup or "");
-              });
-              bitstring = pyPrev.bitstring.overridePythonAttrs (attrs: {
-                # Keep correctness tests without the benchmark plugin's
-                # unrelated Elasticsearch/notebook test dependencies.
-                nativeCheckInputs = builtins.filter
-                  (dep: nixpkgs.lib.getName dep != "pytest-benchmark")
-                  (attrs.nativeCheckInputs or [ ]);
-                pytestFlags = builtins.filter
-                  (flag: flag != "--benchmark-disable")
-                  (attrs.pytestFlags or [ ]);
-                disabledTestPaths = (attrs.disabledTestPaths or [ ])
-                  ++ [ "tests/test_benchmarks.py" ];
-              });
-            });
-        });
-      })
+      (lean4-nix.readToolchainFile { toolchain = ../lean-toolchain; binary = true; })
+      ifrl.overlays.angr
     ];
   };
   python = pkgs.python312.withPackages (ps: [
@@ -61,7 +29,7 @@ let
     version = bazelVersion;
     src = pkgs.fetchurl {
       url = "https://github.com/bazelbuild/bazel/releases/download/${bazelVersion}/bazel-${bazelVersion}-darwin-arm64";
-      hash = "sha256-LbiDcYRT8EN6e8tAjoidv4U5zcTWHI68OAehqI0C/wg=";
+      hash = "sha256-3UZjUqPk01gbiJh0DuH/IIhmzL4l+NNnxdy5UCGVh+Y=";
     };
     dontUnpack = true;
     dontFixup = true;
@@ -71,6 +39,7 @@ let
   } else pkgs.bazel_9;
   environment = {
     ELAN = "";
+    IFRL_ANGR_ENVIRONMENT = "${python}";
     IXYK_NIX_PYTHON_ROOT = "${python}";
     IXYK_NIX_XED_ROOT = if pkgs.stdenv.isLinux then
       "${import ../tools/xed_enc2.nix { inherit pkgs; }}" else "";
@@ -117,6 +86,9 @@ let
 in
 assert pkgs.bazel_9.version == bazelVersion;
 assert pkgs.lean.version == leanVersion;
+assert nixpkgs.lib.assertMsg
+  (nixpkgs.lib.versionAtLeast pkgs.python312Packages.angr.version "10.0")
+  "IXYK requires Angr >= 10.0; found ${pkgs.python312Packages.angr.version}.";
 {
   shell = pkgs.mkShell (environment // { inherit packages; });
   package = pkgs.buildEnv {

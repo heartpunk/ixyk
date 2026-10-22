@@ -9,18 +9,6 @@ module(
 bazel_dep(name = "platforms", version = "1.1.0")
 bazel_dep(name = "rules_cc", version = "0.2.17")
 bazel_dep(name = "rules_python", version = "1.7.0")
-bazel_dep(name = "ixyk_vendored_arpy", version = "1.1.1")
-bazel_dep(name = "ixyk_vendored_mulpyplexer", version = "0.9")
-
-local_path_override(
-    module_name = "ixyk_vendored_arpy",
-    path = "third_party/arpy",
-)
-
-local_path_override(
-    module_name = "ixyk_vendored_mulpyplexer",
-    path = "third_party/mulpyplexer",
-)
 
 python = use_extension(
     "@rules_python//python/extensions:python.bzl",
@@ -47,10 +35,60 @@ pip.parse(
     },
 )
 
+# Use the development environment's packages for every overlapping dependency.
+# Pip supplies only test tools absent from that environment.
 override_repo(
     pip,
-    ixyk_pypi_312_arpy = "ixyk_vendored_arpy",
-    ixyk_pypi_312_mulpyplexer = "ixyk_vendored_mulpyplexer",
+    ixyk_pypi_312_angr = "shared_angr",
+    ixyk_pypi_312_angr_data = "shared_angr",
+    ixyk_pypi_312_archinfo = "shared_angr",
+    ixyk_pypi_312_arpy = "shared_angr",
+    ixyk_pypi_312_bitarray = "shared_angr",
+    ixyk_pypi_312_bitstring = "shared_angr",
+    ixyk_pypi_312_cachetools = "shared_angr",
+    ixyk_pypi_312_capstone = "shared_angr",
+    ixyk_pypi_312_cart = "shared_angr",
+    ixyk_pypi_312_cffi = "shared_angr",
+    ixyk_pypi_312_cle = "shared_angr",
+    ixyk_pypi_312_coverage = "shared_angr",
+    ixyk_pypi_312_cxxheaderparser = "shared_angr",
+    ixyk_pypi_312_future = "shared_angr",
+    ixyk_pypi_312_gitdb = "shared_angr",
+    ixyk_pypi_312_gitpython = "shared_angr",
+    ixyk_pypi_312_hypothesis = "shared_angr",
+    ixyk_pypi_312_iniconfig = "shared_angr",
+    ixyk_pypi_312_lmdb = "shared_angr",
+    ixyk_pypi_312_markdown_it_py = "shared_angr",
+    ixyk_pypi_312_mdurl = "shared_angr",
+    ixyk_pypi_312_minidump = "shared_angr",
+    ixyk_pypi_312_mpmath = "shared_angr",
+    ixyk_pypi_312_msgspec = "shared_angr",
+    ixyk_pypi_312_mulpyplexer = "shared_angr",
+    ixyk_pypi_312_networkx = "shared_angr",
+    ixyk_pypi_312_packaging = "shared_angr",
+    ixyk_pypi_312_pefile = "shared_angr",
+    ixyk_pypi_312_platformdirs = "shared_angr",
+    ixyk_pypi_312_pluggy = "shared_angr",
+    ixyk_pypi_312_protobuf = "shared_angr",
+    ixyk_pypi_312_psutil = "shared_angr",
+    ixyk_pypi_312_pycparser = "shared_angr",
+    ixyk_pypi_312_pycryptodome = "shared_angr",
+    ixyk_pypi_312_pydemumble = "shared_angr",
+    ixyk_pypi_312_pyelftools = "shared_angr",
+    ixyk_pypi_312_pygments = "shared_angr",
+    ixyk_pypi_312_pypcode = "shared_angr",
+    ixyk_pypi_312_pytest = "shared_angr",
+    ixyk_pypi_312_pyvex = "shared_angr",
+    ixyk_pypi_312_pyxbe = "shared_angr",
+    ixyk_pypi_312_pyxdia = "shared_angr",
+    ixyk_pypi_312_rich = "shared_angr",
+    ixyk_pypi_312_smmap = "shared_angr",
+    ixyk_pypi_312_sortedcontainers = "shared_angr",
+    ixyk_pypi_312_sympy = "shared_angr",
+    ixyk_pypi_312_typing_extensions = "shared_angr",
+    ixyk_pypi_312_uefi_firmware = "shared_angr",
+    ixyk_pypi_312_unicorn = "shared_angr",
+    ixyk_pypi_312_z3_solver = "shared_angr",
 )
 
 use_repo(pip, "ixyk_pypi")
@@ -60,3 +98,14 @@ nix_native_deps = use_extension(
     "nix_native_deps",
 )
 use_repo(nix_native_deps, "nix_native_deps")
+
+bazel_dep(name = "ifrl", version = "0.1.0")
+git_override(
+    module_name = "ifrl",
+    commit = "d4fdac39e0cfe916cc6d4edcd8043ce9d08cdda4",
+    remote = "https://github.com/heartpunk/ifrl.git",
+)
+
+angr_environment_repository = use_repo_rule("@ifrl//bazel/angr:repository.bzl", "angr_environment_repository")
+
+angr_environment_repository(name = "shared_angr")

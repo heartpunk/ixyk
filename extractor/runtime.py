@@ -25,7 +25,7 @@ _EXPECTED_PYTHON = (3, 12, 13)
 _EXPECTED_SOLVED_VALUE = 0x1234
 _EXPECTED_VEX_INSTRUCTIONS = 2
 _EXPECTED_TOP_LEVEL_VERSIONS = {
-    "angr": "10.0.0",
+    "angr": "10.0.1",
     "coverage": "7.15.2",
     "hypothesis": "6.160.0",
     "mutmut": "3.6.0",
