@@ -48,13 +48,23 @@ if [[ "${1:-}" != run ]]; then
 fi
 mapfile -t targets < .ci/python-targets.txt
 set +e
+python3 -m pytest -q \
+  tools/ci_changes_test.py \
+  tools/ci_cachix_restore_test.py \
+  tools/reapi_test.py
+tooling_status=$?
 bazel --batch --host_jvm_args=-Xmx2g test --jobs=2 --local_resources=memory=12000 \
   --spawn_strategy=local --strategy=TestRunner=local \
   --nocache_test_results --test_output=errors "${targets[@]}"
-status=$?
+bazel_status=$?
 set -e
-case "$status" in
-  0|1|3) ;;
-  *) echo "IFRL_MUTATION_INFRASTRUCTURE: bazel exit=$status" ;;
+case "$tooling_status" in
+  0|1) ;;
+  *) echo "IFRL_MUTATION_INFRASTRUCTURE: pytest exit=$tooling_status"; exit 125 ;;
 esac
-exit "$status"
+case "$bazel_status" in
+  0|1|3) ;;
+  *) echo "IFRL_MUTATION_INFRASTRUCTURE: bazel exit=$bazel_status"; exit 125 ;;
+esac
+if [[ "$tooling_status" -ne 0 ]]; then exit 1; fi
+exit "$bazel_status"

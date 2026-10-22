@@ -14,7 +14,7 @@ for target in "${targets[@]}"; do
   fi
 done
 set +e
-bash .ifrl-ci/ci/python.sh coverage
+python3 .ifrl-ci/ci/python.py coverage
 tools_status=$?
 # This target passes in normal CI but its 60-second fuzz budget is consumed
 # before any fuzz executions when Bazel instruments it for coverage.
