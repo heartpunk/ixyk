@@ -10,7 +10,7 @@
   };
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/e7a3ca8092b61ff85b6a45bf863ea2b2d6a661b3";
+    nixpkgs.url = "github:NixOS/nixpkgs/e79d204daf01f8a877f7b2ce7324874ce9c84676";
     ifrl = {
       url = "github:heartpunk/ifrl/main";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -19,10 +19,16 @@
 
   outputs = { nixpkgs, ifrl, ... }:
     let
-      angr-nix = ifrl.lib.angr-nix;
+      lib = nixpkgs.lib;
       systems = [ "aarch64-darwin" "x86_64-linux" ];
       environments = nixpkgs.lib.genAttrs systems (system:
-        import ./nix/dev-environment.nix { inherit nixpkgs angr-nix ifrl system; });
+        let
+          pkgs = import nixpkgs { inherit system; };
+          angrVersion = pkgs.python312Packages.angr.version;
+        in
+        assert lib.assertMsg (lib.versionAtLeast angrVersion "10.0")
+          "IXYK requires Angr >= 10.0 from its pinned Nixpkgs; found ${angrVersion}.";
+        import ./nix/dev-environment.nix { inherit nixpkgs ifrl system; });
     in {
       devShells = nixpkgs.lib.mapAttrs (_: env: {
         default = env.shell.overrideAttrs (old: {
@@ -36,7 +42,7 @@
           python = pkgs.python312;
           developmentEnvironment = env.package;
           component = "ixyk";
-          workerContract = "ixyk-e7a3ca80-python312-lean434-procns-v1";
+          workerContract = "ixyk-e79d204d-python312-lean434-procns-v1";
           clientDependencies = env.package;
           contractProperty = "ixyk-nix-contract";
         };

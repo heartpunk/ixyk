@@ -1,11 +1,11 @@
 # SPDX-FileCopyrightText: 2026 Sophie Smithburg
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-{ nixpkgs, angr-nix, ifrl, system }:
+{ nixpkgs, ifrl, system }:
 let
   pkgs = import nixpkgs { inherit system; };
   shared = import (ifrl.outPath + "/nix/clients/ixyk/nix/dev-environment.nix") {
-    inherit nixpkgs angr-nix ifrl system;
+    inherit nixpkgs ifrl system;
   };
   xedRoot = if pkgs.stdenv.isLinux then
     toString (import ../tools/xed_enc2.nix { inherit pkgs; }) else "";
