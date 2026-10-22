@@ -22,7 +22,7 @@
       angr-nix = ifrl.lib.angr-nix;
       systems = [ "aarch64-darwin" "x86_64-linux" ];
       environments = nixpkgs.lib.genAttrs systems (system:
-        import (ifrl.outPath + "/nix/clients/ixyk/nix/dev-environment.nix") { inherit nixpkgs angr-nix ifrl system; });
+        import ./nix/dev-environment.nix { inherit nixpkgs angr-nix ifrl system; });
     in {
       devShells = nixpkgs.lib.mapAttrs (_: env: {
         default = env.shell.overrideAttrs (old: {
