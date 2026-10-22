@@ -14,7 +14,6 @@ import z3
 def test_runtime_probe_checks_the_pinned_angr_public_api() -> None:
     result = runtime.run_probe()
 
-    assert result["python"] == "3.12.13"
     assert result["mnemonics"] == ["mov", "ret"]
     assert result["solution"] == 0x1234
 

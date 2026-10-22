@@ -105,6 +105,6 @@ py_library(
         "//extractor:normalization",
         "//extractor:typed_z3",
         requirement("hypothesis"),
-        requirement("z3-solver"),
+        "@shared_angr//:pkg",
     ],
 )

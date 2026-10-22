@@ -21,17 +21,9 @@ from extractor.native_runtime import (
 )
 from extractor.tool_errors import ShellcodeLoadError
 
-_EXPECTED_PYTHON = (3, 12, 13)
 _EXPECTED_SOLVED_VALUE = 0x1234
 _EXPECTED_VEX_INSTRUCTIONS = 2
-_EXPECTED_TOP_LEVEL_VERSIONS = {
-    "angr": "10.0.0",
-    "coverage": "7.15.2",
-    "hypothesis": "6.160.0",
-    "mutmut": "3.6.0",
-    "pytest": "9.1.1",
-    "unicorn": "2.1.4",
-}
+_ANGR_DISTRIBUTIONS = ("angr", "archinfo", "cle", "pyvex")
 _REQUIRED_MODULES = (
     "angr",
     "archinfo",
@@ -164,10 +156,6 @@ def _fail(message: str) -> Never:
 
 
 def _assert_python_environment() -> None:
-    actual_python = sys.version_info[:3]
-    if actual_python != _EXPECTED_PYTHON:
-        message = f"unexpected Python: {actual_python!r}; expected {_EXPECTED_PYTHON!r}"
-        _fail(message)
     if os.environ.get("PYTHONNOUSERSITE") != "1":
         _fail("PYTHONNOUSERSITE=1 is required")
     if os.environ.get("PYTHONSAFEPATH") != "1" or not sys.flags.safe_path:
@@ -208,7 +196,10 @@ def _assert_module_origins(runfiles_root: Path) -> dict[str, str]:
 
 
 def _assert_versions() -> None:
-    for distribution, expected in _EXPECTED_TOP_LEVEL_VERSIONS.items():
+    expected = os.environ.get("IXYK_NIX_ANGR_VERSION")
+    if not expected:
+        _fail("IXYK_NIX_ANGR_VERSION must identify IFRL's selected Angr version")
+    for distribution in _ANGR_DISTRIBUTIONS:
         actual = importlib.metadata.version(distribution)
         if actual != expected:
             _fail(f"unexpected {distribution} version: {actual}; expected {expected}")

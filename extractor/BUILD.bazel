@@ -78,7 +78,7 @@ py_test(
         "//antiunification:algebra",
         requirement("hypothesis"),
         requirement("pytest"),
-        requirement("z3-solver"),
+        "@shared_angr//:pkg",
     ],
 )
 
@@ -163,7 +163,7 @@ py_library(
     target_compatible_with = _LINUX_X86_64,
     deps = [
         ":package",
-        requirement("z3-solver"),
+        "@shared_angr//:pkg",
     ],
 )
 
@@ -174,7 +174,7 @@ py_library(
     deps = [
         ":artifact",
         ":z3_boundary",
-        requirement("z3-solver"),
+        "@shared_angr//:pkg",
     ],
 )
 
@@ -184,7 +184,7 @@ py_library(
     target_compatible_with = _LINUX_X86_64,
     deps = [
         ":package",
-        requirement("unicorn"),
+        "@shared_angr//:pkg",
     ],
 )
 
@@ -215,7 +215,7 @@ py_library(
     deps = [
         ":native_runtime",
         ":tool_errors",
-        requirement("angr"),
+        "@shared_angr//:pkg",
         requirement("coverage"),
         requirement("hypothesis"),
         requirement("mutmut"),
@@ -241,8 +241,7 @@ py_library(
         ":angr_boundary",
         ":artifact",
         ":z3_boundary",
-        requirement("angr"),
-        requirement("z3-solver"),
+        "@shared_angr//:pkg",
     ],
 )
 
@@ -259,7 +258,7 @@ py_test(
     deps = [
         ":amd64_state",
         requirement("pytest"),
-        requirement("z3-solver"),
+        "@shared_angr//:pkg",
     ],
 )
 
@@ -281,8 +280,7 @@ py_library(
         ":xed",
         ":z3_boundary",
         "//antiunification:algebra",
-        requirement("angr"),
-        requirement("z3-solver"),
+        "@shared_angr//:pkg",
     ],
 )
 
@@ -335,7 +333,7 @@ py_library(
         ":z3_boundary",
         "//antiunification:algebra",
         requirement("hypothesis"),
-        requirement("z3-solver"),
+        "@shared_angr//:pkg",
     ],
 )
 
@@ -620,7 +618,7 @@ py_test(
         ":z3_boundary",
         ":z3_runtime",
         requirement("pytest"),
-        requirement("z3-solver"),
+        "@shared_angr//:pkg",
     ],
 )
 
@@ -657,7 +655,7 @@ py_library(
         ":au_inputs",
         ":model_syntax",
         ":xed",
-        requirement("capstone"),
+        "@shared_angr//:pkg",
     ],
 )
 
@@ -786,7 +784,7 @@ py_test(
         "//antiunification:algebra",
         requirement("hypothesis"),
         requirement("pytest"),
-        requirement("unicorn"),
+        "@shared_angr//:pkg",
     ],
 )
 
@@ -828,7 +826,7 @@ py_test(
         "//tools:differential_cases",
         requirement("hypothesis"),
         requirement("pytest"),
-        requirement("z3-solver"),
+        "@shared_angr//:pkg",
     ],
 )
 
@@ -928,7 +926,7 @@ py_test(
         "//antiunification:algebra",
         requirement("hypothesis"),
         requirement("pytest"),
-        requirement("unicorn"),
+        "@shared_angr//:pkg",
     ],
 )
 
