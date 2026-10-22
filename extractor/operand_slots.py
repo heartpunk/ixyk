@@ -13,13 +13,13 @@ import capstone  # pyright: ignore[reportMissingTypeStubs]
 
 from extractor.angr_boundary import Project, lift_block
 from extractor.artifact import Declaration, InstructionModel, TermSort
+from extractor.au_inputs import parameters
 from extractor.model_syntax import (
     AddressAtom,
     BitVectorAtom,
     CanonicalVariable,
     canonical_variable,
 )
-from extractor.au_inputs import parameters
 from extractor.xed import InstructionInfo, registers, relative_target
 
 
@@ -126,7 +126,7 @@ def decode_operand_slots(
     if block.vex.instructions != 1 or len(block.capstone.insns) != 1:
         raise OperandDecodeError("expected exactly one decoded instruction")
     wrapped = block.capstone.insns[0]
-    instruction = cast(_Instruction, getattr(wrapped, "insn"))
+    instruction = cast(_Instruction, wrapped.insn)
     operands: list[OperandSlot] = []
     for index, operand in enumerate(instruction.operands):
         variable = None

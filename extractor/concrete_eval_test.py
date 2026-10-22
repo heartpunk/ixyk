@@ -3,23 +3,27 @@
 from dataclasses import replace
 from unittest.mock import patch
 
+import pytest
+import z3
+from hypothesis import Phase, given, settings
+from hypothesis import strategies as st
+
 from extractor import z3_runtime as _z3_runtime  # noqa: F401
-from extractor.concrete_eval import ConcreteArray, evaluator, share_expressions
 from extractor.artifact import (
-    InstructionModel,
-    Declaration,
     Assignment,
+    Declaration,
+    InstructionModel,
     StepSummary,
     Target,
-    TypedExpr as E,
     TermSort,
 )
+from extractor.artifact import (
+    TypedExpr as E,
+)
+from extractor.concrete_eval import ConcreteArray, evaluator, share_expressions
 from extractor.fuzzer import ComparisonUnavailable, CompiledModel, ConcreteState
 from extractor.typed_z3 import expr_to_z3
 from tools.lean_differential import OPS, cases
-from hypothesis import given, settings, Phase, strategies as st
-import pytest
-import z3
 
 
 def test_operators():
@@ -29,7 +33,7 @@ def test_operators():
 
         @given(cases(op))
         @settings(max_examples=100, deadline=None, phases=[Phase.generate])
-        def check(case):
+        def check(case, op=op):
             counts[op] += 1
             expr, bindings = case
             context = z3.Context()

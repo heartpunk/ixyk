@@ -1,17 +1,24 @@
 """Regression cases for cheap, conservative CI selection."""
 
-import os
-from contextlib import redirect_stdout
 import io
-from pathlib import Path
+import os
 import runpy
 import subprocess
 import tempfile
 import unittest
+from contextlib import redirect_stdout
+from pathlib import Path
 from unittest.mock import patch
 
 from ci_changes import (
-    ALL_SUITES, BLANK_VM_INPUTS, CACHE_INPUTS, DOCKER_INPUTS, NEWCOMER_INPUTS, SUITES, affected, changed_paths,
+    ALL_SUITES,
+    BLANK_VM_INPUTS,
+    CACHE_INPUTS,
+    DOCKER_INPUTS,
+    NEWCOMER_INPUTS,
+    SUITES,
+    affected,
+    changed_paths,
 )
 
 
@@ -245,7 +252,7 @@ class SelectionTest(unittest.TestCase):
                 ):
                     runpy.run_path(
                         str(Path(__file__).with_name("ci_changes.py")),
-                        run_name="".join(["__", "main", "__"]),
+                        run_name="__main__",
                     )
                 expected = "existing=value\n" + "".join(
                     f"{suite}={str(suite in enabled).lower()}\n"

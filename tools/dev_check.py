@@ -5,12 +5,12 @@
 
 import ctypes
 import os
-from pathlib import Path
 import platform
 import re
 import shutil
 import subprocess
 import sys
+from pathlib import Path
 
 
 def check() -> None:
@@ -57,13 +57,13 @@ def check() -> None:
         ctypes.CDLL(str(Path(library_root) / "lib/libstdc++.so.6"))
 
     import angr
-    from angr import claripy
     import coverage
     import hypothesis
     import ipykernel
     import pytest
     import unicorn
     import z3
+    from angr import claripy
 
     # Import developer dependencies and exercise the native engines with tiny,
     # deterministic inputs. No repository imports or Bazel downloads are needed.

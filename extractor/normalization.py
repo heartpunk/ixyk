@@ -3,8 +3,8 @@
 
 """Experimental, semantics-preserving normalization of typed QF_ABV syntax."""
 
-from dataclasses import replace
 from collections.abc import Mapping
+from dataclasses import replace
 from typing import cast
 
 from extractor.artifact import Assignment, InstructionModel, TypedExpr

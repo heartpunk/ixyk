@@ -4,8 +4,6 @@
 """Artifact-producing boundary preserving independent instruction acquisitions."""
 
 # Runtime must preload declared libstdc++ before Z3 or Angr imports.
-from extractor.runtime import load_shellcode
-
 import argparse
 import json
 from collections.abc import Sequence
@@ -15,14 +13,15 @@ from typing import Literal, Protocol, TypedDict, cast
 from extractor.acquisition_errors import EXPECTED_ACQUISITION
 from extractor.amd64_state import Amd64AdapterError
 from extractor.artifact import UnsupportedTheoryError
+from extractor.evidence_events import AttemptContext
 from extractor.evidence_session import (
     add_recording_arguments,
     recording_options,
     recording_session,
 )
-from extractor.evidence_events import AttemptContext
 from extractor.extract_cli import DEFAULT_SOURCE, source_address
 from extractor.extractor import extract
+from extractor.runtime import load_shellcode
 
 
 class _Options(Protocol):
@@ -101,13 +100,13 @@ def main(arguments: Sequence[str] | None = None) -> None:
                     model_ids=tuple(model_ids),
                 )
             findings.append(
-                dict(
-                    stage=name,
-                    instruction_hex=code.hex(),
-                    error_kind=type(error).__name__,
-                    message=str(error),
-                    attempt=attempt.to_data() if attempt is not None else None,
-                )
+                {
+                    "stage": name,
+                    "instruction_hex": code.hex(),
+                    "error_kind": type(error).__name__,
+                    "message": str(error),
+                    "attempt": attempt.to_data() if attempt is not None else None,
+                }
             )
             if evidence is not None:
                 evidence.finding(
@@ -161,7 +160,7 @@ def main(arguments: Sequence[str] | None = None) -> None:
         "error": error_text,
         "model_route": route,
         "retained_models": [
-            dict(instruction_hex=code.hex(), model=model.to_data())
+            {"instruction_hex": code.hex(), "model": model.to_data()}
             for (code, source), model in requested_retained.items()
         ],
         "findings": findings,

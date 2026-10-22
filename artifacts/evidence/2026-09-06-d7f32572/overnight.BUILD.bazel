@@ -11,7 +11,10 @@ genrule(
         "001_mov.fuzz.evidence.zst",
     ],
     cmd = "$(location //extractor:acquire_model) --instruction-hex 4889d8 --model-output $(@D)/001_mov.model.json --result-output $(@D)/001_mov.acquisition.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/001_mov.acquisition.evidence.zst && $(location //extractor:fuzz_model) --acquisition $(@D)/001_mov.acquisition.json --model $(@D)/001_mov.model.json --instruction-hex 4889d8 --examples 10000 --max-executions 10000 --stage discover --seconds 1800 --output $(@D)/001_mov.fuzz.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/001_mov.fuzz.evidence.zst",
-    exec_properties = {"cpu_count": "1", "memory_mb": "2048"},
+    exec_properties = {
+        "cpu_count": "1",
+        "memory_mb": "2048",
+    },
     tools = [
         "//extractor:acquire_model",
         "//extractor:fuzz_model",
@@ -28,7 +31,10 @@ genrule(
         "002_add.fuzz.evidence.zst",
     ],
     cmd = "$(location //extractor:acquire_model) --instruction-hex 4801d8 --model-output $(@D)/002_add.model.json --result-output $(@D)/002_add.acquisition.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/002_add.acquisition.evidence.zst && $(location //extractor:fuzz_model) --acquisition $(@D)/002_add.acquisition.json --model $(@D)/002_add.model.json --instruction-hex 4801d8 --examples 10000 --max-executions 10000 --stage discover --seconds 1800 --output $(@D)/002_add.fuzz.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/002_add.fuzz.evidence.zst",
-    exec_properties = {"cpu_count": "1", "memory_mb": "2048"},
+    exec_properties = {
+        "cpu_count": "1",
+        "memory_mb": "2048",
+    },
     tools = [
         "//extractor:acquire_model",
         "//extractor:fuzz_model",
@@ -45,7 +51,10 @@ genrule(
         "003_call.fuzz.evidence.zst",
     ],
     cmd = "$(location //extractor:acquire_model) --instruction-hex e800000000 --model-output $(@D)/003_call.model.json --result-output $(@D)/003_call.acquisition.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/003_call.acquisition.evidence.zst && $(location //extractor:fuzz_model) --acquisition $(@D)/003_call.acquisition.json --model $(@D)/003_call.model.json --instruction-hex e800000000 --examples 10000 --max-executions 10000 --stage discover --seconds 1800 --output $(@D)/003_call.fuzz.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/003_call.fuzz.evidence.zst",
-    exec_properties = {"cpu_count": "1", "memory_mb": "2048"},
+    exec_properties = {
+        "cpu_count": "1",
+        "memory_mb": "2048",
+    },
     tools = [
         "//extractor:acquire_model",
         "//extractor:fuzz_model",
@@ -62,7 +71,10 @@ genrule(
         "004_lea.fuzz.evidence.zst",
     ],
     cmd = "$(location //extractor:acquire_model) --instruction-hex 488d444b08 --model-output $(@D)/004_lea.model.json --result-output $(@D)/004_lea.acquisition.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/004_lea.acquisition.evidence.zst && $(location //extractor:fuzz_model) --acquisition $(@D)/004_lea.acquisition.json --model $(@D)/004_lea.model.json --instruction-hex 488d444b08 --examples 10000 --max-executions 10000 --stage discover --seconds 1800 --output $(@D)/004_lea.fuzz.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/004_lea.fuzz.evidence.zst",
-    exec_properties = {"cpu_count": "1", "memory_mb": "2048"},
+    exec_properties = {
+        "cpu_count": "1",
+        "memory_mb": "2048",
+    },
     tools = [
         "//extractor:acquire_model",
         "//extractor:fuzz_model",
@@ -79,7 +91,10 @@ genrule(
         "005_je.fuzz.evidence.zst",
     ],
     cmd = "$(location //extractor:acquire_model) --instruction-hex 7400 --model-output $(@D)/005_je.model.json --result-output $(@D)/005_je.acquisition.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/005_je.acquisition.evidence.zst && $(location //extractor:fuzz_model) --acquisition $(@D)/005_je.acquisition.json --model $(@D)/005_je.model.json --instruction-hex 7400 --examples 10000 --max-executions 10000 --stage discover --seconds 1800 --output $(@D)/005_je.fuzz.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/005_je.fuzz.evidence.zst",
-    exec_properties = {"cpu_count": "1", "memory_mb": "2048"},
+    exec_properties = {
+        "cpu_count": "1",
+        "memory_mb": "2048",
+    },
     tools = [
         "//extractor:acquire_model",
         "//extractor:fuzz_model",
@@ -96,7 +111,10 @@ genrule(
         "006_test.fuzz.evidence.zst",
     ],
     cmd = "$(location //extractor:acquire_model) --instruction-hex 4885d8 --model-output $(@D)/006_test.model.json --result-output $(@D)/006_test.acquisition.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/006_test.acquisition.evidence.zst && $(location //extractor:fuzz_model) --acquisition $(@D)/006_test.acquisition.json --model $(@D)/006_test.model.json --instruction-hex 4885d8 --examples 10000 --max-executions 10000 --stage discover --seconds 1800 --output $(@D)/006_test.fuzz.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/006_test.fuzz.evidence.zst",
-    exec_properties = {"cpu_count": "1", "memory_mb": "2048"},
+    exec_properties = {
+        "cpu_count": "1",
+        "memory_mb": "2048",
+    },
     tools = [
         "//extractor:acquire_model",
         "//extractor:fuzz_model",
@@ -113,7 +131,10 @@ genrule(
         "007_jmp.fuzz.evidence.zst",
     ],
     cmd = "$(location //extractor:acquire_model) --instruction-hex eb00 --model-output $(@D)/007_jmp.model.json --result-output $(@D)/007_jmp.acquisition.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/007_jmp.acquisition.evidence.zst && $(location //extractor:fuzz_model) --acquisition $(@D)/007_jmp.acquisition.json --model $(@D)/007_jmp.model.json --instruction-hex eb00 --examples 10000 --max-executions 10000 --stage discover --seconds 1800 --output $(@D)/007_jmp.fuzz.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/007_jmp.fuzz.evidence.zst",
-    exec_properties = {"cpu_count": "1", "memory_mb": "2048"},
+    exec_properties = {
+        "cpu_count": "1",
+        "memory_mb": "2048",
+    },
     tools = [
         "//extractor:acquire_model",
         "//extractor:fuzz_model",
@@ -130,7 +151,10 @@ genrule(
         "008_nop.fuzz.evidence.zst",
     ],
     cmd = "$(location //extractor:acquire_model) --instruction-hex 90 --model-output $(@D)/008_nop.model.json --result-output $(@D)/008_nop.acquisition.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/008_nop.acquisition.evidence.zst && $(location //extractor:fuzz_model) --acquisition $(@D)/008_nop.acquisition.json --model $(@D)/008_nop.model.json --instruction-hex 90 --examples 10000 --max-executions 10000 --stage discover --seconds 1800 --output $(@D)/008_nop.fuzz.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/008_nop.fuzz.evidence.zst",
-    exec_properties = {"cpu_count": "1", "memory_mb": "2048"},
+    exec_properties = {
+        "cpu_count": "1",
+        "memory_mb": "2048",
+    },
     tools = [
         "//extractor:acquire_model",
         "//extractor:fuzz_model",
@@ -147,7 +171,10 @@ genrule(
         "009_cmp.fuzz.evidence.zst",
     ],
     cmd = "$(location //extractor:acquire_model) --instruction-hex 4839d8 --model-output $(@D)/009_cmp.model.json --result-output $(@D)/009_cmp.acquisition.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/009_cmp.acquisition.evidence.zst && $(location //extractor:fuzz_model) --acquisition $(@D)/009_cmp.acquisition.json --model $(@D)/009_cmp.model.json --instruction-hex 4839d8 --examples 10000 --max-executions 10000 --stage discover --seconds 1800 --output $(@D)/009_cmp.fuzz.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/009_cmp.fuzz.evidence.zst",
-    exec_properties = {"cpu_count": "1", "memory_mb": "2048"},
+    exec_properties = {
+        "cpu_count": "1",
+        "memory_mb": "2048",
+    },
     tools = [
         "//extractor:acquire_model",
         "//extractor:fuzz_model",
@@ -164,7 +191,10 @@ genrule(
         "010_jne.fuzz.evidence.zst",
     ],
     cmd = "$(location //extractor:acquire_model) --instruction-hex 7500 --model-output $(@D)/010_jne.model.json --result-output $(@D)/010_jne.acquisition.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/010_jne.acquisition.evidence.zst && $(location //extractor:fuzz_model) --acquisition $(@D)/010_jne.acquisition.json --model $(@D)/010_jne.model.json --instruction-hex 7500 --examples 10000 --max-executions 10000 --stage discover --seconds 1800 --output $(@D)/010_jne.fuzz.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/010_jne.fuzz.evidence.zst",
-    exec_properties = {"cpu_count": "1", "memory_mb": "2048"},
+    exec_properties = {
+        "cpu_count": "1",
+        "memory_mb": "2048",
+    },
     tools = [
         "//extractor:acquire_model",
         "//extractor:fuzz_model",
@@ -181,7 +211,10 @@ genrule(
         "011_xor.fuzz.evidence.zst",
     ],
     cmd = "$(location //extractor:acquire_model) --instruction-hex 4831d8 --model-output $(@D)/011_xor.model.json --result-output $(@D)/011_xor.acquisition.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/011_xor.acquisition.evidence.zst && $(location //extractor:fuzz_model) --acquisition $(@D)/011_xor.acquisition.json --model $(@D)/011_xor.model.json --instruction-hex 4831d8 --examples 10000 --max-executions 10000 --stage discover --seconds 1800 --output $(@D)/011_xor.fuzz.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/011_xor.fuzz.evidence.zst",
-    exec_properties = {"cpu_count": "1", "memory_mb": "2048"},
+    exec_properties = {
+        "cpu_count": "1",
+        "memory_mb": "2048",
+    },
     tools = [
         "//extractor:acquire_model",
         "//extractor:fuzz_model",
@@ -198,7 +231,10 @@ genrule(
         "012_ret.fuzz.evidence.zst",
     ],
     cmd = "$(location //extractor:acquire_model) --instruction-hex c3 --model-output $(@D)/012_ret.model.json --result-output $(@D)/012_ret.acquisition.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/012_ret.acquisition.evidence.zst && $(location //extractor:fuzz_model) --acquisition $(@D)/012_ret.acquisition.json --model $(@D)/012_ret.model.json --instruction-hex c3 --examples 10000 --max-executions 10000 --stage discover --seconds 1800 --output $(@D)/012_ret.fuzz.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/012_ret.fuzz.evidence.zst",
-    exec_properties = {"cpu_count": "1", "memory_mb": "2048"},
+    exec_properties = {
+        "cpu_count": "1",
+        "memory_mb": "2048",
+    },
     tools = [
         "//extractor:acquire_model",
         "//extractor:fuzz_model",
@@ -215,7 +251,10 @@ genrule(
         "013_and.fuzz.evidence.zst",
     ],
     cmd = "$(location //extractor:acquire_model) --instruction-hex 4821d8 --model-output $(@D)/013_and.model.json --result-output $(@D)/013_and.acquisition.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/013_and.acquisition.evidence.zst && $(location //extractor:fuzz_model) --acquisition $(@D)/013_and.acquisition.json --model $(@D)/013_and.model.json --instruction-hex 4821d8 --examples 10000 --max-executions 10000 --stage discover --seconds 1800 --output $(@D)/013_and.fuzz.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/013_and.fuzz.evidence.zst",
-    exec_properties = {"cpu_count": "1", "memory_mb": "2048"},
+    exec_properties = {
+        "cpu_count": "1",
+        "memory_mb": "2048",
+    },
     tools = [
         "//extractor:acquire_model",
         "//extractor:fuzz_model",
@@ -232,7 +271,10 @@ genrule(
         "014_movzx.fuzz.evidence.zst",
     ],
     cmd = "$(location //extractor:acquire_model) --instruction-hex 0fb6c3 --model-output $(@D)/014_movzx.model.json --result-output $(@D)/014_movzx.acquisition.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/014_movzx.acquisition.evidence.zst && $(location //extractor:fuzz_model) --acquisition $(@D)/014_movzx.acquisition.json --model $(@D)/014_movzx.model.json --instruction-hex 0fb6c3 --examples 10000 --max-executions 10000 --stage discover --seconds 1800 --output $(@D)/014_movzx.fuzz.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/014_movzx.fuzz.evidence.zst",
-    exec_properties = {"cpu_count": "1", "memory_mb": "2048"},
+    exec_properties = {
+        "cpu_count": "1",
+        "memory_mb": "2048",
+    },
     tools = [
         "//extractor:acquire_model",
         "//extractor:fuzz_model",
@@ -249,7 +291,10 @@ genrule(
         "015_movsd.fuzz.evidence.zst",
     ],
     cmd = "$(location //extractor:acquire_model) --instruction-hex f20f10c1 --model-output $(@D)/015_movsd.model.json --result-output $(@D)/015_movsd.acquisition.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/015_movsd.acquisition.evidence.zst && $(location //extractor:fuzz_model) --acquisition $(@D)/015_movsd.acquisition.json --model $(@D)/015_movsd.model.json --instruction-hex f20f10c1 --examples 10000 --max-executions 10000 --stage discover --seconds 1800 --output $(@D)/015_movsd.fuzz.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/015_movsd.fuzz.evidence.zst",
-    exec_properties = {"cpu_count": "1", "memory_mb": "2048"},
+    exec_properties = {
+        "cpu_count": "1",
+        "memory_mb": "2048",
+    },
     tools = [
         "//extractor:acquire_model",
         "//extractor:fuzz_model",
@@ -266,7 +311,10 @@ genrule(
         "016_rol.fuzz.evidence.zst",
     ],
     cmd = "$(location //extractor:acquire_model) --instruction-hex 48d3c0 --model-output $(@D)/016_rol.model.json --result-output $(@D)/016_rol.acquisition.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/016_rol.acquisition.evidence.zst && $(location //extractor:fuzz_model) --acquisition $(@D)/016_rol.acquisition.json --model $(@D)/016_rol.model.json --instruction-hex 48d3c0 --examples 10000 --max-executions 10000 --stage discover --seconds 1800 --output $(@D)/016_rol.fuzz.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/016_rol.fuzz.evidence.zst",
-    exec_properties = {"cpu_count": "1", "memory_mb": "2048"},
+    exec_properties = {
+        "cpu_count": "1",
+        "memory_mb": "2048",
+    },
     tools = [
         "//extractor:acquire_model",
         "//extractor:fuzz_model",
@@ -283,7 +331,10 @@ genrule(
         "017_sub.fuzz.evidence.zst",
     ],
     cmd = "$(location //extractor:acquire_model) --instruction-hex 4829d8 --model-output $(@D)/017_sub.model.json --result-output $(@D)/017_sub.acquisition.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/017_sub.acquisition.evidence.zst && $(location //extractor:fuzz_model) --acquisition $(@D)/017_sub.acquisition.json --model $(@D)/017_sub.model.json --instruction-hex 4829d8 --examples 10000 --max-executions 10000 --stage discover --seconds 1800 --output $(@D)/017_sub.fuzz.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/017_sub.fuzz.evidence.zst",
-    exec_properties = {"cpu_count": "1", "memory_mb": "2048"},
+    exec_properties = {
+        "cpu_count": "1",
+        "memory_mb": "2048",
+    },
     tools = [
         "//extractor:acquire_model",
         "//extractor:fuzz_model",
@@ -300,7 +351,10 @@ genrule(
         "018_sar.fuzz.evidence.zst",
     ],
     cmd = "$(location //extractor:acquire_model) --instruction-hex 48d3f8 --model-output $(@D)/018_sar.model.json --result-output $(@D)/018_sar.acquisition.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/018_sar.acquisition.evidence.zst && $(location //extractor:fuzz_model) --acquisition $(@D)/018_sar.acquisition.json --model $(@D)/018_sar.model.json --instruction-hex 48d3f8 --examples 10000 --max-executions 10000 --stage discover --seconds 1800 --output $(@D)/018_sar.fuzz.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/018_sar.fuzz.evidence.zst",
-    exec_properties = {"cpu_count": "1", "memory_mb": "2048"},
+    exec_properties = {
+        "cpu_count": "1",
+        "memory_mb": "2048",
+    },
     tools = [
         "//extractor:acquire_model",
         "//extractor:fuzz_model",
@@ -317,7 +371,10 @@ genrule(
         "019_or.fuzz.evidence.zst",
     ],
     cmd = "$(location //extractor:acquire_model) --instruction-hex 4809d8 --model-output $(@D)/019_or.model.json --result-output $(@D)/019_or.acquisition.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/019_or.acquisition.evidence.zst && $(location //extractor:fuzz_model) --acquisition $(@D)/019_or.acquisition.json --model $(@D)/019_or.model.json --instruction-hex 4809d8 --examples 10000 --max-executions 10000 --stage discover --seconds 1800 --output $(@D)/019_or.fuzz.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/019_or.fuzz.evidence.zst",
-    exec_properties = {"cpu_count": "1", "memory_mb": "2048"},
+    exec_properties = {
+        "cpu_count": "1",
+        "memory_mb": "2048",
+    },
     tools = [
         "//extractor:acquire_model",
         "//extractor:fuzz_model",
@@ -334,7 +391,10 @@ genrule(
         "020_movsxd.fuzz.evidence.zst",
     ],
     cmd = "$(location //extractor:acquire_model) --instruction-hex 4863c3 --model-output $(@D)/020_movsxd.model.json --result-output $(@D)/020_movsxd.acquisition.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/020_movsxd.acquisition.evidence.zst && $(location //extractor:fuzz_model) --acquisition $(@D)/020_movsxd.acquisition.json --model $(@D)/020_movsxd.model.json --instruction-hex 4863c3 --examples 10000 --max-executions 10000 --stage discover --seconds 1800 --output $(@D)/020_movsxd.fuzz.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/020_movsxd.fuzz.evidence.zst",
-    exec_properties = {"cpu_count": "1", "memory_mb": "2048"},
+    exec_properties = {
+        "cpu_count": "1",
+        "memory_mb": "2048",
+    },
     tools = [
         "//extractor:acquire_model",
         "//extractor:fuzz_model",
@@ -351,7 +411,10 @@ genrule(
         "021_jbe.fuzz.evidence.zst",
     ],
     cmd = "$(location //extractor:acquire_model) --instruction-hex 7600 --model-output $(@D)/021_jbe.model.json --result-output $(@D)/021_jbe.acquisition.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/021_jbe.acquisition.evidence.zst && $(location //extractor:fuzz_model) --acquisition $(@D)/021_jbe.acquisition.json --model $(@D)/021_jbe.model.json --instruction-hex 7600 --examples 10000 --max-executions 10000 --stage discover --seconds 1800 --output $(@D)/021_jbe.fuzz.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/021_jbe.fuzz.evidence.zst",
-    exec_properties = {"cpu_count": "1", "memory_mb": "2048"},
+    exec_properties = {
+        "cpu_count": "1",
+        "memory_mb": "2048",
+    },
     tools = [
         "//extractor:acquire_model",
         "//extractor:fuzz_model",
@@ -368,7 +431,10 @@ genrule(
         "022_ja.fuzz.evidence.zst",
     ],
     cmd = "$(location //extractor:acquire_model) --instruction-hex 7700 --model-output $(@D)/022_ja.model.json --result-output $(@D)/022_ja.acquisition.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/022_ja.acquisition.evidence.zst && $(location //extractor:fuzz_model) --acquisition $(@D)/022_ja.acquisition.json --model $(@D)/022_ja.model.json --instruction-hex 7700 --examples 10000 --max-executions 10000 --stage discover --seconds 1800 --output $(@D)/022_ja.fuzz.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/022_ja.fuzz.evidence.zst",
-    exec_properties = {"cpu_count": "1", "memory_mb": "2048"},
+    exec_properties = {
+        "cpu_count": "1",
+        "memory_mb": "2048",
+    },
     tools = [
         "//extractor:acquire_model",
         "//extractor:fuzz_model",
@@ -385,7 +451,10 @@ genrule(
         "023_setne.fuzz.evidence.zst",
     ],
     cmd = "$(location //extractor:acquire_model) --instruction-hex 0f95c0 --model-output $(@D)/023_setne.model.json --result-output $(@D)/023_setne.acquisition.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/023_setne.acquisition.evidence.zst && $(location //extractor:fuzz_model) --acquisition $(@D)/023_setne.acquisition.json --model $(@D)/023_setne.model.json --instruction-hex 0f95c0 --examples 10000 --max-executions 10000 --stage discover --seconds 1800 --output $(@D)/023_setne.fuzz.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/023_setne.fuzz.evidence.zst",
-    exec_properties = {"cpu_count": "1", "memory_mb": "2048"},
+    exec_properties = {
+        "cpu_count": "1",
+        "memory_mb": "2048",
+    },
     tools = [
         "//extractor:acquire_model",
         "//extractor:fuzz_model",
@@ -402,7 +471,10 @@ genrule(
         "024_dec.fuzz.evidence.zst",
     ],
     cmd = "$(location //extractor:acquire_model) --instruction-hex 48ffc8 --model-output $(@D)/024_dec.model.json --result-output $(@D)/024_dec.acquisition.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/024_dec.acquisition.evidence.zst && $(location //extractor:fuzz_model) --acquisition $(@D)/024_dec.acquisition.json --model $(@D)/024_dec.model.json --instruction-hex 48ffc8 --examples 10000 --max-executions 10000 --stage discover --seconds 1800 --output $(@D)/024_dec.fuzz.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/024_dec.fuzz.evidence.zst",
-    exec_properties = {"cpu_count": "1", "memory_mb": "2048"},
+    exec_properties = {
+        "cpu_count": "1",
+        "memory_mb": "2048",
+    },
     tools = [
         "//extractor:acquire_model",
         "//extractor:fuzz_model",
@@ -419,7 +491,10 @@ genrule(
         "025_xchg.fuzz.evidence.zst",
     ],
     cmd = "$(location //extractor:acquire_model) --instruction-hex 4893 --model-output $(@D)/025_xchg.model.json --result-output $(@D)/025_xchg.acquisition.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/025_xchg.acquisition.evidence.zst && $(location //extractor:fuzz_model) --acquisition $(@D)/025_xchg.acquisition.json --model $(@D)/025_xchg.model.json --instruction-hex 4893 --examples 10000 --max-executions 10000 --stage discover --seconds 1800 --output $(@D)/025_xchg.fuzz.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/025_xchg.fuzz.evidence.zst",
-    exec_properties = {"cpu_count": "1", "memory_mb": "2048"},
+    exec_properties = {
+        "cpu_count": "1",
+        "memory_mb": "2048",
+    },
     tools = [
         "//extractor:acquire_model",
         "//extractor:fuzz_model",
@@ -436,7 +511,10 @@ genrule(
         "026_jle.fuzz.evidence.zst",
     ],
     cmd = "$(location //extractor:acquire_model) --instruction-hex 7e00 --model-output $(@D)/026_jle.model.json --result-output $(@D)/026_jle.acquisition.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/026_jle.acquisition.evidence.zst && $(location //extractor:fuzz_model) --acquisition $(@D)/026_jle.acquisition.json --model $(@D)/026_jle.model.json --instruction-hex 7e00 --examples 10000 --max-executions 10000 --stage discover --seconds 1800 --output $(@D)/026_jle.fuzz.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/026_jle.fuzz.evidence.zst",
-    exec_properties = {"cpu_count": "1", "memory_mb": "2048"},
+    exec_properties = {
+        "cpu_count": "1",
+        "memory_mb": "2048",
+    },
     tools = [
         "//extractor:acquire_model",
         "//extractor:fuzz_model",
@@ -453,7 +531,10 @@ genrule(
         "027_jb.fuzz.evidence.zst",
     ],
     cmd = "$(location //extractor:acquire_model) --instruction-hex 7200 --model-output $(@D)/027_jb.model.json --result-output $(@D)/027_jb.acquisition.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/027_jb.acquisition.evidence.zst && $(location //extractor:fuzz_model) --acquisition $(@D)/027_jb.acquisition.json --model $(@D)/027_jb.model.json --instruction-hex 7200 --examples 10000 --max-executions 10000 --stage discover --seconds 1800 --output $(@D)/027_jb.fuzz.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/027_jb.fuzz.evidence.zst",
-    exec_properties = {"cpu_count": "1", "memory_mb": "2048"},
+    exec_properties = {
+        "cpu_count": "1",
+        "memory_mb": "2048",
+    },
     tools = [
         "//extractor:acquire_model",
         "//extractor:fuzz_model",
@@ -470,7 +551,10 @@ genrule(
         "028_mulsd.fuzz.evidence.zst",
     ],
     cmd = "$(location //extractor:acquire_model) --instruction-hex f20f59c1 --model-output $(@D)/028_mulsd.model.json --result-output $(@D)/028_mulsd.acquisition.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/028_mulsd.acquisition.evidence.zst && $(location //extractor:fuzz_model) --acquisition $(@D)/028_mulsd.acquisition.json --model $(@D)/028_mulsd.model.json --instruction-hex f20f59c1 --examples 10000 --max-executions 10000 --stage discover --seconds 1800 --output $(@D)/028_mulsd.fuzz.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/028_mulsd.fuzz.evidence.zst",
-    exec_properties = {"cpu_count": "1", "memory_mb": "2048"},
+    exec_properties = {
+        "cpu_count": "1",
+        "memory_mb": "2048",
+    },
     tools = [
         "//extractor:acquire_model",
         "//extractor:fuzz_model",
@@ -487,7 +571,10 @@ genrule(
         "029_jae.fuzz.evidence.zst",
     ],
     cmd = "$(location //extractor:acquire_model) --instruction-hex 7300 --model-output $(@D)/029_jae.model.json --result-output $(@D)/029_jae.acquisition.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/029_jae.acquisition.evidence.zst && $(location //extractor:fuzz_model) --acquisition $(@D)/029_jae.acquisition.json --model $(@D)/029_jae.model.json --instruction-hex 7300 --examples 10000 --max-executions 10000 --stage discover --seconds 1800 --output $(@D)/029_jae.fuzz.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/029_jae.fuzz.evidence.zst",
-    exec_properties = {"cpu_count": "1", "memory_mb": "2048"},
+    exec_properties = {
+        "cpu_count": "1",
+        "memory_mb": "2048",
+    },
     tools = [
         "//extractor:acquire_model",
         "//extractor:fuzz_model",
@@ -504,7 +591,10 @@ genrule(
         "030_addsd.fuzz.evidence.zst",
     ],
     cmd = "$(location //extractor:acquire_model) --instruction-hex f20f58c1 --model-output $(@D)/030_addsd.model.json --result-output $(@D)/030_addsd.acquisition.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/030_addsd.acquisition.evidence.zst && $(location //extractor:fuzz_model) --acquisition $(@D)/030_addsd.acquisition.json --model $(@D)/030_addsd.model.json --instruction-hex f20f58c1 --examples 10000 --max-executions 10000 --stage discover --seconds 1800 --output $(@D)/030_addsd.fuzz.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/030_addsd.fuzz.evidence.zst",
-    exec_properties = {"cpu_count": "1", "memory_mb": "2048"},
+    exec_properties = {
+        "cpu_count": "1",
+        "memory_mb": "2048",
+    },
     tools = [
         "//extractor:acquire_model",
         "//extractor:fuzz_model",
@@ -521,7 +611,10 @@ genrule(
         "031_movapd.fuzz.evidence.zst",
     ],
     cmd = "$(location //extractor:acquire_model) --instruction-hex 660f28c1 --model-output $(@D)/031_movapd.model.json --result-output $(@D)/031_movapd.acquisition.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/031_movapd.acquisition.evidence.zst && $(location //extractor:fuzz_model) --acquisition $(@D)/031_movapd.acquisition.json --model $(@D)/031_movapd.model.json --instruction-hex 660f28c1 --examples 10000 --max-executions 10000 --stage discover --seconds 1800 --output $(@D)/031_movapd.fuzz.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/031_movapd.fuzz.evidence.zst",
-    exec_properties = {"cpu_count": "1", "memory_mb": "2048"},
+    exec_properties = {
+        "cpu_count": "1",
+        "memory_mb": "2048",
+    },
     tools = [
         "//extractor:acquire_model",
         "//extractor:fuzz_model",
@@ -538,7 +631,10 @@ genrule(
         "032_imul.fuzz.evidence.zst",
     ],
     cmd = "$(location //extractor:acquire_model) --instruction-hex 480fafc3 --model-output $(@D)/032_imul.model.json --result-output $(@D)/032_imul.acquisition.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/032_imul.acquisition.evidence.zst && $(location //extractor:fuzz_model) --acquisition $(@D)/032_imul.acquisition.json --model $(@D)/032_imul.model.json --instruction-hex 480fafc3 --examples 10000 --max-executions 10000 --stage discover --seconds 1800 --output $(@D)/032_imul.fuzz.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/032_imul.fuzz.evidence.zst",
-    exec_properties = {"cpu_count": "1", "memory_mb": "2048"},
+    exec_properties = {
+        "cpu_count": "1",
+        "memory_mb": "2048",
+    },
     tools = [
         "//extractor:acquire_model",
         "//extractor:fuzz_model",
@@ -555,7 +651,10 @@ genrule(
         "033_jg.fuzz.evidence.zst",
     ],
     cmd = "$(location //extractor:acquire_model) --instruction-hex 7f00 --model-output $(@D)/033_jg.model.json --result-output $(@D)/033_jg.acquisition.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/033_jg.acquisition.evidence.zst && $(location //extractor:fuzz_model) --acquisition $(@D)/033_jg.acquisition.json --model $(@D)/033_jg.model.json --instruction-hex 7f00 --examples 10000 --max-executions 10000 --stage discover --seconds 1800 --output $(@D)/033_jg.fuzz.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/033_jg.fuzz.evidence.zst",
-    exec_properties = {"cpu_count": "1", "memory_mb": "2048"},
+    exec_properties = {
+        "cpu_count": "1",
+        "memory_mb": "2048",
+    },
     tools = [
         "//extractor:acquire_model",
         "//extractor:fuzz_model",
@@ -572,7 +671,10 @@ genrule(
         "034_ucomisd.fuzz.evidence.zst",
     ],
     cmd = "$(location //extractor:acquire_model) --instruction-hex 660f2ec1 --model-output $(@D)/034_ucomisd.model.json --result-output $(@D)/034_ucomisd.acquisition.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/034_ucomisd.acquisition.evidence.zst && $(location //extractor:fuzz_model) --acquisition $(@D)/034_ucomisd.acquisition.json --model $(@D)/034_ucomisd.model.json --instruction-hex 660f2ec1 --examples 10000 --max-executions 10000 --stage discover --seconds 1800 --output $(@D)/034_ucomisd.fuzz.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/034_ucomisd.fuzz.evidence.zst",
-    exec_properties = {"cpu_count": "1", "memory_mb": "2048"},
+    exec_properties = {
+        "cpu_count": "1",
+        "memory_mb": "2048",
+    },
     tools = [
         "//extractor:acquire_model",
         "//extractor:fuzz_model",
@@ -589,7 +691,10 @@ genrule(
         "035_js.fuzz.evidence.zst",
     ],
     cmd = "$(location //extractor:acquire_model) --instruction-hex 7800 --model-output $(@D)/035_js.model.json --result-output $(@D)/035_js.acquisition.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/035_js.acquisition.evidence.zst && $(location //extractor:fuzz_model) --acquisition $(@D)/035_js.acquisition.json --model $(@D)/035_js.model.json --instruction-hex 7800 --examples 10000 --max-executions 10000 --stage discover --seconds 1800 --output $(@D)/035_js.fuzz.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/035_js.fuzz.evidence.zst",
-    exec_properties = {"cpu_count": "1", "memory_mb": "2048"},
+    exec_properties = {
+        "cpu_count": "1",
+        "memory_mb": "2048",
+    },
     tools = [
         "//extractor:acquire_model",
         "//extractor:fuzz_model",
@@ -606,7 +711,10 @@ genrule(
         "036_pxor.fuzz.evidence.zst",
     ],
     cmd = "$(location //extractor:acquire_model) --instruction-hex 660fefc1 --model-output $(@D)/036_pxor.model.json --result-output $(@D)/036_pxor.acquisition.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/036_pxor.acquisition.evidence.zst && $(location //extractor:fuzz_model) --acquisition $(@D)/036_pxor.acquisition.json --model $(@D)/036_pxor.model.json --instruction-hex 660fefc1 --examples 10000 --max-executions 10000 --stage discover --seconds 1800 --output $(@D)/036_pxor.fuzz.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/036_pxor.fuzz.evidence.zst",
-    exec_properties = {"cpu_count": "1", "memory_mb": "2048"},
+    exec_properties = {
+        "cpu_count": "1",
+        "memory_mb": "2048",
+    },
     tools = [
         "//extractor:acquire_model",
         "//extractor:fuzz_model",
@@ -623,7 +731,10 @@ genrule(
         "037_adc.fuzz.evidence.zst",
     ],
     cmd = "$(location //extractor:acquire_model) --instruction-hex 4811d8 --model-output $(@D)/037_adc.model.json --result-output $(@D)/037_adc.acquisition.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/037_adc.acquisition.evidence.zst && $(location //extractor:fuzz_model) --acquisition $(@D)/037_adc.acquisition.json --model $(@D)/037_adc.model.json --instruction-hex 4811d8 --examples 10000 --max-executions 10000 --stage discover --seconds 1800 --output $(@D)/037_adc.fuzz.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/037_adc.fuzz.evidence.zst",
-    exec_properties = {"cpu_count": "1", "memory_mb": "2048"},
+    exec_properties = {
+        "cpu_count": "1",
+        "memory_mb": "2048",
+    },
     tools = [
         "//extractor:acquire_model",
         "//extractor:fuzz_model",
@@ -640,7 +751,10 @@ genrule(
         "038_shl.fuzz.evidence.zst",
     ],
     cmd = "$(location //extractor:acquire_model) --instruction-hex 48d3e0 --model-output $(@D)/038_shl.model.json --result-output $(@D)/038_shl.acquisition.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/038_shl.acquisition.evidence.zst && $(location //extractor:fuzz_model) --acquisition $(@D)/038_shl.acquisition.json --model $(@D)/038_shl.model.json --instruction-hex 48d3e0 --examples 10000 --max-executions 10000 --stage discover --seconds 1800 --output $(@D)/038_shl.fuzz.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/038_shl.fuzz.evidence.zst",
-    exec_properties = {"cpu_count": "1", "memory_mb": "2048"},
+    exec_properties = {
+        "cpu_count": "1",
+        "memory_mb": "2048",
+    },
     tools = [
         "//extractor:acquire_model",
         "//extractor:fuzz_model",
@@ -657,7 +771,10 @@ genrule(
         "039_movsx.fuzz.evidence.zst",
     ],
     cmd = "$(location //extractor:acquire_model) --instruction-hex 0fbec3 --model-output $(@D)/039_movsx.model.json --result-output $(@D)/039_movsx.acquisition.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/039_movsx.acquisition.evidence.zst && $(location //extractor:fuzz_model) --acquisition $(@D)/039_movsx.acquisition.json --model $(@D)/039_movsx.model.json --instruction-hex 0fbec3 --examples 10000 --max-executions 10000 --stage discover --seconds 1800 --output $(@D)/039_movsx.fuzz.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/039_movsx.fuzz.evidence.zst",
-    exec_properties = {"cpu_count": "1", "memory_mb": "2048"},
+    exec_properties = {
+        "cpu_count": "1",
+        "memory_mb": "2048",
+    },
     tools = [
         "//extractor:acquire_model",
         "//extractor:fuzz_model",
@@ -674,7 +791,10 @@ genrule(
         "040_sete.fuzz.evidence.zst",
     ],
     cmd = "$(location //extractor:acquire_model) --instruction-hex 0f94c0 --model-output $(@D)/040_sete.model.json --result-output $(@D)/040_sete.acquisition.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/040_sete.acquisition.evidence.zst && $(location //extractor:fuzz_model) --acquisition $(@D)/040_sete.acquisition.json --model $(@D)/040_sete.model.json --instruction-hex 0f94c0 --examples 10000 --max-executions 10000 --stage discover --seconds 1800 --output $(@D)/040_sete.fuzz.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/040_sete.fuzz.evidence.zst",
-    exec_properties = {"cpu_count": "1", "memory_mb": "2048"},
+    exec_properties = {
+        "cpu_count": "1",
+        "memory_mb": "2048",
+    },
     tools = [
         "//extractor:acquire_model",
         "//extractor:fuzz_model",
@@ -691,7 +811,10 @@ genrule(
         "041_subsd.fuzz.evidence.zst",
     ],
     cmd = "$(location //extractor:acquire_model) --instruction-hex f20f5cc1 --model-output $(@D)/041_subsd.model.json --result-output $(@D)/041_subsd.acquisition.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/041_subsd.acquisition.evidence.zst && $(location //extractor:fuzz_model) --acquisition $(@D)/041_subsd.acquisition.json --model $(@D)/041_subsd.model.json --instruction-hex f20f5cc1 --examples 10000 --max-executions 10000 --stage discover --seconds 1800 --output $(@D)/041_subsd.fuzz.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/041_subsd.fuzz.evidence.zst",
-    exec_properties = {"cpu_count": "1", "memory_mb": "2048"},
+    exec_properties = {
+        "cpu_count": "1",
+        "memory_mb": "2048",
+    },
     tools = [
         "//extractor:acquire_model",
         "//extractor:fuzz_model",
@@ -708,7 +831,10 @@ genrule(
         "042_cmove.fuzz.evidence.zst",
     ],
     cmd = "$(location //extractor:acquire_model) --instruction-hex 480f44c3 --model-output $(@D)/042_cmove.model.json --result-output $(@D)/042_cmove.acquisition.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/042_cmove.acquisition.evidence.zst && $(location //extractor:fuzz_model) --acquisition $(@D)/042_cmove.acquisition.json --model $(@D)/042_cmove.model.json --instruction-hex 480f44c3 --examples 10000 --max-executions 10000 --stage discover --seconds 1800 --output $(@D)/042_cmove.fuzz.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/042_cmove.fuzz.evidence.zst",
-    exec_properties = {"cpu_count": "1", "memory_mb": "2048"},
+    exec_properties = {
+        "cpu_count": "1",
+        "memory_mb": "2048",
+    },
     tools = [
         "//extractor:acquire_model",
         "//extractor:fuzz_model",
@@ -725,7 +851,10 @@ genrule(
         "043_movaps.fuzz.evidence.zst",
     ],
     cmd = "$(location //extractor:acquire_model) --instruction-hex 0f28c1 --model-output $(@D)/043_movaps.model.json --result-output $(@D)/043_movaps.acquisition.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/043_movaps.acquisition.evidence.zst && $(location //extractor:fuzz_model) --acquisition $(@D)/043_movaps.acquisition.json --model $(@D)/043_movaps.model.json --instruction-hex 0f28c1 --examples 10000 --max-executions 10000 --stage discover --seconds 1800 --output $(@D)/043_movaps.fuzz.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/043_movaps.fuzz.evidence.zst",
-    exec_properties = {"cpu_count": "1", "memory_mb": "2048"},
+    exec_properties = {
+        "cpu_count": "1",
+        "memory_mb": "2048",
+    },
     tools = [
         "//extractor:acquire_model",
         "//extractor:fuzz_model",
@@ -742,7 +871,10 @@ genrule(
         "044_jl.fuzz.evidence.zst",
     ],
     cmd = "$(location //extractor:acquire_model) --instruction-hex 7c00 --model-output $(@D)/044_jl.model.json --result-output $(@D)/044_jl.acquisition.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/044_jl.acquisition.evidence.zst && $(location //extractor:fuzz_model) --acquisition $(@D)/044_jl.acquisition.json --model $(@D)/044_jl.model.json --instruction-hex 7c00 --examples 10000 --max-executions 10000 --stage discover --seconds 1800 --output $(@D)/044_jl.fuzz.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/044_jl.fuzz.evidence.zst",
-    exec_properties = {"cpu_count": "1", "memory_mb": "2048"},
+    exec_properties = {
+        "cpu_count": "1",
+        "memory_mb": "2048",
+    },
     tools = [
         "//extractor:acquire_model",
         "//extractor:fuzz_model",
@@ -759,7 +891,10 @@ genrule(
         "045_cmovne.fuzz.evidence.zst",
     ],
     cmd = "$(location //extractor:acquire_model) --instruction-hex 480f45c3 --model-output $(@D)/045_cmovne.model.json --result-output $(@D)/045_cmovne.acquisition.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/045_cmovne.acquisition.evidence.zst && $(location //extractor:fuzz_model) --acquisition $(@D)/045_cmovne.acquisition.json --model $(@D)/045_cmovne.model.json --instruction-hex 480f45c3 --examples 10000 --max-executions 10000 --stage discover --seconds 1800 --output $(@D)/045_cmovne.fuzz.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/045_cmovne.fuzz.evidence.zst",
-    exec_properties = {"cpu_count": "1", "memory_mb": "2048"},
+    exec_properties = {
+        "cpu_count": "1",
+        "memory_mb": "2048",
+    },
     tools = [
         "//extractor:acquire_model",
         "//extractor:fuzz_model",
@@ -776,7 +911,10 @@ genrule(
         "046_movss.fuzz.evidence.zst",
     ],
     cmd = "$(location //extractor:acquire_model) --instruction-hex f30f10c1 --model-output $(@D)/046_movss.model.json --result-output $(@D)/046_movss.acquisition.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/046_movss.acquisition.evidence.zst && $(location //extractor:fuzz_model) --acquisition $(@D)/046_movss.acquisition.json --model $(@D)/046_movss.model.json --instruction-hex f30f10c1 --examples 10000 --max-executions 10000 --stage discover --seconds 1800 --output $(@D)/046_movss.fuzz.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/046_movss.fuzz.evidence.zst",
-    exec_properties = {"cpu_count": "1", "memory_mb": "2048"},
+    exec_properties = {
+        "cpu_count": "1",
+        "memory_mb": "2048",
+    },
     tools = [
         "//extractor:acquire_model",
         "//extractor:fuzz_model",
@@ -793,7 +931,10 @@ genrule(
         "047_jge.fuzz.evidence.zst",
     ],
     cmd = "$(location //extractor:acquire_model) --instruction-hex 7d00 --model-output $(@D)/047_jge.model.json --result-output $(@D)/047_jge.acquisition.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/047_jge.acquisition.evidence.zst && $(location //extractor:fuzz_model) --acquisition $(@D)/047_jge.acquisition.json --model $(@D)/047_jge.model.json --instruction-hex 7d00 --examples 10000 --max-executions 10000 --stage discover --seconds 1800 --output $(@D)/047_jge.fuzz.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/047_jge.fuzz.evidence.zst",
-    exec_properties = {"cpu_count": "1", "memory_mb": "2048"},
+    exec_properties = {
+        "cpu_count": "1",
+        "memory_mb": "2048",
+    },
     tools = [
         "//extractor:acquire_model",
         "//extractor:fuzz_model",
@@ -810,7 +951,10 @@ genrule(
         "048_cvtsi2sd.fuzz.evidence.zst",
     ],
     cmd = "$(location //extractor:acquire_model) --instruction-hex f2480f2ac0 --model-output $(@D)/048_cvtsi2sd.model.json --result-output $(@D)/048_cvtsi2sd.acquisition.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/048_cvtsi2sd.acquisition.evidence.zst && $(location //extractor:fuzz_model) --acquisition $(@D)/048_cvtsi2sd.acquisition.json --model $(@D)/048_cvtsi2sd.model.json --instruction-hex f2480f2ac0 --examples 10000 --max-executions 10000 --stage discover --seconds 1800 --output $(@D)/048_cvtsi2sd.fuzz.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/048_cvtsi2sd.fuzz.evidence.zst",
-    exec_properties = {"cpu_count": "1", "memory_mb": "2048"},
+    exec_properties = {
+        "cpu_count": "1",
+        "memory_mb": "2048",
+    },
     tools = [
         "//extractor:acquire_model",
         "//extractor:fuzz_model",
@@ -827,7 +971,10 @@ genrule(
         "049_ud2.fuzz.evidence.zst",
     ],
     cmd = "$(location //extractor:acquire_model) --instruction-hex 0f0b --model-output $(@D)/049_ud2.model.json --result-output $(@D)/049_ud2.acquisition.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/049_ud2.acquisition.evidence.zst && $(location //extractor:fuzz_model) --acquisition $(@D)/049_ud2.acquisition.json --model $(@D)/049_ud2.model.json --instruction-hex 0f0b --examples 10000 --max-executions 10000 --stage discover --seconds 1800 --output $(@D)/049_ud2.fuzz.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/049_ud2.fuzz.evidence.zst",
-    exec_properties = {"cpu_count": "1", "memory_mb": "2048"},
+    exec_properties = {
+        "cpu_count": "1",
+        "memory_mb": "2048",
+    },
     tools = [
         "//extractor:acquire_model",
         "//extractor:fuzz_model",
@@ -844,7 +991,10 @@ genrule(
         "050_div.fuzz.evidence.zst",
     ],
     cmd = "$(location //extractor:acquire_model) --instruction-hex 48f7f3 --model-output $(@D)/050_div.model.json --result-output $(@D)/050_div.acquisition.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/050_div.acquisition.evidence.zst && $(location //extractor:fuzz_model) --acquisition $(@D)/050_div.acquisition.json --model $(@D)/050_div.model.json --instruction-hex 48f7f3 --examples 10000 --max-executions 10000 --stage discover --seconds 1800 --output $(@D)/050_div.fuzz.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/050_div.fuzz.evidence.zst",
-    exec_properties = {"cpu_count": "1", "memory_mb": "2048"},
+    exec_properties = {
+        "cpu_count": "1",
+        "memory_mb": "2048",
+    },
     tools = [
         "//extractor:acquire_model",
         "//extractor:fuzz_model",
@@ -861,7 +1011,10 @@ genrule(
         "051_cvttsd2si.fuzz.evidence.zst",
     ],
     cmd = "$(location //extractor:acquire_model) --instruction-hex f2480f2cc0 --model-output $(@D)/051_cvttsd2si.model.json --result-output $(@D)/051_cvttsd2si.acquisition.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/051_cvttsd2si.acquisition.evidence.zst && $(location //extractor:fuzz_model) --acquisition $(@D)/051_cvttsd2si.acquisition.json --model $(@D)/051_cvttsd2si.model.json --instruction-hex f2480f2cc0 --examples 10000 --max-executions 10000 --stage discover --seconds 1800 --output $(@D)/051_cvttsd2si.fuzz.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/051_cvttsd2si.fuzz.evidence.zst",
-    exec_properties = {"cpu_count": "1", "memory_mb": "2048"},
+    exec_properties = {
+        "cpu_count": "1",
+        "memory_mb": "2048",
+    },
     tools = [
         "//extractor:acquire_model",
         "//extractor:fuzz_model",
@@ -878,7 +1031,10 @@ genrule(
         "052_cdqe.fuzz.evidence.zst",
     ],
     cmd = "$(location //extractor:acquire_model) --instruction-hex 4898 --model-output $(@D)/052_cdqe.model.json --result-output $(@D)/052_cdqe.acquisition.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/052_cdqe.acquisition.evidence.zst && $(location //extractor:fuzz_model) --acquisition $(@D)/052_cdqe.acquisition.json --model $(@D)/052_cdqe.model.json --instruction-hex 4898 --examples 10000 --max-executions 10000 --stage discover --seconds 1800 --output $(@D)/052_cdqe.fuzz.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/052_cdqe.fuzz.evidence.zst",
-    exec_properties = {"cpu_count": "1", "memory_mb": "2048"},
+    exec_properties = {
+        "cpu_count": "1",
+        "memory_mb": "2048",
+    },
     tools = [
         "//extractor:acquire_model",
         "//extractor:fuzz_model",
@@ -895,7 +1051,10 @@ genrule(
         "053_mul.fuzz.evidence.zst",
     ],
     cmd = "$(location //extractor:acquire_model) --instruction-hex 48f7e3 --model-output $(@D)/053_mul.model.json --result-output $(@D)/053_mul.acquisition.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/053_mul.acquisition.evidence.zst && $(location //extractor:fuzz_model) --acquisition $(@D)/053_mul.acquisition.json --model $(@D)/053_mul.model.json --instruction-hex 48f7e3 --examples 10000 --max-executions 10000 --stage discover --seconds 1800 --output $(@D)/053_mul.fuzz.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/053_mul.fuzz.evidence.zst",
-    exec_properties = {"cpu_count": "1", "memory_mb": "2048"},
+    exec_properties = {
+        "cpu_count": "1",
+        "memory_mb": "2048",
+    },
     tools = [
         "//extractor:acquire_model",
         "//extractor:fuzz_model",
@@ -912,7 +1071,10 @@ genrule(
         "054_sbb.fuzz.evidence.zst",
     ],
     cmd = "$(location //extractor:acquire_model) --instruction-hex 4819d8 --model-output $(@D)/054_sbb.model.json --result-output $(@D)/054_sbb.acquisition.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/054_sbb.acquisition.evidence.zst && $(location //extractor:fuzz_model) --acquisition $(@D)/054_sbb.acquisition.json --model $(@D)/054_sbb.model.json --instruction-hex 4819d8 --examples 10000 --max-executions 10000 --stage discover --seconds 1800 --output $(@D)/054_sbb.fuzz.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/054_sbb.fuzz.evidence.zst",
-    exec_properties = {"cpu_count": "1", "memory_mb": "2048"},
+    exec_properties = {
+        "cpu_count": "1",
+        "memory_mb": "2048",
+    },
     tools = [
         "//extractor:acquire_model",
         "//extractor:fuzz_model",
@@ -929,7 +1091,10 @@ genrule(
         "055_jns.fuzz.evidence.zst",
     ],
     cmd = "$(location //extractor:acquire_model) --instruction-hex 7900 --model-output $(@D)/055_jns.model.json --result-output $(@D)/055_jns.acquisition.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/055_jns.acquisition.evidence.zst && $(location //extractor:fuzz_model) --acquisition $(@D)/055_jns.acquisition.json --model $(@D)/055_jns.model.json --instruction-hex 7900 --examples 10000 --max-executions 10000 --stage discover --seconds 1800 --output $(@D)/055_jns.fuzz.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/055_jns.fuzz.evidence.zst",
-    exec_properties = {"cpu_count": "1", "memory_mb": "2048"},
+    exec_properties = {
+        "cpu_count": "1",
+        "memory_mb": "2048",
+    },
     tools = [
         "//extractor:acquire_model",
         "//extractor:fuzz_model",
@@ -946,7 +1111,10 @@ genrule(
         "056_bt.fuzz.evidence.zst",
     ],
     cmd = "$(location //extractor:acquire_model) --instruction-hex 480fa3d8 --model-output $(@D)/056_bt.model.json --result-output $(@D)/056_bt.acquisition.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/056_bt.acquisition.evidence.zst && $(location //extractor:fuzz_model) --acquisition $(@D)/056_bt.acquisition.json --model $(@D)/056_bt.model.json --instruction-hex 480fa3d8 --examples 10000 --max-executions 10000 --stage discover --seconds 1800 --output $(@D)/056_bt.fuzz.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/056_bt.fuzz.evidence.zst",
-    exec_properties = {"cpu_count": "1", "memory_mb": "2048"},
+    exec_properties = {
+        "cpu_count": "1",
+        "memory_mb": "2048",
+    },
     tools = [
         "//extractor:acquire_model",
         "//extractor:fuzz_model",
@@ -963,7 +1131,10 @@ genrule(
         "057_xorpd.fuzz.evidence.zst",
     ],
     cmd = "$(location //extractor:acquire_model) --instruction-hex 660f57c1 --model-output $(@D)/057_xorpd.model.json --result-output $(@D)/057_xorpd.acquisition.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/057_xorpd.acquisition.evidence.zst && $(location //extractor:fuzz_model) --acquisition $(@D)/057_xorpd.acquisition.json --model $(@D)/057_xorpd.model.json --instruction-hex 660f57c1 --examples 10000 --max-executions 10000 --stage discover --seconds 1800 --output $(@D)/057_xorpd.fuzz.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/057_xorpd.fuzz.evidence.zst",
-    exec_properties = {"cpu_count": "1", "memory_mb": "2048"},
+    exec_properties = {
+        "cpu_count": "1",
+        "memory_mb": "2048",
+    },
     tools = [
         "//extractor:acquire_model",
         "//extractor:fuzz_model",
@@ -980,7 +1151,10 @@ genrule(
         "058_inc.fuzz.evidence.zst",
     ],
     cmd = "$(location //extractor:acquire_model) --instruction-hex 48ffc0 --model-output $(@D)/058_inc.model.json --result-output $(@D)/058_inc.acquisition.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/058_inc.acquisition.evidence.zst && $(location //extractor:fuzz_model) --acquisition $(@D)/058_inc.acquisition.json --model $(@D)/058_inc.model.json --instruction-hex 48ffc0 --examples 10000 --max-executions 10000 --stage discover --seconds 1800 --output $(@D)/058_inc.fuzz.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/058_inc.fuzz.evidence.zst",
-    exec_properties = {"cpu_count": "1", "memory_mb": "2048"},
+    exec_properties = {
+        "cpu_count": "1",
+        "memory_mb": "2048",
+    },
     tools = [
         "//extractor:acquire_model",
         "//extractor:fuzz_model",
@@ -997,7 +1171,10 @@ genrule(
         "059_neg.fuzz.evidence.zst",
     ],
     cmd = "$(location //extractor:acquire_model) --instruction-hex 48f7d8 --model-output $(@D)/059_neg.model.json --result-output $(@D)/059_neg.acquisition.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/059_neg.acquisition.evidence.zst && $(location //extractor:fuzz_model) --acquisition $(@D)/059_neg.acquisition.json --model $(@D)/059_neg.model.json --instruction-hex 48f7d8 --examples 10000 --max-executions 10000 --stage discover --seconds 1800 --output $(@D)/059_neg.fuzz.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/059_neg.fuzz.evidence.zst",
-    exec_properties = {"cpu_count": "1", "memory_mb": "2048"},
+    exec_properties = {
+        "cpu_count": "1",
+        "memory_mb": "2048",
+    },
     tools = [
         "//extractor:acquire_model",
         "//extractor:fuzz_model",
@@ -1014,7 +1191,10 @@ genrule(
         "060_divsd.fuzz.evidence.zst",
     ],
     cmd = "$(location //extractor:acquire_model) --instruction-hex f20f5ec1 --model-output $(@D)/060_divsd.model.json --result-output $(@D)/060_divsd.acquisition.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/060_divsd.acquisition.evidence.zst && $(location //extractor:fuzz_model) --acquisition $(@D)/060_divsd.acquisition.json --model $(@D)/060_divsd.model.json --instruction-hex f20f5ec1 --examples 10000 --max-executions 10000 --stage discover --seconds 1800 --output $(@D)/060_divsd.fuzz.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/060_divsd.fuzz.evidence.zst",
-    exec_properties = {"cpu_count": "1", "memory_mb": "2048"},
+    exec_properties = {
+        "cpu_count": "1",
+        "memory_mb": "2048",
+    },
     tools = [
         "//extractor:acquire_model",
         "//extractor:fuzz_model",
@@ -1031,7 +1211,10 @@ genrule(
         "061_jp.fuzz.evidence.zst",
     ],
     cmd = "$(location //extractor:acquire_model) --instruction-hex 7a00 --model-output $(@D)/061_jp.model.json --result-output $(@D)/061_jp.acquisition.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/061_jp.acquisition.evidence.zst && $(location //extractor:fuzz_model) --acquisition $(@D)/061_jp.acquisition.json --model $(@D)/061_jp.model.json --instruction-hex 7a00 --examples 10000 --max-executions 10000 --stage discover --seconds 1800 --output $(@D)/061_jp.fuzz.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/061_jp.fuzz.evidence.zst",
-    exec_properties = {"cpu_count": "1", "memory_mb": "2048"},
+    exec_properties = {
+        "cpu_count": "1",
+        "memory_mb": "2048",
+    },
     tools = [
         "//extractor:acquire_model",
         "//extractor:fuzz_model",
@@ -1048,7 +1231,10 @@ genrule(
         "062_shr.fuzz.evidence.zst",
     ],
     cmd = "$(location //extractor:acquire_model) --instruction-hex 48d3e8 --model-output $(@D)/062_shr.model.json --result-output $(@D)/062_shr.acquisition.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/062_shr.acquisition.evidence.zst && $(location //extractor:fuzz_model) --acquisition $(@D)/062_shr.acquisition.json --model $(@D)/062_shr.model.json --instruction-hex 48d3e8 --examples 10000 --max-executions 10000 --stage discover --seconds 1800 --output $(@D)/062_shr.fuzz.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/062_shr.fuzz.evidence.zst",
-    exec_properties = {"cpu_count": "1", "memory_mb": "2048"},
+    exec_properties = {
+        "cpu_count": "1",
+        "memory_mb": "2048",
+    },
     tools = [
         "//extractor:acquire_model",
         "//extractor:fuzz_model",
@@ -1065,7 +1251,10 @@ genrule(
         "063_mulss.fuzz.evidence.zst",
     ],
     cmd = "$(location //extractor:acquire_model) --instruction-hex f30f59c1 --model-output $(@D)/063_mulss.model.json --result-output $(@D)/063_mulss.acquisition.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/063_mulss.acquisition.evidence.zst && $(location //extractor:fuzz_model) --acquisition $(@D)/063_mulss.acquisition.json --model $(@D)/063_mulss.model.json --instruction-hex f30f59c1 --examples 10000 --max-executions 10000 --stage discover --seconds 1800 --output $(@D)/063_mulss.fuzz.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/063_mulss.fuzz.evidence.zst",
-    exec_properties = {"cpu_count": "1", "memory_mb": "2048"},
+    exec_properties = {
+        "cpu_count": "1",
+        "memory_mb": "2048",
+    },
     tools = [
         "//extractor:acquire_model",
         "//extractor:fuzz_model",
@@ -1082,7 +1271,10 @@ genrule(
         "064_cmpxchg.fuzz.evidence.zst",
     ],
     cmd = "$(location //extractor:acquire_model) --instruction-hex 480fb1d8 --model-output $(@D)/064_cmpxchg.model.json --result-output $(@D)/064_cmpxchg.acquisition.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/064_cmpxchg.acquisition.evidence.zst && $(location //extractor:fuzz_model) --acquisition $(@D)/064_cmpxchg.acquisition.json --model $(@D)/064_cmpxchg.model.json --instruction-hex 480fb1d8 --examples 10000 --max-executions 10000 --stage discover --seconds 1800 --output $(@D)/064_cmpxchg.fuzz.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/064_cmpxchg.fuzz.evidence.zst",
-    exec_properties = {"cpu_count": "1", "memory_mb": "2048"},
+    exec_properties = {
+        "cpu_count": "1",
+        "memory_mb": "2048",
+    },
     tools = [
         "//extractor:acquire_model",
         "//extractor:fuzz_model",
@@ -1099,7 +1291,10 @@ genrule(
         "065_int3.fuzz.evidence.zst",
     ],
     cmd = "$(location //extractor:acquire_model) --instruction-hex cc --model-output $(@D)/065_int3.model.json --result-output $(@D)/065_int3.acquisition.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/065_int3.acquisition.evidence.zst && $(location //extractor:fuzz_model) --acquisition $(@D)/065_int3.acquisition.json --model $(@D)/065_int3.model.json --instruction-hex cc --examples 10000 --max-executions 10000 --stage discover --seconds 1800 --output $(@D)/065_int3.fuzz.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/065_int3.fuzz.evidence.zst",
-    exec_properties = {"cpu_count": "1", "memory_mb": "2048"},
+    exec_properties = {
+        "cpu_count": "1",
+        "memory_mb": "2048",
+    },
     tools = [
         "//extractor:acquire_model",
         "//extractor:fuzz_model",
@@ -1116,7 +1311,10 @@ genrule(
         "066_cmovle.fuzz.evidence.zst",
     ],
     cmd = "$(location //extractor:acquire_model) --instruction-hex 480f4ec3 --model-output $(@D)/066_cmovle.model.json --result-output $(@D)/066_cmovle.acquisition.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/066_cmovle.acquisition.evidence.zst && $(location //extractor:fuzz_model) --acquisition $(@D)/066_cmovle.acquisition.json --model $(@D)/066_cmovle.model.json --instruction-hex 480f4ec3 --examples 10000 --max-executions 10000 --stage discover --seconds 1800 --output $(@D)/066_cmovle.fuzz.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/066_cmovle.fuzz.evidence.zst",
-    exec_properties = {"cpu_count": "1", "memory_mb": "2048"},
+    exec_properties = {
+        "cpu_count": "1",
+        "memory_mb": "2048",
+    },
     tools = [
         "//extractor:acquire_model",
         "//extractor:fuzz_model",
@@ -1133,7 +1331,10 @@ genrule(
         "067_cmovb.fuzz.evidence.zst",
     ],
     cmd = "$(location //extractor:acquire_model) --instruction-hex 480f42c3 --model-output $(@D)/067_cmovb.model.json --result-output $(@D)/067_cmovb.acquisition.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/067_cmovb.acquisition.evidence.zst && $(location //extractor:fuzz_model) --acquisition $(@D)/067_cmovb.acquisition.json --model $(@D)/067_cmovb.model.json --instruction-hex 480f42c3 --examples 10000 --max-executions 10000 --stage discover --seconds 1800 --output $(@D)/067_cmovb.fuzz.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/067_cmovb.fuzz.evidence.zst",
-    exec_properties = {"cpu_count": "1", "memory_mb": "2048"},
+    exec_properties = {
+        "cpu_count": "1",
+        "memory_mb": "2048",
+    },
     tools = [
         "//extractor:acquire_model",
         "//extractor:fuzz_model",
@@ -1150,7 +1351,10 @@ genrule(
         "068_cmovge.fuzz.evidence.zst",
     ],
     cmd = "$(location //extractor:acquire_model) --instruction-hex 480f4dc3 --model-output $(@D)/068_cmovge.model.json --result-output $(@D)/068_cmovge.acquisition.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/068_cmovge.acquisition.evidence.zst && $(location //extractor:fuzz_model) --acquisition $(@D)/068_cmovge.acquisition.json --model $(@D)/068_cmovge.model.json --instruction-hex 480f4dc3 --examples 10000 --max-executions 10000 --stage discover --seconds 1800 --output $(@D)/068_cmovge.fuzz.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/068_cmovge.fuzz.evidence.zst",
-    exec_properties = {"cpu_count": "1", "memory_mb": "2048"},
+    exec_properties = {
+        "cpu_count": "1",
+        "memory_mb": "2048",
+    },
     tools = [
         "//extractor:acquire_model",
         "//extractor:fuzz_model",
@@ -1167,7 +1371,10 @@ genrule(
         "069_cmovbe.fuzz.evidence.zst",
     ],
     cmd = "$(location //extractor:acquire_model) --instruction-hex 480f46c3 --model-output $(@D)/069_cmovbe.model.json --result-output $(@D)/069_cmovbe.acquisition.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/069_cmovbe.acquisition.evidence.zst && $(location //extractor:fuzz_model) --acquisition $(@D)/069_cmovbe.acquisition.json --model $(@D)/069_cmovbe.model.json --instruction-hex 480f46c3 --examples 10000 --max-executions 10000 --stage discover --seconds 1800 --output $(@D)/069_cmovbe.fuzz.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/069_cmovbe.fuzz.evidence.zst",
-    exec_properties = {"cpu_count": "1", "memory_mb": "2048"},
+    exec_properties = {
+        "cpu_count": "1",
+        "memory_mb": "2048",
+    },
     tools = [
         "//extractor:acquire_model",
         "//extractor:fuzz_model",
@@ -1184,7 +1391,10 @@ genrule(
         "070_setbe.fuzz.evidence.zst",
     ],
     cmd = "$(location //extractor:acquire_model) --instruction-hex 0f96c0 --model-output $(@D)/070_setbe.model.json --result-output $(@D)/070_setbe.acquisition.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/070_setbe.acquisition.evidence.zst && $(location //extractor:fuzz_model) --acquisition $(@D)/070_setbe.acquisition.json --model $(@D)/070_setbe.model.json --instruction-hex 0f96c0 --examples 10000 --max-executions 10000 --stage discover --seconds 1800 --output $(@D)/070_setbe.fuzz.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/070_setbe.fuzz.evidence.zst",
-    exec_properties = {"cpu_count": "1", "memory_mb": "2048"},
+    exec_properties = {
+        "cpu_count": "1",
+        "memory_mb": "2048",
+    },
     tools = [
         "//extractor:acquire_model",
         "//extractor:fuzz_model",
@@ -1201,7 +1411,10 @@ genrule(
         "071_cmovae.fuzz.evidence.zst",
     ],
     cmd = "$(location //extractor:acquire_model) --instruction-hex 480f43c3 --model-output $(@D)/071_cmovae.model.json --result-output $(@D)/071_cmovae.acquisition.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/071_cmovae.acquisition.evidence.zst && $(location //extractor:fuzz_model) --acquisition $(@D)/071_cmovae.acquisition.json --model $(@D)/071_cmovae.model.json --instruction-hex 480f43c3 --examples 10000 --max-executions 10000 --stage discover --seconds 1800 --output $(@D)/071_cmovae.fuzz.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/071_cmovae.fuzz.evidence.zst",
-    exec_properties = {"cpu_count": "1", "memory_mb": "2048"},
+    exec_properties = {
+        "cpu_count": "1",
+        "memory_mb": "2048",
+    },
     tools = [
         "//extractor:acquire_model",
         "//extractor:fuzz_model",
@@ -1218,7 +1431,10 @@ genrule(
         "072_clc.fuzz.evidence.zst",
     ],
     cmd = "$(location //extractor:acquire_model) --instruction-hex f8 --model-output $(@D)/072_clc.model.json --result-output $(@D)/072_clc.acquisition.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/072_clc.acquisition.evidence.zst && $(location //extractor:fuzz_model) --acquisition $(@D)/072_clc.acquisition.json --model $(@D)/072_clc.model.json --instruction-hex f8 --examples 10000 --max-executions 10000 --stage discover --seconds 1800 --output $(@D)/072_clc.fuzz.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/072_clc.fuzz.evidence.zst",
-    exec_properties = {"cpu_count": "1", "memory_mb": "2048"},
+    exec_properties = {
+        "cpu_count": "1",
+        "memory_mb": "2048",
+    },
     tools = [
         "//extractor:acquire_model",
         "//extractor:fuzz_model",
@@ -1235,7 +1451,10 @@ genrule(
         "073_cmovg.fuzz.evidence.zst",
     ],
     cmd = "$(location //extractor:acquire_model) --instruction-hex 480f4fc3 --model-output $(@D)/073_cmovg.model.json --result-output $(@D)/073_cmovg.acquisition.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/073_cmovg.acquisition.evidence.zst && $(location //extractor:fuzz_model) --acquisition $(@D)/073_cmovg.acquisition.json --model $(@D)/073_cmovg.model.json --instruction-hex 480f4fc3 --examples 10000 --max-executions 10000 --stage discover --seconds 1800 --output $(@D)/073_cmovg.fuzz.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/073_cmovg.fuzz.evidence.zst",
-    exec_properties = {"cpu_count": "1", "memory_mb": "2048"},
+    exec_properties = {
+        "cpu_count": "1",
+        "memory_mb": "2048",
+    },
     tools = [
         "//extractor:acquire_model",
         "//extractor:fuzz_model",
@@ -1252,7 +1471,10 @@ genrule(
         "074_addss.fuzz.evidence.zst",
     ],
     cmd = "$(location //extractor:acquire_model) --instruction-hex f30f58c1 --model-output $(@D)/074_addss.model.json --result-output $(@D)/074_addss.acquisition.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/074_addss.acquisition.evidence.zst && $(location //extractor:fuzz_model) --acquisition $(@D)/074_addss.acquisition.json --model $(@D)/074_addss.model.json --instruction-hex f30f58c1 --examples 10000 --max-executions 10000 --stage discover --seconds 1800 --output $(@D)/074_addss.fuzz.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/074_addss.fuzz.evidence.zst",
-    exec_properties = {"cpu_count": "1", "memory_mb": "2048"},
+    exec_properties = {
+        "cpu_count": "1",
+        "memory_mb": "2048",
+    },
     tools = [
         "//extractor:acquire_model",
         "//extractor:fuzz_model",
@@ -1269,7 +1491,10 @@ genrule(
         "075_stos.fuzz.evidence.zst",
     ],
     cmd = "$(location //extractor:acquire_model) --instruction-hex f348ab --model-output $(@D)/075_stos.model.json --result-output $(@D)/075_stos.acquisition.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/075_stos.acquisition.evidence.zst && $(location //extractor:fuzz_model) --acquisition $(@D)/075_stos.acquisition.json --model $(@D)/075_stos.model.json --instruction-hex f348ab --examples 10000 --max-executions 10000 --stage discover --seconds 1800 --output $(@D)/075_stos.fuzz.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/075_stos.fuzz.evidence.zst",
-    exec_properties = {"cpu_count": "1", "memory_mb": "2048"},
+    exec_properties = {
+        "cpu_count": "1",
+        "memory_mb": "2048",
+    },
     tools = [
         "//extractor:acquire_model",
         "//extractor:fuzz_model",
@@ -1286,7 +1511,10 @@ genrule(
         "076_cmovs.fuzz.evidence.zst",
     ],
     cmd = "$(location //extractor:acquire_model) --instruction-hex 480f48c3 --model-output $(@D)/076_cmovs.model.json --result-output $(@D)/076_cmovs.acquisition.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/076_cmovs.acquisition.evidence.zst && $(location //extractor:fuzz_model) --acquisition $(@D)/076_cmovs.acquisition.json --model $(@D)/076_cmovs.model.json --instruction-hex 480f48c3 --examples 10000 --max-executions 10000 --stage discover --seconds 1800 --output $(@D)/076_cmovs.fuzz.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/076_cmovs.fuzz.evidence.zst",
-    exec_properties = {"cpu_count": "1", "memory_mb": "2048"},
+    exec_properties = {
+        "cpu_count": "1",
+        "memory_mb": "2048",
+    },
     tools = [
         "//extractor:acquire_model",
         "//extractor:fuzz_model",
@@ -1303,7 +1531,10 @@ genrule(
         "077_xadd.fuzz.evidence.zst",
     ],
     cmd = "$(location //extractor:acquire_model) --instruction-hex 480fc1d8 --model-output $(@D)/077_xadd.model.json --result-output $(@D)/077_xadd.acquisition.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/077_xadd.acquisition.evidence.zst && $(location //extractor:fuzz_model) --acquisition $(@D)/077_xadd.acquisition.json --model $(@D)/077_xadd.model.json --instruction-hex 480fc1d8 --examples 10000 --max-executions 10000 --stage discover --seconds 1800 --output $(@D)/077_xadd.fuzz.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/077_xadd.fuzz.evidence.zst",
-    exec_properties = {"cpu_count": "1", "memory_mb": "2048"},
+    exec_properties = {
+        "cpu_count": "1",
+        "memory_mb": "2048",
+    },
     tools = [
         "//extractor:acquire_model",
         "//extractor:fuzz_model",
@@ -1320,7 +1551,10 @@ genrule(
         "078_movdqa.fuzz.evidence.zst",
     ],
     cmd = "$(location //extractor:acquire_model) --instruction-hex 660f6fc1 --model-output $(@D)/078_movdqa.model.json --result-output $(@D)/078_movdqa.acquisition.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/078_movdqa.acquisition.evidence.zst && $(location //extractor:fuzz_model) --acquisition $(@D)/078_movdqa.acquisition.json --model $(@D)/078_movdqa.model.json --instruction-hex 660f6fc1 --examples 10000 --max-executions 10000 --stage discover --seconds 1800 --output $(@D)/078_movdqa.fuzz.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/078_movdqa.fuzz.evidence.zst",
-    exec_properties = {"cpu_count": "1", "memory_mb": "2048"},
+    exec_properties = {
+        "cpu_count": "1",
+        "memory_mb": "2048",
+    },
     tools = [
         "//extractor:acquire_model",
         "//extractor:fuzz_model",
@@ -1337,7 +1571,10 @@ genrule(
         "079_cmps.fuzz.evidence.zst",
     ],
     cmd = "$(location //extractor:acquire_model) --instruction-hex f348a7 --model-output $(@D)/079_cmps.model.json --result-output $(@D)/079_cmps.acquisition.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/079_cmps.acquisition.evidence.zst && $(location //extractor:fuzz_model) --acquisition $(@D)/079_cmps.acquisition.json --model $(@D)/079_cmps.model.json --instruction-hex f348a7 --examples 10000 --max-executions 10000 --stage discover --seconds 1800 --output $(@D)/079_cmps.fuzz.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/079_cmps.fuzz.evidence.zst",
-    exec_properties = {"cpu_count": "1", "memory_mb": "2048"},
+    exec_properties = {
+        "cpu_count": "1",
+        "memory_mb": "2048",
+    },
     tools = [
         "//extractor:acquire_model",
         "//extractor:fuzz_model",
@@ -1354,7 +1591,10 @@ genrule(
         "080_setg.fuzz.evidence.zst",
     ],
     cmd = "$(location //extractor:acquire_model) --instruction-hex 0f9fc0 --model-output $(@D)/080_setg.model.json --result-output $(@D)/080_setg.acquisition.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/080_setg.acquisition.evidence.zst && $(location //extractor:fuzz_model) --acquisition $(@D)/080_setg.acquisition.json --model $(@D)/080_setg.model.json --instruction-hex 0f9fc0 --examples 10000 --max-executions 10000 --stage discover --seconds 1800 --output $(@D)/080_setg.fuzz.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/080_setg.fuzz.evidence.zst",
-    exec_properties = {"cpu_count": "1", "memory_mb": "2048"},
+    exec_properties = {
+        "cpu_count": "1",
+        "memory_mb": "2048",
+    },
     tools = [
         "//extractor:acquire_model",
         "//extractor:fuzz_model",
@@ -1371,7 +1611,10 @@ genrule(
         "081_cmova.fuzz.evidence.zst",
     ],
     cmd = "$(location //extractor:acquire_model) --instruction-hex 480f47c3 --model-output $(@D)/081_cmova.model.json --result-output $(@D)/081_cmova.acquisition.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/081_cmova.acquisition.evidence.zst && $(location //extractor:fuzz_model) --acquisition $(@D)/081_cmova.acquisition.json --model $(@D)/081_cmova.model.json --instruction-hex 480f47c3 --examples 10000 --max-executions 10000 --stage discover --seconds 1800 --output $(@D)/081_cmova.fuzz.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/081_cmova.fuzz.evidence.zst",
-    exec_properties = {"cpu_count": "1", "memory_mb": "2048"},
+    exec_properties = {
+        "cpu_count": "1",
+        "memory_mb": "2048",
+    },
     tools = [
         "//extractor:acquire_model",
         "//extractor:fuzz_model",
@@ -1388,7 +1631,10 @@ genrule(
         "082_vaddsd.fuzz.evidence.zst",
     ],
     cmd = "$(location //extractor:acquire_model) --instruction-hex c5f358c2 --model-output $(@D)/082_vaddsd.model.json --result-output $(@D)/082_vaddsd.acquisition.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/082_vaddsd.acquisition.evidence.zst && $(location //extractor:fuzz_model) --acquisition $(@D)/082_vaddsd.acquisition.json --model $(@D)/082_vaddsd.model.json --instruction-hex c5f358c2 --examples 10000 --max-executions 10000 --stage discover --seconds 1800 --output $(@D)/082_vaddsd.fuzz.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/082_vaddsd.fuzz.evidence.zst",
-    exec_properties = {"cpu_count": "1", "memory_mb": "2048"},
+    exec_properties = {
+        "cpu_count": "1",
+        "memory_mb": "2048",
+    },
     tools = [
         "//extractor:acquire_model",
         "//extractor:fuzz_model",
@@ -1405,7 +1651,10 @@ genrule(
         "083_movdqu.fuzz.evidence.zst",
     ],
     cmd = "$(location //extractor:acquire_model) --instruction-hex f30f6fc1 --model-output $(@D)/083_movdqu.model.json --result-output $(@D)/083_movdqu.acquisition.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/083_movdqu.acquisition.evidence.zst && $(location //extractor:fuzz_model) --acquisition $(@D)/083_movdqu.acquisition.json --model $(@D)/083_movdqu.model.json --instruction-hex f30f6fc1 --examples 10000 --max-executions 10000 --stage discover --seconds 1800 --output $(@D)/083_movdqu.fuzz.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/083_movdqu.fuzz.evidence.zst",
-    exec_properties = {"cpu_count": "1", "memory_mb": "2048"},
+    exec_properties = {
+        "cpu_count": "1",
+        "memory_mb": "2048",
+    },
     tools = [
         "//extractor:acquire_model",
         "//extractor:fuzz_model",
@@ -1422,7 +1671,10 @@ genrule(
         "084_setae.fuzz.evidence.zst",
     ],
     cmd = "$(location //extractor:acquire_model) --instruction-hex 0f93c0 --model-output $(@D)/084_setae.model.json --result-output $(@D)/084_setae.acquisition.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/084_setae.acquisition.evidence.zst && $(location //extractor:fuzz_model) --acquisition $(@D)/084_setae.acquisition.json --model $(@D)/084_setae.model.json --instruction-hex 0f93c0 --examples 10000 --max-executions 10000 --stage discover --seconds 1800 --output $(@D)/084_setae.fuzz.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/084_setae.fuzz.evidence.zst",
-    exec_properties = {"cpu_count": "1", "memory_mb": "2048"},
+    exec_properties = {
+        "cpu_count": "1",
+        "memory_mb": "2048",
+    },
     tools = [
         "//extractor:acquire_model",
         "//extractor:fuzz_model",
@@ -1439,7 +1691,10 @@ genrule(
         "085_seta.fuzz.evidence.zst",
     ],
     cmd = "$(location //extractor:acquire_model) --instruction-hex 0f97c0 --model-output $(@D)/085_seta.model.json --result-output $(@D)/085_seta.acquisition.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/085_seta.acquisition.evidence.zst && $(location //extractor:fuzz_model) --acquisition $(@D)/085_seta.acquisition.json --model $(@D)/085_seta.model.json --instruction-hex 0f97c0 --examples 10000 --max-executions 10000 --stage discover --seconds 1800 --output $(@D)/085_seta.fuzz.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/085_seta.fuzz.evidence.zst",
-    exec_properties = {"cpu_count": "1", "memory_mb": "2048"},
+    exec_properties = {
+        "cpu_count": "1",
+        "memory_mb": "2048",
+    },
     tools = [
         "//extractor:acquire_model",
         "//extractor:fuzz_model",
@@ -1456,7 +1711,10 @@ genrule(
         "086_pcmpeqb.fuzz.evidence.zst",
     ],
     cmd = "$(location //extractor:acquire_model) --instruction-hex 660f74c1 --model-output $(@D)/086_pcmpeqb.model.json --result-output $(@D)/086_pcmpeqb.acquisition.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/086_pcmpeqb.acquisition.evidence.zst && $(location //extractor:fuzz_model) --acquisition $(@D)/086_pcmpeqb.acquisition.json --model $(@D)/086_pcmpeqb.model.json --instruction-hex 660f74c1 --examples 10000 --max-executions 10000 --stage discover --seconds 1800 --output $(@D)/086_pcmpeqb.fuzz.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/086_pcmpeqb.fuzz.evidence.zst",
-    exec_properties = {"cpu_count": "1", "memory_mb": "2048"},
+    exec_properties = {
+        "cpu_count": "1",
+        "memory_mb": "2048",
+    },
     tools = [
         "//extractor:acquire_model",
         "//extractor:fuzz_model",
@@ -1473,7 +1731,10 @@ genrule(
         "087_pmovmskb.fuzz.evidence.zst",
     ],
     cmd = "$(location //extractor:acquire_model) --instruction-hex 660fd7c0 --model-output $(@D)/087_pmovmskb.model.json --result-output $(@D)/087_pmovmskb.acquisition.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/087_pmovmskb.acquisition.evidence.zst && $(location //extractor:fuzz_model) --acquisition $(@D)/087_pmovmskb.acquisition.json --model $(@D)/087_pmovmskb.model.json --instruction-hex 660fd7c0 --examples 10000 --max-executions 10000 --stage discover --seconds 1800 --output $(@D)/087_pmovmskb.fuzz.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/087_pmovmskb.fuzz.evidence.zst",
-    exec_properties = {"cpu_count": "1", "memory_mb": "2048"},
+    exec_properties = {
+        "cpu_count": "1",
+        "memory_mb": "2048",
+    },
     tools = [
         "//extractor:acquire_model",
         "//extractor:fuzz_model",
@@ -1490,7 +1751,10 @@ genrule(
         "088_cmovl.fuzz.evidence.zst",
     ],
     cmd = "$(location //extractor:acquire_model) --instruction-hex 480f4cc3 --model-output $(@D)/088_cmovl.model.json --result-output $(@D)/088_cmovl.acquisition.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/088_cmovl.acquisition.evidence.zst && $(location //extractor:fuzz_model) --acquisition $(@D)/088_cmovl.acquisition.json --model $(@D)/088_cmovl.model.json --instruction-hex 480f4cc3 --examples 10000 --max-executions 10000 --stage discover --seconds 1800 --output $(@D)/088_cmovl.fuzz.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/088_cmovl.fuzz.evidence.zst",
-    exec_properties = {"cpu_count": "1", "memory_mb": "2048"},
+    exec_properties = {
+        "cpu_count": "1",
+        "memory_mb": "2048",
+    },
     tools = [
         "//extractor:acquire_model",
         "//extractor:fuzz_model",
@@ -1507,7 +1771,10 @@ genrule(
         "089_movups.fuzz.evidence.zst",
     ],
     cmd = "$(location //extractor:acquire_model) --instruction-hex 0f10c1 --model-output $(@D)/089_movups.model.json --result-output $(@D)/089_movups.acquisition.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/089_movups.acquisition.evidence.zst && $(location //extractor:fuzz_model) --acquisition $(@D)/089_movups.acquisition.json --model $(@D)/089_movups.model.json --instruction-hex 0f10c1 --examples 10000 --max-executions 10000 --stage discover --seconds 1800 --output $(@D)/089_movups.fuzz.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/089_movups.fuzz.evidence.zst",
-    exec_properties = {"cpu_count": "1", "memory_mb": "2048"},
+    exec_properties = {
+        "cpu_count": "1",
+        "memory_mb": "2048",
+    },
     tools = [
         "//extractor:acquire_model",
         "//extractor:fuzz_model",
@@ -1524,7 +1791,10 @@ genrule(
         "090_bsr.fuzz.evidence.zst",
     ],
     cmd = "$(location //extractor:acquire_model) --instruction-hex 480fbdc3 --model-output $(@D)/090_bsr.model.json --result-output $(@D)/090_bsr.acquisition.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/090_bsr.acquisition.evidence.zst && $(location //extractor:fuzz_model) --acquisition $(@D)/090_bsr.acquisition.json --model $(@D)/090_bsr.model.json --instruction-hex 480fbdc3 --examples 10000 --max-executions 10000 --stage discover --seconds 1800 --output $(@D)/090_bsr.fuzz.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/090_bsr.fuzz.evidence.zst",
-    exec_properties = {"cpu_count": "1", "memory_mb": "2048"},
+    exec_properties = {
+        "cpu_count": "1",
+        "memory_mb": "2048",
+    },
     tools = [
         "//extractor:acquire_model",
         "//extractor:fuzz_model",
@@ -1541,7 +1811,10 @@ genrule(
         "091_maxsd.fuzz.evidence.zst",
     ],
     cmd = "$(location //extractor:acquire_model) --instruction-hex f20f5fc1 --model-output $(@D)/091_maxsd.model.json --result-output $(@D)/091_maxsd.acquisition.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/091_maxsd.acquisition.evidence.zst && $(location //extractor:fuzz_model) --acquisition $(@D)/091_maxsd.acquisition.json --model $(@D)/091_maxsd.model.json --instruction-hex f20f5fc1 --examples 10000 --max-executions 10000 --stage discover --seconds 1800 --output $(@D)/091_maxsd.fuzz.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/091_maxsd.fuzz.evidence.zst",
-    exec_properties = {"cpu_count": "1", "memory_mb": "2048"},
+    exec_properties = {
+        "cpu_count": "1",
+        "memory_mb": "2048",
+    },
     tools = [
         "//extractor:acquire_model",
         "//extractor:fuzz_model",
@@ -1558,7 +1831,10 @@ genrule(
         "092_cmovns.fuzz.evidence.zst",
     ],
     cmd = "$(location //extractor:acquire_model) --instruction-hex 480f49c3 --model-output $(@D)/092_cmovns.model.json --result-output $(@D)/092_cmovns.acquisition.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/092_cmovns.acquisition.evidence.zst && $(location //extractor:fuzz_model) --acquisition $(@D)/092_cmovns.acquisition.json --model $(@D)/092_cmovns.model.json --instruction-hex 480f49c3 --examples 10000 --max-executions 10000 --stage discover --seconds 1800 --output $(@D)/092_cmovns.fuzz.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/092_cmovns.fuzz.evidence.zst",
-    exec_properties = {"cpu_count": "1", "memory_mb": "2048"},
+    exec_properties = {
+        "cpu_count": "1",
+        "memory_mb": "2048",
+    },
     tools = [
         "//extractor:acquire_model",
         "//extractor:fuzz_model",
@@ -1575,7 +1851,10 @@ genrule(
         "093_mulpd.fuzz.evidence.zst",
     ],
     cmd = "$(location //extractor:acquire_model) --instruction-hex 660f59c1 --model-output $(@D)/093_mulpd.model.json --result-output $(@D)/093_mulpd.acquisition.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/093_mulpd.acquisition.evidence.zst && $(location //extractor:fuzz_model) --acquisition $(@D)/093_mulpd.acquisition.json --model $(@D)/093_mulpd.model.json --instruction-hex 660f59c1 --examples 10000 --max-executions 10000 --stage discover --seconds 1800 --output $(@D)/093_mulpd.fuzz.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/093_mulpd.fuzz.evidence.zst",
-    exec_properties = {"cpu_count": "1", "memory_mb": "2048"},
+    exec_properties = {
+        "cpu_count": "1",
+        "memory_mb": "2048",
+    },
     tools = [
         "//extractor:acquire_model",
         "//extractor:fuzz_model",
@@ -1592,7 +1871,10 @@ genrule(
         "094_setb.fuzz.evidence.zst",
     ],
     cmd = "$(location //extractor:acquire_model) --instruction-hex 0f92c0 --model-output $(@D)/094_setb.model.json --result-output $(@D)/094_setb.acquisition.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/094_setb.acquisition.evidence.zst && $(location //extractor:fuzz_model) --acquisition $(@D)/094_setb.acquisition.json --model $(@D)/094_setb.model.json --instruction-hex 0f92c0 --examples 10000 --max-executions 10000 --stage discover --seconds 1800 --output $(@D)/094_setb.fuzz.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/094_setb.fuzz.evidence.zst",
-    exec_properties = {"cpu_count": "1", "memory_mb": "2048"},
+    exec_properties = {
+        "cpu_count": "1",
+        "memory_mb": "2048",
+    },
     tools = [
         "//extractor:acquire_model",
         "//extractor:fuzz_model",
@@ -1609,7 +1891,10 @@ genrule(
         "095_ucomiss.fuzz.evidence.zst",
     ],
     cmd = "$(location //extractor:acquire_model) --instruction-hex 0f2ec1 --model-output $(@D)/095_ucomiss.model.json --result-output $(@D)/095_ucomiss.acquisition.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/095_ucomiss.acquisition.evidence.zst && $(location //extractor:fuzz_model) --acquisition $(@D)/095_ucomiss.acquisition.json --model $(@D)/095_ucomiss.model.json --instruction-hex 0f2ec1 --examples 10000 --max-executions 10000 --stage discover --seconds 1800 --output $(@D)/095_ucomiss.fuzz.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/095_ucomiss.fuzz.evidence.zst",
-    exec_properties = {"cpu_count": "1", "memory_mb": "2048"},
+    exec_properties = {
+        "cpu_count": "1",
+        "memory_mb": "2048",
+    },
     tools = [
         "//extractor:acquire_model",
         "//extractor:fuzz_model",
@@ -1626,7 +1911,10 @@ genrule(
         "096_cdq.fuzz.evidence.zst",
     ],
     cmd = "$(location //extractor:acquire_model) --instruction-hex 99 --model-output $(@D)/096_cdq.model.json --result-output $(@D)/096_cdq.acquisition.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/096_cdq.acquisition.evidence.zst && $(location //extractor:fuzz_model) --acquisition $(@D)/096_cdq.acquisition.json --model $(@D)/096_cdq.model.json --instruction-hex 99 --examples 10000 --max-executions 10000 --stage discover --seconds 1800 --output $(@D)/096_cdq.fuzz.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/096_cdq.fuzz.evidence.zst",
-    exec_properties = {"cpu_count": "1", "memory_mb": "2048"},
+    exec_properties = {
+        "cpu_count": "1",
+        "memory_mb": "2048",
+    },
     tools = [
         "//extractor:acquire_model",
         "//extractor:fuzz_model",
@@ -1643,7 +1931,10 @@ genrule(
         "097_subss.fuzz.evidence.zst",
     ],
     cmd = "$(location //extractor:acquire_model) --instruction-hex f30f5cc1 --model-output $(@D)/097_subss.model.json --result-output $(@D)/097_subss.acquisition.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/097_subss.acquisition.evidence.zst && $(location //extractor:fuzz_model) --acquisition $(@D)/097_subss.acquisition.json --model $(@D)/097_subss.model.json --instruction-hex f30f5cc1 --examples 10000 --max-executions 10000 --stage discover --seconds 1800 --output $(@D)/097_subss.fuzz.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/097_subss.fuzz.evidence.zst",
-    exec_properties = {"cpu_count": "1", "memory_mb": "2048"},
+    exec_properties = {
+        "cpu_count": "1",
+        "memory_mb": "2048",
+    },
     tools = [
         "//extractor:acquire_model",
         "//extractor:fuzz_model",
@@ -1660,7 +1951,10 @@ genrule(
         "098_bswap.fuzz.evidence.zst",
     ],
     cmd = "$(location //extractor:acquire_model) --instruction-hex 480fc8 --model-output $(@D)/098_bswap.model.json --result-output $(@D)/098_bswap.acquisition.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/098_bswap.acquisition.evidence.zst && $(location //extractor:fuzz_model) --acquisition $(@D)/098_bswap.acquisition.json --model $(@D)/098_bswap.model.json --instruction-hex 480fc8 --examples 10000 --max-executions 10000 --stage discover --seconds 1800 --output $(@D)/098_bswap.fuzz.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/098_bswap.fuzz.evidence.zst",
-    exec_properties = {"cpu_count": "1", "memory_mb": "2048"},
+    exec_properties = {
+        "cpu_count": "1",
+        "memory_mb": "2048",
+    },
     tools = [
         "//extractor:acquire_model",
         "//extractor:fuzz_model",
@@ -1677,7 +1971,10 @@ genrule(
         "099_leave.fuzz.evidence.zst",
     ],
     cmd = "$(location //extractor:acquire_model) --instruction-hex c9 --model-output $(@D)/099_leave.model.json --result-output $(@D)/099_leave.acquisition.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/099_leave.acquisition.evidence.zst && $(location //extractor:fuzz_model) --acquisition $(@D)/099_leave.acquisition.json --model $(@D)/099_leave.model.json --instruction-hex c9 --examples 10000 --max-executions 10000 --stage discover --seconds 1800 --output $(@D)/099_leave.fuzz.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/099_leave.fuzz.evidence.zst",
-    exec_properties = {"cpu_count": "1", "memory_mb": "2048"},
+    exec_properties = {
+        "cpu_count": "1",
+        "memory_mb": "2048",
+    },
     tools = [
         "//extractor:acquire_model",
         "//extractor:fuzz_model",
@@ -1694,7 +1991,10 @@ genrule(
         "100_cvtss2sd.fuzz.evidence.zst",
     ],
     cmd = "$(location //extractor:acquire_model) --instruction-hex f30f5ac1 --model-output $(@D)/100_cvtss2sd.model.json --result-output $(@D)/100_cvtss2sd.acquisition.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/100_cvtss2sd.acquisition.evidence.zst && $(location //extractor:fuzz_model) --acquisition $(@D)/100_cvtss2sd.acquisition.json --model $(@D)/100_cvtss2sd.model.json --instruction-hex f30f5ac1 --examples 10000 --max-executions 10000 --stage discover --seconds 1800 --output $(@D)/100_cvtss2sd.fuzz.json --recording reference-json --commit 94a99a9dfdc7dec295c3231465d4ae7a6e9626f0 --invocation-id d7f32572-64dd-4474-8475-0fe7f735dac5 --evidence-output $(@D)/100_cvtss2sd.fuzz.evidence.zst",
-    exec_properties = {"cpu_count": "1", "memory_mb": "2048"},
+    exec_properties = {
+        "cpu_count": "1",
+        "memory_mb": "2048",
+    },
     tools = [
         "//extractor:acquire_model",
         "//extractor:fuzz_model",

@@ -6,14 +6,14 @@
 from __future__ import annotations
 
 import argparse
-from collections.abc import Sequence
 import json
+from collections.abc import Sequence
 from pathlib import Path
 from typing import Protocol, cast
 
-from extractor.z3_runtime import LIBSTDCXX
-from extractor.fuzz_runner import run_bounded
 from extractor.evidence_session import add_recording_arguments, recording_options
+from extractor.fuzz_runner import run_bounded
+from extractor.z3_runtime import LIBSTDCXX
 
 
 class _Options(Protocol):

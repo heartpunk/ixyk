@@ -12,11 +12,13 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import cast
 
+import z3
+
 from extractor import z3_boundary as _z3
 from extractor.artifact import (
     BOOL,
-    Assignment,
     ArtifactError,
+    Assignment,
     Declaration,
     StepSummary,
     Target,
@@ -24,8 +26,6 @@ from extractor.artifact import (
     TypedExpr,
     UnsupportedTheoryError,
 )
-import z3
-
 
 _BINARY = {
     z3.Z3_OP_BADD: "bv_add",

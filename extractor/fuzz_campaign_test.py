@@ -374,22 +374,22 @@ def test_frozen_campaign_has_no_acquisition_in_sampling(recording, fallback):
 
 
 def test_unavailable_acquisition_is_reported_without_new_discovery():
-    acquisition = dict(
-        prepared_cases=[],
-        schema="ixyk.instruction_acquisition.v1",
-        instruction_hex="90",
-        status="unsupported",
-        model_route=None,
-        retained_models=[],
-        findings=[
-            dict(
-                stage="generalization",
-                instruction_hex="90",
-                error_kind="OperandDecodeError",
-                message="no model",
-            )
+    acquisition = {
+        "prepared_cases": [],
+        "schema": "ixyk.instruction_acquisition.v1",
+        "instruction_hex": "90",
+        "status": "unsupported",
+        "model_route": None,
+        "retained_models": [],
+        "findings": [
+            {
+                "stage": "generalization",
+                "instruction_hex": "90",
+                "error_kind": "OperandDecodeError",
+                "message": "no model",
+            }
         ],
-    )
+    }
     with patch.object(
         campaign_module, "extract", side_effect=AssertionError("new discovery")
     ):

@@ -1,16 +1,16 @@
 """Exercise actual REAPI actions without depending on project source targets."""
 
 import argparse
-from contextlib import contextmanager
-from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import json
 import os
-from pathlib import Path
 import shutil
 import subprocess
 import tempfile
 import threading
 import uuid
+from contextlib import contextmanager
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from pathlib import Path
 
 
 @contextmanager

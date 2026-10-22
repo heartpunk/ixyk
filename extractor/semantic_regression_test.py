@@ -9,11 +9,9 @@ import argparse
 from collections.abc import Sequence
 from typing import Protocol, cast
 
-from extractor.runtime import load_shellcode
-
 from extractor.extractor import extract
 from extractor.fuzzer import fuzz
-
+from extractor.runtime import load_shellcode
 
 SOURCE = 0x400000
 

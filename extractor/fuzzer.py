@@ -5,17 +5,17 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable, Iterable, Mapping, Sequence
-from dataclasses import dataclass
-from typing import Literal, NotRequired, TypedDict
 import hashlib
 import json
+from collections.abc import Callable, Iterable, Mapping, Sequence
+from dataclasses import dataclass
 from time import perf_counter
+from typing import Literal, NotRequired, TypedDict
 
 import hypothesis
+from hypothesis import Phase, given, seed, settings
+from hypothesis import strategies as st
 from hypothesis.database import ExampleDatabase
-
-from hypothesis import Phase, given, seed, settings, strategies as st
 
 from extractor.amd64_state import (
     AMD64_FLAG_BIT,
@@ -517,7 +517,8 @@ def fuzz(
             assert current is not None
             try:
                 after = emulate(code, before)
-            except Exception as error:
+            # Model broad emulator errors as data, then classify CPU exceptions.
+            except Exception as error:  # noqa: BLE001
                 if not is_cpu_exception(error):
                     differences = (f"emulator {type(error).__name__}: {error}",)
                 else:

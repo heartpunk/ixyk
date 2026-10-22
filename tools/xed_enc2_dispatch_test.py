@@ -1,8 +1,8 @@
 # SPDX-FileCopyrightText: 2026 Sophie Smithburg
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-from dataclasses import dataclass
 import unittest
+from dataclasses import dataclass
 
 from tools.xed_enc2_dispatch import arguments
 

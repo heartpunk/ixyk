@@ -6,13 +6,14 @@
 from __future__ import annotations
 
 from collections.abc import (
+    AbstractSet,
     Callable,
     Mapping,
     MutableMapping,
     MutableSet,
     Sequence,
 )
-from typing import AbstractSet, Protocol, cast
+from typing import Protocol, cast
 
 from extractor import runtime
 from extractor.tool_errors import AngrOperationError

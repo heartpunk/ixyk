@@ -2,9 +2,9 @@
 
 import copy
 import json
-from pathlib import Path
 import subprocess
 import tempfile
+from pathlib import Path
 
 
 def read_model(path: Path) -> dict:
@@ -79,7 +79,7 @@ def check(workspace: Path) -> None:
             path = Path(temporary) / f"{name}.json"
             path.write_text(json.dumps(model))
             result = subprocess.run(
-                [str(binary), str(path)], capture_output=True, text=True
+                [str(binary), str(path)], check=False, capture_output=True, text=True
             )
             if result.returncode != 1:
                 raise ValueError(

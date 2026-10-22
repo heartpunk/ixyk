@@ -1,16 +1,15 @@
 # Imports intentionally follow path setup and the import-time timer.
-# ruff: noqa: E402
-import os
-import sys
-import pathlib
-import time
-import json
 import cProfile
-import pstats
-import hashlib
 import dataclasses
-import resource
+import hashlib
 import importlib.metadata
+import json
+import os
+import pathlib
+import pstats
+import resource
+import sys
+import time
 
 root = pathlib.Path(__file__).resolve().parent
 rf = pathlib.Path(
@@ -23,21 +22,24 @@ sys.path[:0] = (
     + [str(rf / "ixyk_vendored_arpy+"), str(rf / "ixyk_vendored_mulpyplexer+")]
 )
 t0 = time.perf_counter()
-from extractor import z3_runtime  # noqa: F401 -- preload native runtime
-from extractor.fuzzer import fuzz
-from extractor.fuzz_campaign import Campaign
+import zstandard
+
+from extractor import (
+    xed,
+    z3_runtime,  # noqa: F401 -- preload native runtime
+)
 from extractor.evidence import RunContext
 from extractor.evidence_events import EvidenceHooks, evidence_types
 from extractor.evidence_recording import BackgroundRecorder
 from extractor.evidence_reference_json import ReferenceJSONBackend
-from extractor import xed
-import zstandard
+from extractor.fuzz_campaign import Campaign
+from extractor.fuzzer import fuzz
 
 imports = time.perf_counter() - t0
 mode, opcode, hexcode, variant, profiled, label = sys.argv[1:]
 output = root / "results" / label
 output.mkdir(parents=True, exist_ok=True)
-print(json.dumps(dict(event="start", label=label, imports_s=imports)), flush=True)
+print(json.dumps({"event": "start", "label": label, "imports_s": imports}), flush=True)
 invocations = {}
 cache = {}
 cache_hits = 0
@@ -67,12 +69,12 @@ generated = hashlib.sha256()
 
 def select(self, code, source, sample, **kw):
     before = kw["before"]
-    inp = dict(
-        code=code.hex(),
-        source=source,
-        scalars=dict(before.scalars),
-        memory=sorted(before.memory.items()),
-    )
+    inp = {
+        "code": code.hex(),
+        "source": source,
+        "scalars": dict(before.scalars),
+        "memory": sorted(before.memory.items()),
+    }
     generated.update(json.dumps(inp, sort_keys=True).encode())
     start = time.perf_counter()
     try:
@@ -93,14 +95,14 @@ def compare(self, current, code, before, sample):
     samples.append(row)
     print(
         json.dumps(
-            dict(
-                event="sample",
-                label=label,
-                sample=sample,
-                select_s=row["select_s"],
-                compare_s=row["compare_s"],
-                route=row["route"],
-            )
+            {
+                "event": "sample",
+                "label": label,
+                "sample": sample,
+                "select_s": row["select_s"],
+                "compare_s": row["compare_s"],
+                "route": row["route"],
+            }
         ),
         flush=True,
     )
@@ -156,55 +158,55 @@ finally:
 wall = time.perf_counter() - started
 stats = pstats.Stats(prof) if profiled == "yes" else None
 rows = [
-    dict(
-        file=k[0],
-        line=k[1],
-        function=k[2],
-        primitive=v[0],
-        calls=v[1],
-        self_s=v[2],
-        cumulative_s=v[3],
-    )
+    {
+        "file": k[0],
+        "line": k[1],
+        "function": k[2],
+        "primitive": v[0],
+        "calls": v[1],
+        "self_s": v[2],
+        "cumulative_s": v[3],
+    }
     for k, v in (stats.stats.items() if stats else [])
 ]
-result = dict(
-    label=label,
-    mode=mode,
-    opcode=opcode,
-    variant=variant,
-    profiled=profiled,
-    wall_s=wall,
-    imports_s=imports,
-    report=report,
-    generated_sha256=generated.hexdigest(),
-    samples=samples,
-    progress_count=progress_count,
-    xed_calls=sum(invocations.values()),
-    xed_unique=len(invocations),
-    xed_cache_hits=cache_hits,
-    xed_keys=invocations,
-    profile=rows,
-    recording=dataclasses.asdict(recorder.metrics) if recorder else None,
-    peak_rss_kib=resource.getrusage(resource.RUSAGE_SELF).ru_maxrss,
-    versions={
+result = {
+    "label": label,
+    "mode": mode,
+    "opcode": opcode,
+    "variant": variant,
+    "profiled": profiled,
+    "wall_s": wall,
+    "imports_s": imports,
+    "report": report,
+    "generated_sha256": generated.hexdigest(),
+    "samples": samples,
+    "progress_count": progress_count,
+    "xed_calls": sum(invocations.values()),
+    "xed_unique": len(invocations),
+    "xed_cache_hits": cache_hits,
+    "xed_keys": invocations,
+    "profile": rows,
+    "recording": dataclasses.asdict(recorder.metrics) if recorder else None,
+    "peak_rss_kib": resource.getrusage(resource.RUSAGE_SELF).ru_maxrss,
+    "versions": {
         k: importlib.metadata.version(k)
         for k in ["angr", "hypothesis", "unicorn", "zstandard", "z3-solver"]
     },
-)
+}
 (output / "result.json").write_text(json.dumps(result, indent=2))
 if stats:
     prof.dump_stats(str(output / "profile.pstats"))
 print(
     json.dumps(
-        dict(
-            event="done",
-            label=label,
-            wall_s=wall,
-            xed_calls=result["xed_calls"],
-            xed_unique=len(invocations),
-            peak_rss_kib=result["peak_rss_kib"],
-            report=report,
-        )
+        {
+            "event": "done",
+            "label": label,
+            "wall_s": wall,
+            "xed_calls": result["xed_calls"],
+            "xed_unique": len(invocations),
+            "peak_rss_kib": result["peak_rss_kib"],
+            "report": report,
+        }
     ),
     flush=True,
 )

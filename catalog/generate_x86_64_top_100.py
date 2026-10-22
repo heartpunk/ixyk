@@ -5,13 +5,12 @@
 
 from __future__ import annotations
 
+import json
 from collections.abc import Iterable
 from hashlib import sha256
-import json
 from pathlib import Path
 from typing import TypedDict, cast
 from urllib.request import urlopen
-
 
 SOURCE = "https://x86instructionpop.com/grouped_data.json"
 SOURCE_SHA256 = "f7531052413093997e0bf995801f4284c95e8b7a0807276b66fde1c949c68bcc"

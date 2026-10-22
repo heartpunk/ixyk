@@ -20,11 +20,11 @@ def recording_options(parser, options):
         parser.error(
             "recording requires --evidence-output, --commit, and --invocation-id"
         )
-    return dict(
-        path=str(options.evidence_output.resolve()),
-        commit=options.commit,
-        invocation_id=options.invocation_id,
-    )
+    return {
+        "path": str(options.evidence_output.resolve()),
+        "commit": options.commit,
+        "invocation_id": options.invocation_id,
+    }
 
 
 @contextmanager
@@ -33,22 +33,25 @@ def recording_session(options):
         yield None
         return
     import zstandard
+
     from extractor.evidence import RunContext
     from extractor.evidence_events import EvidenceHooks, evidence_types
     from extractor.evidence_recording import BackgroundRecorder
     from extractor.evidence_reference_json import ReferenceJSONBackend
 
-    with Path(options["path"]).open("xb") as raw:
-        with zstandard.ZstdCompressor(level=3).stream_writer(
+    with (
+        Path(options["path"]).open("xb") as raw,
+        zstandard.ZstdCompressor(level=3).stream_writer(
             raw, closefd=False
-        ) as compressed:
-            recorder = BackgroundRecorder(
-                backend=ReferenceJSONBackend(),
-                types=evidence_types(),
-                run=RunContext(options["commit"], options["invocation_id"]),
-                output=compressed,
-            )
-            try:
-                yield EvidenceHooks(recorder)
-            finally:
-                recorder.close()
+        ) as compressed,
+    ):
+        recorder = BackgroundRecorder(
+            backend=ReferenceJSONBackend(),
+            types=evidence_types(),
+            run=RunContext(options["commit"], options["invocation_id"]),
+            output=compressed,
+        )
+        try:
+            yield EvidenceHooks(recorder)
+        finally:
+            recorder.close()

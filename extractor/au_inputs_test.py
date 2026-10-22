@@ -1,16 +1,17 @@
 # SPDX-FileCopyrightText: 2026 Sophie Smithburg
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-import pytest
 import json
 from pathlib import Path
-from antiunification.many import separating_inputs, antiunify_many
+
+import pytest
+
+from antiunification.many import antiunify_many, separating_inputs
+from extractor.artifact import Declaration, TermSort
 from extractor.au_inputs import instruction_inputs, parameters
 from extractor.model_syntax import BitVectorAtom, QFAbvSyntax
-from extractor.artifact import TermSort
-from extractor.xed import decode
 from extractor.operand_slots import canonical_bindings
-from extractor.artifact import Declaration
+from extractor.xed import decode
 
 
 @pytest.mark.parametrize(

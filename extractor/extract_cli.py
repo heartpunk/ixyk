@@ -4,15 +4,13 @@
 """File-producing command line boundary for one instruction extraction."""
 
 # Native runtime must preload declared libstdc++ before Z3 or Angr imports.
-from extractor.runtime import load_shellcode
-
 import argparse
 from collections.abc import Sequence
 from pathlib import Path
 from typing import Protocol, cast
 
 from extractor.extractor import extract
-
+from extractor.runtime import load_shellcode
 
 DEFAULT_SOURCE = 0x400000
 

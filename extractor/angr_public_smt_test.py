@@ -5,10 +5,11 @@
 
 from __future__ import annotations
 
+import z3
+
 from extractor import runtime
 from extractor.amd64_state import LTS_EXTRACTION_CONTEXT, claripy_to_z3
 from extractor.angr_boundary import claripy
-import z3
 
 
 def test_runtime_probe_checks_the_pinned_angr_public_api() -> None:

@@ -1,11 +1,17 @@
-from contextlib import ExitStack
-from unittest.mock import patch
 import json
 import time
-from extractor import z3_runtime  # noqa: F401 -- preload native runtime
-from extractor import fuzz_campaign, xed, runtime, evidence_benchmark
-from extractor.fuzzer import CompiledModel
+from contextlib import ExitStack
+from unittest.mock import patch
+
 import antiunification.many as au
+from extractor import (
+    evidence_benchmark,
+    fuzz_campaign,
+    runtime,
+    xed,
+    z3_runtime,  # noqa: F401 -- preload native runtime
+)
+from extractor.fuzzer import CompiledModel
 
 prepare = fuzz_campaign.Campaign.prepare
 fuzz = evidence_benchmark._fuzz
@@ -39,7 +45,7 @@ with ExitStack() as guards:
                 last[0] = n
                 print(
                     json.dumps(
-                        dict(samples=n, elapsed_s=round(time.monotonic() - start, 2))
+                        {"samples": n, "elapsed_s": round(time.monotonic() - start, 2)}
                     ),
                     flush=True,
                 )
@@ -59,14 +65,14 @@ with ExitStack() as guards:
     assert case["fallback_allocations"] == case["planned_fallback_allocations"]
     print(
         json.dumps(
-            dict(
-                guards=counts,
-                preparation_s=case["preparation_seconds"],
-                execution_s=case["execution_seconds"],
-                total_s=case["elapsed_ns"] / 1e9,
-                peak_rss_bytes=result["peak_rss_bytes"],
-                input_sha256=case["input_sha256"],
-            )
+            {
+                "guards": counts,
+                "preparation_s": case["preparation_seconds"],
+                "execution_s": case["execution_seconds"],
+                "total_s": case["elapsed_ns"] / 1e9,
+                "peak_rss_bytes": result["peak_rss_bytes"],
+                "input_sha256": case["input_sha256"],
+            }
         ),
         flush=True,
     )

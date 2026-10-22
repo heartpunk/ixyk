@@ -9,7 +9,6 @@ from extractor.operand_slots import OperandDecodeError
 from extractor.tool_errors import AngrOperationError, ShellcodeLoadError
 from extractor.xed import EncodingError
 
-
 EXPECTED_ACQUISITION = (
     Amd64AdapterError,
     UnsupportedTheoryError,

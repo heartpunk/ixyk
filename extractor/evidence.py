@@ -3,11 +3,11 @@
 
 """Typed evidence records with codec-independent provenance and framing."""
 
-from collections.abc import Callable, Iterator
-from dataclasses import dataclass, fields, is_dataclass
 import json
 import struct
 import time
+from collections.abc import Callable, Iterator
+from dataclasses import dataclass, fields, is_dataclass
 from typing import BinaryIO, Protocol, get_type_hints
 from uuid import uuid4
 

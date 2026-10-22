@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import pytest
+
 from extractor.xed import EncodingError, decode, encode, registers, relative_target
 
 

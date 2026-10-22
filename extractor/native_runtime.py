@@ -10,7 +10,6 @@ import faulthandler
 import os
 from pathlib import Path
 
-
 # Fatal native faults must leave all Python thread stacks in the action log.
 faulthandler.enable(all_threads=True)
 

@@ -1,9 +1,15 @@
 # SPDX-FileCopyrightText: 2026 Sophie Smithburg
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-from extractor import z3_runtime as _z3_runtime
 from dataclasses import replace
+
+import pytest
+import z3
+from hypothesis import Phase, given, settings
+from hypothesis import strategies as st
+
 from antiunification.many import antiunify_many
+from extractor import z3_runtime as _z3_runtime
 from extractor.artifact import (
     Assignment,
     Declaration,
@@ -16,9 +22,6 @@ from extractor.artifact import (
 from extractor.model_syntax import QFAbvSyntax
 from extractor.normalization import normalize_expression, normalize_model
 from extractor.typed_z3 import expr_to_z3
-from hypothesis import Phase, given, settings, strategies as st
-import pytest
-import z3
 
 
 @st.composite

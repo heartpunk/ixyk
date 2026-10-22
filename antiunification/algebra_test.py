@@ -3,9 +3,9 @@
 
 from __future__ import annotations
 
+import unittest
 from dataclasses import dataclass
 from enum import Enum
-import unittest
 
 from antiunification import (
     AlgebraError,

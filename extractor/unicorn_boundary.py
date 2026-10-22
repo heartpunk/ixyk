@@ -5,8 +5,8 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable
 import importlib
+from collections.abc import Callable
 from types import ModuleType
 from typing import Protocol, cast
 

@@ -8,7 +8,6 @@ from urllib.error import HTTPError, URLError
 
 from ci_cachix_restore import CACHIX, UPSTREAM, restore, upstream_has, validate_paths
 
-
 PYTHON = "/nix/store/" + "a" * 32 + "-python-env"
 XED = "/nix/store/" + "b" * 32 + "-ixyk-xed-enc2"
 UPSTREAM_PATH = "/nix/store/" + "c" * 32 + "-bash"

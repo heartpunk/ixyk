@@ -6,10 +6,9 @@
 from __future__ import annotations
 
 import json
-from pathlib import Path
 import subprocess
+from pathlib import Path
 from tempfile import TemporaryDirectory
-
 
 CATALOG = Path(__file__).with_name("x86_64_top_100.json")
 OUTPUT = Path(__file__).with_name("x86_64_probes.json")

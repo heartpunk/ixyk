@@ -4,12 +4,12 @@
 """Test scaffolding for the adapter contract, not the production JSON backend."""
 
 import base64
-from collections.abc import Mapping, Sequence
-from dataclasses import dataclass, fields, is_dataclass
 import json
 import sys
 import types
-from typing import Callable, Literal, Union, get_args, get_origin, get_type_hints
+from collections.abc import Callable, Mapping, Sequence
+from dataclasses import dataclass, fields, is_dataclass
+from typing import Literal, Union, get_args, get_origin, get_type_hints
 
 from extractor.evidence import TypeSchema
 

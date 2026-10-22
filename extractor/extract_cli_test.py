@@ -3,8 +3,8 @@
 
 """The extractor CLI writes a reusable typed model artifact."""
 
-from tempfile import TemporaryDirectory
 from pathlib import Path
+from tempfile import TemporaryDirectory
 
 from extractor.artifact import InstructionModel
 from extractor.extract_cli import DEFAULT_SOURCE, main

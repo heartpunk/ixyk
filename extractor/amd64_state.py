@@ -7,26 +7,31 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from dataclasses import dataclass
-from functools import lru_cache
+from functools import cache
 from typing import Protocol, cast
+
+import z3
+from angr.engines.vex.claripy import ccall as _angr_ccall
+
+from extractor import z3_boundary as _z3
 
 # Importing the boundary preloads libstdc++ before the Angr import below.
 from extractor.angr_boundary import (
     Ast,
     State,
-    angr as _angr,
     ast_not_equal,
     blank_state,
-    claripy as _claripy,
     expect_ast,
     expect_project,
     expect_state,
 )
-from extractor import z3_boundary as _z3
+from extractor.angr_boundary import (
+    angr as _angr,
+)
+from extractor.angr_boundary import (
+    claripy as _claripy,
+)
 from extractor.artifact import MEM64_8, Declaration, TermSort
-
-from angr.engines.vex.claripy import ccall as _angr_ccall
-import z3
 
 
 class Amd64AdapterError(RuntimeError):
@@ -179,14 +184,14 @@ def canonical_declarations() -> tuple[Declaration, ...]:
     )
 
 
-@lru_cache(maxsize=None)
+@cache
 def canonical_register(name: str) -> z3.BitVecRef:
     if name not in REGISTER_NAMES:
         raise Amd64AdapterError(f"unknown canonical AMD64 register {name!r}")
     return _z3.bit_vec(name, REGISTER_WIDTH[name], LTS_EXTRACTION_CONTEXT)
 
 
-@lru_cache(maxsize=None)
+@cache
 def canonical_flag(name: str) -> z3.BitVecRef:
     if name not in FLAG_NAMES:
         raise Amd64AdapterError(f"unknown canonical AMD64 flag {name!r}")
@@ -197,7 +202,7 @@ def canonical_flag(name: str) -> z3.BitVecRef:
     )
 
 
-@lru_cache(maxsize=None)
+@cache
 def canonical_memory() -> z3.ArrayRef:
     address = _z3.bit_vec_sort(64, LTS_EXTRACTION_CONTEXT)
     byte = _z3.bit_vec_sort(8, LTS_EXTRACTION_CONTEXT)

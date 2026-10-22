@@ -5,5 +5,4 @@
 
 from extractor.native_runtime import preload_libstdcxx
 
-
 LIBSTDCXX = preload_libstdcxx()

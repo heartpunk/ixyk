@@ -3,8 +3,8 @@
 
 """Bounded background recording and measurements shared by every codec."""
 
-from dataclasses import dataclass
 import gc
+from dataclasses import dataclass
 from queue import Full, Queue
 from threading import Thread
 from time import perf_counter_ns, thread_time_ns, time_ns
@@ -174,9 +174,8 @@ class BackgroundRecorder:
                 if actual != identifier:
                     raise AssertionError("producer/writer record sequences diverged")
                 self.metrics.records += 1
-        except (
-            BaseException
-        ) as error:  # noqa: BLE001  # Re-raise on the producer thread.
+        # Preserve worker control-flow exceptions so the producer can re-raise them.
+        except BaseException as error:  # noqa: BLE001
             self._error = error
         finally:
             self.metrics.worker_cpu_ns = thread_time_ns() - started

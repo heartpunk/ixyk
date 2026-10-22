@@ -136,7 +136,7 @@ class _ProbeResult(TypedDict):
 _LIBSTDCXX = _preload_libstdcxx()
 
 angr = importlib.import_module("angr")
-claripy = getattr(angr, "claripy")
+claripy = angr.claripy
 
 __all__ = ["angr", "claripy"]
 

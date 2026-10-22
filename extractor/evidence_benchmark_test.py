@@ -6,9 +6,10 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest.mock import patch
 
-from hypothesis import given, settings, strategies as st
 import pytest
 import zstandard
+from hypothesis import given, settings
+from hypothesis import strategies as st
 
 from extractor import evidence_benchmark as benchmark
 from extractor.evidence import EvidenceReader

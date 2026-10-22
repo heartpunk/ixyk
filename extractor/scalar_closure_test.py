@@ -3,10 +3,8 @@
 
 """The extractor admits declared scalar and vector architectural state."""
 
-from extractor.runtime import load_shellcode
-
 from extractor.extractor import extract
-
+from extractor.runtime import load_shellcode
 
 SOURCE = 0x400000
 ADD_RAX_RBX = bytes.fromhex("4801d8")

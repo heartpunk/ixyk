@@ -7,18 +7,22 @@ from tempfile import TemporaryDirectory
 from types import SimpleNamespace
 from unittest.mock import patch
 
-from hypothesis import given, settings, strategies as st
 import pytest
 import zstandard
+from hypothesis import given, settings
+from hypothesis import strategies as st
 
-from extractor import acquire_cli, extractor as extraction
+from extractor import acquire_cli
+from extractor import extractor as extraction
 from extractor.artifact import (
-    InstructionModel,
-    Declaration,
     Assignment,
+    Declaration,
+    InstructionModel,
     StepSummary,
     Target,
     TermSort,
+)
+from extractor.artifact import (
     TypedExpr as E,
 )
 from extractor.evidence import EvidenceReader
@@ -137,14 +141,14 @@ def test_unsupported_candidate_preserves_successful_siblings(supported):
         ),
         patch("extractor.au_inputs.instruction_inputs", return_value=codes),
         patch.object(extraction, "_extract_concrete", side_effect=concrete),
+        pytest.raises(OperandDecodeError, match="incomplete"),
     ):
-        with pytest.raises(OperandDecodeError, match="incomplete"):
-            extraction.extract(
-                project,
-                4096,
-                on_model=lambda code, model, route: retained.append(code),
-                on_finding=lambda stage, code, error: findings.append(code),
-            )
+        extraction.extract(
+            project,
+            4096,
+            on_model=lambda code, model, route: retained.append(code),
+            on_finding=lambda stage, code, error: findings.append(code),
+        )
     assert attempts == codes
     assert retained == [code for code, ok in zip(codes, supported) if ok]
     assert findings == [code for code, ok in zip(codes, supported) if not ok]
@@ -155,14 +159,13 @@ def test_unsupported_candidate_preserves_successful_siblings(supported):
 def test_interruption_drains_evidence_and_replay_preserves_ids(messages):
     with TemporaryDirectory() as temporary:
         path = Path(temporary) / "evidence.zst"
-        options = dict(
-            path=str(path), commit="a" * 40, invocation_id="test-interruption"
-        )
-        with pytest.raises(KeyboardInterrupt):
-            with recording_session(options) as hooks:
-                for message in messages:
-                    hooks.finding("test", b"\x90", OperandDecodeError(message))
-                raise KeyboardInterrupt()
+        options = {
+            "path": str(path), "commit": "a" * 40, "invocation_id": "test-interruption"
+        }
+        with pytest.raises(KeyboardInterrupt), recording_session(options) as hooks:
+            for message in messages:
+                hooks.finding("test", b"\x90", OperandDecodeError(message))
+            raise KeyboardInterrupt()
         _, records = read_records(path)
         _, replay = read_records(path)
         assert [record.value.message for record in records] == messages
@@ -178,27 +181,27 @@ def test_unexpected_acquisition_exception_propagates():
                 acquire_cli, "extract", side_effect=RuntimeError("unexpected")
             ),
             patch.object(acquire_cli, "load_shellcode"),
+            pytest.raises(RuntimeError, match="unexpected"),
         ):
-            with pytest.raises(RuntimeError, match="unexpected"):
-                acquire_cli.main(
-                    [
-                        "--instruction-hex",
-                        "90",
-                        "--model-output",
-                        str(root / "model.json"),
-                        "--result-output",
-                        str(root / "result.json"),
-                    ]
-                )
+            acquire_cli.main(
+                [
+                    "--instruction-hex",
+                    "90",
+                    "--model-output",
+                    str(root / "model.json"),
+                    "--result-output",
+                    str(root / "result.json"),
+                ]
+            )
         assert not (root / "model.json").exists()
 
 
 @given(st.integers(1, 3))
 @settings(max_examples=3, deadline=None)
 def test_fuzz_cli_records_subprocess_comparisons(samples):
+    from extractor.evidence_events import Comparison, FuzzInput
     from extractor.fuzz_cli import main as fuzz_main
     from extractor.runtime import load_shellcode
-    from extractor.evidence_events import Comparison, FuzzInput
 
     model = extraction.extract(load_shellcode(bytes.fromhex("4801d8"), 4096), 4096)
     with TemporaryDirectory() as temporary:
@@ -357,6 +360,7 @@ if __name__ == "__main__":
 @settings(deadline=None)
 def test_sparse_prediction_roundtrip(default, entries, probe, scalar):
     from io import BytesIO
+
     from extractor.concrete_eval import ConcreteArray
     from extractor.evidence import EvidenceAdapter, RunContext
     from extractor.evidence_events import Comparison, MemorySnapshot, ModelPrediction
@@ -373,7 +377,8 @@ def test_sparse_prediction_roundtrip(default, entries, probe, scalar):
     writer.emit(value)
     stream.seek(0)
     reader = EvidenceReader(stream, backend=ReferenceJSONBackend(), types=evidence_types())
-    restored = list(reader)[0].value
+    records = list(reader)
+    restored = records[0].value
     assert restored == value
     encoded_memory = restored.model_after.memory
     decoded = ConcreteArray(encoded_memory.index_width, encoded_memory.default,
