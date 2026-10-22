@@ -103,6 +103,9 @@ nix_native_deps = use_extension(
 )
 use_repo(nix_native_deps, "nix_native_deps")
 
+nix_xed_repository = use_repo_rule("//tools:nix_xed.bzl", "nix_xed_repository")
+nix_xed_repository(name = "nix_xed")
+
 bazel_dep(name = "ifrl", version = "0.1.0")
 git_override(
     module_name = "ifrl",
