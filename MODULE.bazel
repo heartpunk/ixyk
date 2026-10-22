@@ -17,6 +17,7 @@ git_override(
 )
 
 angr_environment_repository = use_repo_rule("@ifrl//bazel/angr:repository.bzl", "angr_environment_repository")
+
 angr_environment_repository(name = "shared_angr")
 
 python = use_extension(
@@ -43,7 +44,6 @@ pip.parse(
         "//extractor:requirements_linux_x86_64.txt": "linux_x86_64",
     },
 )
-
 use_repo(pip, "ixyk_pypi")
 
 nix_native_deps = use_extension(
