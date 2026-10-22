@@ -59,8 +59,8 @@
       },
       "original": {
         "owner": "heartpunk",
+        "ref": "main",
         "repo": "ifrl",
-        "rev": "84cfd2929ce9a3510fc042ca1852326f2d22fcb1",
         "type": "github"
       }
     },
