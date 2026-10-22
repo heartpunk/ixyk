@@ -110,7 +110,7 @@ nix_xed_repository(name = "nix_xed")
 bazel_dep(name = "ifrl", version = "0.1.0")
 git_override(
     module_name = "ifrl",
-    commit = "1c30d79c68280e1beaec9a557ee1332e07caa7ba",
+    commit = "e6cea30740c08893099e93795b839c99a19739b5",
     remote = "https://github.com/heartpunk/ifrl.git",
 )
 
