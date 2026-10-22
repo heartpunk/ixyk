@@ -158,7 +158,7 @@ def rename(value: Value, prefix: str) -> Value:
 def rename_name(value: Name, prefix: str) -> Name:
     renamed = rename(value, prefix)
     if not isinstance(renamed, Name):
-        raise AssertionError("renaming a name changed its constructor")
+        raise AssertionError("renaming a name changed its constructor")  # noqa: TRY004
     return renamed
 
 

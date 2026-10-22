@@ -252,7 +252,7 @@ class SelectionTest(unittest.TestCase):
                 ):
                     runpy.run_path(
                         str(Path(__file__).with_name("ci_changes.py")),
-                        run_name="".join(["__", "main", "__"]),
+                        run_name="__main__",
                     )
                 expected = "existing=value\n" + "".join(
                     f"{suite}={str(suite in enabled).lower()}\n"

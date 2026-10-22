@@ -39,17 +39,19 @@ def recording_session(options):
     from extractor.evidence_recording import BackgroundRecorder
     from extractor.evidence_reference_json import ReferenceJSONBackend
 
-    with Path(options["path"]).open("xb") as raw:
-        with zstandard.ZstdCompressor(level=3).stream_writer(
+    with (
+        Path(options["path"]).open("xb") as raw,
+        zstandard.ZstdCompressor(level=3).stream_writer(
             raw, closefd=False
-        ) as compressed:
-            recorder = BackgroundRecorder(
-                backend=ReferenceJSONBackend(),
-                types=evidence_types(),
-                run=RunContext(options["commit"], options["invocation_id"]),
-                output=compressed,
-            )
-            try:
-                yield EvidenceHooks(recorder)
-            finally:
-                recorder.close()
+        ) as compressed,
+    ):
+        recorder = BackgroundRecorder(
+            backend=ReferenceJSONBackend(),
+            types=evidence_types(),
+            run=RunContext(options["commit"], options["invocation_id"]),
+            output=compressed,
+        )
+        try:
+            yield EvidenceHooks(recorder)
+        finally:
+            recorder.close()

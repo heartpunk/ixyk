@@ -33,7 +33,7 @@ def test_operators():
 
         @given(cases(op))
         @settings(max_examples=100, deadline=None, phases=[Phase.generate])
-        def check(case):
+        def check(case, op=op):
             counts[op] += 1
             expr, bindings = case
             context = z3.Context()

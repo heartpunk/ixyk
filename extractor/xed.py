@@ -52,7 +52,7 @@ class InstructionInfo(TypedDict):
 def _invoke(*arguments: str) -> object:
     executable = runfiles_root() / "_main/extractor/xed_bridge"
     result = subprocess.run(
-        [str(executable), *arguments], capture_output=True, text=True
+        [str(executable), *arguments], check=False, capture_output=True, text=True
     )
     if result.returncode:
         raise EncodingError(result.stderr.strip())

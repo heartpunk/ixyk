@@ -42,7 +42,7 @@ def evidence(label):
         n = struct.unpack(">Q", length)[0]
         body = b.read(n)
         assert len(body) == n
-        kind, seq, timestamp, ncontext = struct.unpack_from(">IQQI", body)
+        kind, seq, _timestamp, ncontext = struct.unpack_from(">IQQI", body)
         context = (
             body[24 : 24 + ncontext].decode().replace(manifest["stream_id"], "STREAM")
         )

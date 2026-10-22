@@ -101,9 +101,12 @@ class ReapiTest(unittest.TestCase):
     def test_state_lock_prevents_concurrent_workers_and_allows_reuse(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
-            with state_directory(root), self.assertRaises(ValueError):
-                with state_directory(root):
-                    pass
+            with (
+                state_directory(root),
+                self.assertRaises(ValueError),
+                state_directory(root),
+            ):
+                pass
             with state_directory(root) as reopened:
                 self.assertEqual(reopened, root.resolve())
 
@@ -113,15 +116,19 @@ class ReapiTest(unittest.TestCase):
         self.assertFalse(root.exists())
 
     def test_child_is_stopped_when_context_raises(self):
-        with self.assertRaisesRegex(RuntimeError, 'test failure'):
-            with process([sys.executable, '-c', 'import time; time.sleep(60)']) as child:
-                raise RuntimeError('test failure')
+        with (
+            self.assertRaisesRegex(RuntimeError, 'test failure'),
+            process([sys.executable, '-c', 'import time; time.sleep(60)']) as child,
+        ):
+            raise RuntimeError('test failure')
         self.assertIsNotNone(child.poll())
 
     def test_cleanup_kills_group_even_when_leader_exits(self):
-        with patch("reapi.os.killpg", wraps=os.killpg) as killpg:
-            with process([sys.executable, "-c", "pass"]) as child:
-                child.wait()
+        with (
+            patch("reapi.os.killpg", wraps=os.killpg) as killpg,
+            process([sys.executable, "-c", "pass"]) as child,
+        ):
+            child.wait()
         self.assertEqual(
             [call.args for call in killpg.call_args_list],
             [(child.pid, signal.SIGTERM), (child.pid, signal.SIGKILL)],

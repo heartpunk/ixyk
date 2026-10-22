@@ -27,7 +27,7 @@ def _acquire(instruction_hex: str, directory: Path) -> tuple[Path, dict[str, obj
     )
     raw = cast(object, json.loads(result.read_text(encoding="utf-8")))
     if not isinstance(raw, dict):
-        raise AssertionError("acquisition result is not an object")
+        raise AssertionError("acquisition result is not an object")  # noqa: TRY004
     return model, cast(dict[str, object], raw)
 
 
@@ -50,7 +50,7 @@ def _fuzz(instruction_hex: str, model: Path, directory: Path) -> dict[str, objec
     )
     raw = cast(object, json.loads(output.read_text(encoding="utf-8")))
     if not isinstance(raw, dict):
-        raise AssertionError("fuzz result is not an object")
+        raise AssertionError("fuzz result is not an object")  # noqa: TRY004
     return cast(dict[str, object], raw)
 
 
@@ -71,7 +71,7 @@ def main_test() -> None:
         assert fp["status"] == "unsupported"
         unavailable = cast(object, json.loads(fp_model.read_text(encoding="utf-8")))
         if not isinstance(unavailable, dict):
-            raise AssertionError("unavailable model is not an object")
+            raise AssertionError("unavailable model is not an object")  # noqa: TRY004
         assert unavailable["schema"] == "ixyk.unavailable_instruction_model.v1"
         assert _fuzz("f20f58c1", fp_model, directory)["status"] == "unsupported"
 

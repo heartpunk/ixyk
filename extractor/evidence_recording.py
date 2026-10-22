@@ -174,9 +174,8 @@ class BackgroundRecorder:
                 if actual != identifier:
                     raise AssertionError("producer/writer record sequences diverged")
                 self.metrics.records += 1
-        except (
-            BaseException
-        ) as error:  # Re-raise on the producer thread.
+        # Preserve worker control-flow exceptions so the producer can re-raise them.
+        except BaseException as error:  # noqa: BLE001
             self._error = error
         finally:
             self.metrics.worker_cpu_ns = thread_time_ns() - started

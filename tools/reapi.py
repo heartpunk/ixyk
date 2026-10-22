@@ -308,10 +308,18 @@ def main(argv=None):
 
 def check_namespaces(entrypoint):
     preflight = subprocess.run(
-        [entrypoint, sys.executable, "-c",
-         "import os; assert os.readlink('/proc/self/exe') == "
-         "os.readlink(f'/proc/{os.getpid()}/exe')"],
-        capture_output=True, text=True,
+        [
+            entrypoint,
+            sys.executable,
+            "-c",
+            (
+                "import os; assert os.readlink('/proc/self/exe') == "
+                "os.readlink(f'/proc/{os.getpid()}/exe')"
+            ),
+        ],
+        check=False,
+        capture_output=True,
+        text=True,
     )
     if preflight.returncode:
         raise RuntimeError(

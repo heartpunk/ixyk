@@ -517,7 +517,8 @@ def fuzz(
             assert current is not None
             try:
                 after = emulate(code, before)
-            except Exception as error:
+            # Model broad emulator errors as data, then classify CPU exceptions.
+            except Exception as error:  # noqa: BLE001
                 if not is_cpu_exception(error):
                     differences = (f"emulator {type(error).__name__}: {error}",)
                 else:

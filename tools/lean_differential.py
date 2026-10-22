@@ -64,7 +64,8 @@ class LeanProcess:
     def __init__(self, executable):
         self.executable = executable
         self.process = None
-        self.errors = tempfile.TemporaryFile(mode="w+")
+        # Owned by this process object until close(), beyond __init__'s scope.
+        self.errors = tempfile.TemporaryFile(mode="w+")  # noqa: SIM115
         atexit.register(self.close)
 
     def close(self):
@@ -298,7 +299,7 @@ def main():
             max_examples=args.examples, deadline=None, derandomize=True, database=None
         )
         @given(cases(op))
-        def check(case):
+        def check(case, op=op):
             run_case(op, *case)
 
         check()

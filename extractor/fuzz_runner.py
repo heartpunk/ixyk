@@ -48,7 +48,8 @@ def _worker(
                 **options,
             )
         connection.send(("complete", report))
-    except BaseException:
+    # Send worker control-flow failures to the parent as tracebacks too.
+    except BaseException:  # noqa: BLE001
         connection.send(("error", traceback.format_exc()))
     finally:
         connection.close()

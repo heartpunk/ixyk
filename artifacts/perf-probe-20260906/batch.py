@@ -44,7 +44,8 @@ for variant, profiled, rep, name, code, mode in jobs:
             variant,
             profiled,
             label,
-        ]
+        ],
+        check=False,
     )
     if result.returncode:
         sys.exit(result.returncode)

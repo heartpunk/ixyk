@@ -141,14 +141,14 @@ def test_unsupported_candidate_preserves_successful_siblings(supported):
         ),
         patch("extractor.au_inputs.instruction_inputs", return_value=codes),
         patch.object(extraction, "_extract_concrete", side_effect=concrete),
+        pytest.raises(OperandDecodeError, match="incomplete"),
     ):
-        with pytest.raises(OperandDecodeError, match="incomplete"):
-            extraction.extract(
-                project,
-                4096,
-                on_model=lambda code, model, route: retained.append(code),
-                on_finding=lambda stage, code, error: findings.append(code),
-            )
+        extraction.extract(
+            project,
+            4096,
+            on_model=lambda code, model, route: retained.append(code),
+            on_finding=lambda stage, code, error: findings.append(code),
+        )
     assert attempts == codes
     assert retained == [code for code, ok in zip(codes, supported) if ok]
     assert findings == [code for code, ok in zip(codes, supported) if not ok]
@@ -162,11 +162,10 @@ def test_interruption_drains_evidence_and_replay_preserves_ids(messages):
         options = {
             "path": str(path), "commit": "a" * 40, "invocation_id": "test-interruption"
         }
-        with pytest.raises(KeyboardInterrupt):
-            with recording_session(options) as hooks:
-                for message in messages:
-                    hooks.finding("test", b"\x90", OperandDecodeError(message))
-                raise KeyboardInterrupt()
+        with pytest.raises(KeyboardInterrupt), recording_session(options) as hooks:
+            for message in messages:
+                hooks.finding("test", b"\x90", OperandDecodeError(message))
+            raise KeyboardInterrupt()
         _, records = read_records(path)
         _, replay = read_records(path)
         assert [record.value.message for record in records] == messages
@@ -182,18 +181,18 @@ def test_unexpected_acquisition_exception_propagates():
                 acquire_cli, "extract", side_effect=RuntimeError("unexpected")
             ),
             patch.object(acquire_cli, "load_shellcode"),
+            pytest.raises(RuntimeError, match="unexpected"),
         ):
-            with pytest.raises(RuntimeError, match="unexpected"):
-                acquire_cli.main(
-                    [
-                        "--instruction-hex",
-                        "90",
-                        "--model-output",
-                        str(root / "model.json"),
-                        "--result-output",
-                        str(root / "result.json"),
-                    ]
-                )
+            acquire_cli.main(
+                [
+                    "--instruction-hex",
+                    "90",
+                    "--model-output",
+                    str(root / "model.json"),
+                    "--result-output",
+                    str(root / "result.json"),
+                ]
+            )
         assert not (root / "model.json").exists()
 
 
@@ -378,7 +377,8 @@ def test_sparse_prediction_roundtrip(default, entries, probe, scalar):
     writer.emit(value)
     stream.seek(0)
     reader = EvidenceReader(stream, backend=ReferenceJSONBackend(), types=evidence_types())
-    restored = list(reader)[0].value
+    records = list(reader)
+    restored = records[0].value
     assert restored == value
     encoded_memory = restored.model_after.memory
     decoded = ConcreteArray(encoded_memory.index_width, encoded_memory.default,
