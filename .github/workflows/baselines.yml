@@ -71,17 +71,17 @@ jobs:
           if-no-files-found: error
   actions:
     if: github.event_name != 'schedule'
-    uses: heartpunk/ifrl/.github/workflows/actions-audit.yml@main
+    uses: heartpunk/ifrl/.github/workflows/actions-audit.yml@main # zizmor: ignore[unpinned-uses] -- suite policy deliberately follows IFRL main
   mutation:
     if: github.event_name == 'schedule'
-    uses: heartpunk/ifrl/.github/workflows/python-baseline.yml@main
+    uses: heartpunk/ifrl/.github/workflows/python-baseline.yml@main # zizmor: ignore[unpinned-uses] -- suite policy deliberately follows IFRL main
     with:
       baseline-ref: main
       nix-shell: '.'
       mutation: true
   lean:
     if: github.event_name != 'schedule'
-    uses: heartpunk/ifrl/.github/workflows/lean-baseline.yml@main
+    uses: heartpunk/ifrl/.github/workflows/lean-baseline.yml@main # zizmor: ignore[unpinned-uses] -- suite policy deliberately follows IFRL main
     with:
       baseline-ref: main
       nix-shell: '.'

@@ -24,7 +24,7 @@ jobs:
         with:
           persist-credentials: false
           fetch-depth: 0
-      - uses: ./.github/actions/changes
+      - uses: ./.github/actions/changes # zizmor: ignore[self-repository] -- pinned actionlint does not yet support $/
         id: changes
       - name: Test CI dependency filters
         run: python3 -m unittest discover -s tools -p ci_changes_test.py
