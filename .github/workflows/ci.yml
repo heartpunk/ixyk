@@ -30,8 +30,27 @@ jobs:
         run: python3 -m unittest discover -s tools -p ci_changes_test.py
       - name: Test public cache restore verification
         run: python3 -m unittest discover -s tools -p ci_cachix_restore_test.py
-      - name: Test REAPI launcher lifecycle and isolation settings
-        run: python3 -m unittest discover -s tools -p reapi_test.py
+      - name: Read the locked IFRL revision
+        id: ifrl
+        run: |
+          revision=$(jq -er '.nodes[.nodes.root.inputs.ifrl].locked.rev' flake.lock)
+          [[ "$revision" =~ ^[0-9a-f]{40}$ ]]
+          echo "revision=$revision" >> "$GITHUB_OUTPUT"
+      - name: Check out the pinned IFRL worker source
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          repository: heartpunk/ifrl
+          ref: ${{ steps.ifrl.outputs.revision }}
+          path: .ifrl-worker-tests
+          persist-credentials: false
+      - name: Test the shared REAPI worker lifecycle and isolation settings
+        env:
+          IFRL_REVISION: ${{ steps.ifrl.outputs.revision }}
+        run: |
+          test "$(git -C .ifrl-worker-tests rev-parse HEAD)" = "$IFRL_REVISION"
+          mv .ifrl-worker-tests "$RUNNER_TEMP/ifrl-worker-tests"
+          PYTHONPATH="$RUNNER_TEMP/ifrl-worker-tests/python" \
+            python3 -m unittest discover -s tools -p reapi_test.py
       - uses: cachix/install-nix-action@b85815f71a6de0ddee80b8a80a98d43f4bcc66c7 # v31
         if: steps.changes.outputs.lint == 'true'
         with:
