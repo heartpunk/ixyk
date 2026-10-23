@@ -20,6 +20,10 @@ angr_environment_repository = use_repo_rule("@ifrl//bazel/angr:repository.bzl", 
 
 angr_environment_repository(name = "shared_angr")
 
+coverage_runtime = use_repo_rule("//.ci:coverage.bzl", "coverage_runtime")
+
+coverage_runtime(name = "ci_coverage_runtime")
+
 python = use_extension(
     "@rules_python//python/extensions:python.bzl",
     "python",

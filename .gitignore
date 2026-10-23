@@ -5,3 +5,9 @@
 __pycache__/
 bazel-*
 lake-manifest.json
+
+# Disposable CI output and shared baseline checkout.
+ci-reports/
+ci-mutation-cache/
+.ifrl-ci/
+.pytest_cache/

@@ -1,0 +1,29 @@
+{
+  "sources": [
+    "antiunification",
+    "extractor",
+    "tools"
+  ],
+  "pythonpath": [
+    ".",
+    "tools"
+  ],
+  "tests": [
+    [
+      "-m",
+      "pytest",
+      "-q",
+      "tools/ci_changes_test.py",
+      "tools/ci_cachix_restore_test.py",
+      "tools/reapi_test.py"
+    ]
+  ],
+  "mutation_sources": [
+    "antiunification",
+    "extractor",
+    "tools"
+  ],
+  "mutation_command": "bash .ci/python-mutation.sh",
+  "mutation_baseline_timeout": 1200,
+  "mutation_timeout": 375
+}
