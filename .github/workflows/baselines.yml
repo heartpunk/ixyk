@@ -9,8 +9,6 @@ on:
 permissions:
   contents: read
 jobs:
-  # The umbrella and Python coverage workflows also run lint unconditionally.
-  # Call the shared coverage runner directly to adopt only the non-lint baselines.
   coverage:
     if: github.event_name != 'schedule'
     runs-on: ubuntu-24.04
@@ -22,6 +20,7 @@ jobs:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
         with:
           persist-credentials: false
+          fetch-depth: 2
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
         with:
           repository: heartpunk/ifrl
@@ -47,10 +46,22 @@ jobs:
           git rev-parse HEAD > ci-reports/revision.txt
           git -C .ifrl-ci rev-parse HEAD > ci-reports/baseline-revision.txt
       - name: Prepare the pinned worker test imports
+        id: prepare
         run: nix develop --no-write-lock-file --command bash .ci/python-prepare.sh
+      - name: Lint Python with the shared suite baseline
+        env:
+          IFRL_LINT_BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: |
+          # Manual runs have no event base; compare with the checked-out parent.
+          if [[ -z "$IFRL_LINT_BASE_SHA" || "$IFRL_LINT_BASE_SHA" =~ ^0+$ ]]; then
+            IFRL_LINT_BASE_SHA=$(git rev-parse HEAD^)
+            export IFRL_LINT_BASE_SHA
+          fi
+          nix develop --no-write-lock-file --command python3 .ifrl-ci/ci/python.py lint
       - name: Run existing tests with branch and subprocess coverage
+        if: ${{ !cancelled() && steps.prepare.outcome == 'success' }}
         run: nix develop --no-write-lock-file --command bash .ci/python-coverage.sh
-      - name: Preserve Python coverage reports
+      - name: Preserve Python lint and coverage reports
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
@@ -58,6 +69,9 @@ jobs:
           path: ci-reports
           retention-days: 90
           if-no-files-found: error
+  actions:
+    if: github.event_name != 'schedule'
+    uses: heartpunk/ifrl/.github/workflows/actions-audit.yml@main
   mutation:
     if: github.event_name == 'schedule'
     uses: heartpunk/ifrl/.github/workflows/python-baseline.yml@main
