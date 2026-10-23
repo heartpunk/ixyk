@@ -26,7 +26,7 @@ jobs:
         with:
           persist-credentials: false
           fetch-depth: 0
-      - uses: ./.github/actions/changes
+      - uses: ./.github/actions/changes # zizmor: ignore[self-repository] -- pinned actionlint does not yet support $/
         id: changes
       - uses: cachix/install-nix-action@b85815f71a6de0ddee80b8a80a98d43f4bcc66c7 # v31
         if: steps.changes.outputs.docker == 'true'
