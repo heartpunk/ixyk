@@ -1,4 +1,4 @@
-"""Regression tests for the local REAPI launcher's execution boundaries."""
+"""Regression tests for IXYK's pinned IFRL worker implementation."""
 
 from pathlib import Path
 import os
@@ -9,7 +9,7 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
-from reapi import (
+from ifrl.reapi import (
     bazel_command, configuration, coordinator_configuration, endpoint, main,
     process, state_directory, wait_ready, worker_configuration,
 )
@@ -17,11 +17,18 @@ import argparse
 
 
 class ReapiTest(unittest.TestCase):
+    worker_settings = ("ixyk-nix-contract", "ixyk-e7a3ca80-python312-lean430-procns-v1", 2, 4096)
+
     def test_configuration_keeps_namespaces_and_loopback(self):
-        config = configuration(Path('/tmp/state'), 51001, 51002, 3, '/nix/store/action')
+        config = configuration(Path('/tmp/state'), 51001, 51002, 3, '/nix/store/action',
+                               *self.worker_settings)
         worker = config['workers'][0]['local']
         self.assertEqual(worker['entrypoint'], '/nix/store/action')
         self.assertNotIn('ghot-nix-contract', worker['platform_properties'])
+        self.assertEqual(worker['platform_properties']['ixyk-nix-contract']['values'],
+                         [self.worker_settings[1]])
+        self.assertEqual(worker['platform_properties']['cpu_count']['values'], ['2'])
+        self.assertEqual(worker['platform_properties']['memory_mb']['values'], ['4096'])
         self.assertTrue(worker['use_namespaces'])
         self.assertTrue(worker['use_mount_namespace'])
         self.assertEqual(worker['max_inflight_tasks'], 3)
@@ -42,7 +49,8 @@ class ReapiTest(unittest.TestCase):
             bazel_command('test', [], 51001, 2)
 
     def test_coordinator_has_no_execution_worker(self):
-        config = coordinator_configuration(Path('/tmp/state'), 50051, 50061, '0.0.0.0')
+        config = coordinator_configuration(Path('/tmp/state'), 50051, 50061, '0.0.0.0',
+                                           *self.worker_settings)
         self.assertNotIn('workers', config)
         self.assertEqual([s['name'] for s in config['stores']], ['CAS', 'AC'])
         self.assertEqual([s['listener']['http']['socket_address'] for s in config['servers']],
@@ -50,7 +58,7 @@ class ReapiTest(unittest.TestCase):
 
     def test_worker_fetches_and_uploads_to_shared_coordinator(self):
         config = worker_configuration(Path('/tmp/worker'), 'grpc://hub:50051',
-                                      'grpc://hub:50061', 3, '/nix/action')
+                                      'grpc://hub:50061', 3, '/nix/action', *self.worker_settings)
         self.assertNotIn('schedulers', config)
         self.assertEqual(config['servers'], [])
         for store, kind in zip(config['stores'][:2], ('cas', 'ac')):
@@ -64,7 +72,7 @@ class ReapiTest(unittest.TestCase):
         self.assertEqual(worker['entrypoint'], '/nix/action')
 
     def test_remote_client_never_starts_worker_or_checks_namespaces(self):
-        with patch('reapi.process') as launch, patch('reapi.check_namespaces') as namespaces:
+        with patch('ifrl.reapi.process') as launch, patch('ifrl.reapi.check_namespaces') as namespaces:
             launch.return_value.__enter__.return_value.wait.return_value = 0
             self.assertEqual(main(['--nativelink', 'unused', '--entrypoint', 'unused',
                                    '--endpoint', 'grpc://hub:50051', 'test', '//:target']), 0)
@@ -75,6 +83,20 @@ class ReapiTest(unittest.TestCase):
             self.assertIn('--remote_executor=grpc://hub:50051', command)
             self.assertIn('--remote_local_fallback=false', command)
             self.assertIn('--jobs=48', command)
+
+    def test_ixyk_endpoint_environment_selects_remote_client(self):
+        with (
+            patch.dict(os.environ, {'IXYK_REAPI_ENDPOINT': 'grpc://hub:50051'}),
+            patch('ifrl.reapi.process') as launch,
+            patch('ifrl.reapi.check_namespaces') as namespaces,
+        ):
+            launch.return_value.__enter__.return_value.wait.return_value = 0
+            self.assertEqual(main(['--nativelink', 'unused', '--entrypoint', 'unused',
+                                   '--endpoint-environment', 'IXYK_REAPI_ENDPOINT',
+                                   'test', '//:target']), 0)
+            namespaces.assert_not_called()
+            launch.assert_called_once()
+            self.assertIn('--remote_executor=grpc://hub:50051', launch.call_args.args[0])
 
     def test_endpoint_rejects_ambiguous_or_unsupported_urls(self):
         for value in ('hub:50051', 'grpc://hub', 'grpc://hub:0', 'grpc://hub:65536',
@@ -114,7 +136,7 @@ class ReapiTest(unittest.TestCase):
         self.assertIsNotNone(child.poll())
 
     def test_cleanup_kills_group_even_when_leader_exits(self):
-        with patch("reapi.os.killpg", wraps=os.killpg) as killpg:
+        with patch("ifrl.reapi.os.killpg", wraps=os.killpg) as killpg:
             with process([sys.executable, "-c", "pass"]) as child:
                 child.wait()
         self.assertEqual(

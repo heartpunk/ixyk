@@ -112,14 +112,14 @@ py_test(
 cc_binary(
     name = "xed_bridge",
     srcs = ["xed_bridge.c"],
-    deps = ["@nix_native_deps//:xed_enc2"],
+    deps = ["@nix_xed//:xed_enc2"],
 )
 
 cc_binary(
     name = "xed_native.so",
     srcs = ["xed_bridge.c"],
     linkshared = True,
-    deps = ["@nix_native_deps//:xed_enc2"],
+    deps = ["@nix_xed//:xed_enc2"],
 )
 
 py_library(

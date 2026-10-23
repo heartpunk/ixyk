@@ -27,7 +27,18 @@
       devShells = nixpkgs.lib.mapAttrs (_: env: { default = env.shell; }) environments;
       packages = nixpkgs.lib.mapAttrs (system: env: let
         pkgs = import nixpkgs { inherit system; };
-        reapi = import ./nix/reapi.nix { inherit pkgs; development = env.package; };
+        reapi = ifrl.lib.worker {
+          inherit pkgs;
+          python = pkgs.python312;
+          developmentEnvironment = env.package;
+          component = "ixyk";
+          workerContract = "ixyk-e7a3ca80-python312-lean430-procns-v1";
+          clientDependencies = env.package;
+          contractProperty = "ixyk-nix-contract";
+          endpointEnvironment = "IXYK_REAPI_ENDPOINT";
+          workerCpuCount = 2;
+          workerMemoryMb = 4096;
+        };
       in {
         default = env.package;
         dev-environment = env.package;
