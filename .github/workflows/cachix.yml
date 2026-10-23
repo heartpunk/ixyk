@@ -113,6 +113,6 @@ jobs:
           export PUBLISHED_CLOSURE
           PUBLISHED_CLOSURE=$(cat "$RUNNER_TEMP/published/closure.json")
           python3 tools/ci_cachix_restore.py
-          nix develop --max-jobs 0 --option builders '' --command python tools/dev_smoke.py
-          nix build .#dev-environment --max-jobs 0 --option builders '' --out-link "$RUNNER_TEMP/restored"
+          nix develop --option builders '' --command python tools/dev_smoke.py
+          nix build .#dev-environment --option builders '' --out-link "$RUNNER_TEMP/restored"
           "$RUNNER_TEMP/restored/bin/ixyk-dev" python tools/dev_smoke.py
