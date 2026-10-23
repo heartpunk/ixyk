@@ -1,0 +1,73 @@
+name: Suite CI baselines
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+  schedule:
+    - cron: '49 4 * * *'
+permissions:
+  contents: read
+jobs:
+  # The umbrella and Python coverage workflows also run lint unconditionally.
+  # Call the shared coverage runner directly to adopt only the non-lint baselines.
+  coverage:
+    if: github.event_name != 'schedule'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          repository: heartpunk/ifrl
+          ref: main
+          path: .ifrl-ci
+          persist-credentials: false
+      - uses: cachix/install-nix-action@b85815f71a6de0ddee80b8a80a98d43f4bcc66c7 # v31
+        with:
+          github_access_token: ${{ github.token }}
+          extra_nix_config: |
+            accept-flake-config = true
+            max-jobs = 2
+            cores = 2
+      - uses: cachix/cachix-action@38b082610b782e7e93e209c35fd730d399dee866 # v17
+        with:
+          name: ifrl
+          skipPush: true
+      - name: Prepare public dependency access and record revisions
+        run: |
+          git config --global --add url.https://github.com/.insteadOf ssh://git@github.com/
+          git config --global --add url.https://github.com/.insteadOf git@github.com:
+          mkdir -p ci-reports
+          git rev-parse HEAD > ci-reports/revision.txt
+          git -C .ifrl-ci rev-parse HEAD > ci-reports/baseline-revision.txt
+      - name: Prepare the pinned worker test imports
+        run: nix develop --no-write-lock-file --command bash .ci/python-prepare.sh
+      - name: Run existing tests with branch and subprocess coverage
+        run: nix develop --no-write-lock-file --command bash .ci/python-coverage.sh
+      - name: Preserve Python coverage reports
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: python-branch-coverage-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ci-reports
+          retention-days: 90
+          if-no-files-found: error
+  mutation:
+    if: github.event_name == 'schedule'
+    uses: heartpunk/ifrl/.github/workflows/python-baseline.yml@main
+    with:
+      baseline-ref: main
+      nix-shell: '.'
+      mutation: true
+  lean:
+    if: github.event_name != 'schedule'
+    uses: heartpunk/ifrl/.github/workflows/lean-baseline.yml@main
+    with:
+      baseline-ref: main
+      nix-shell: '.'
