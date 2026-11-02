@@ -98,7 +98,7 @@
       "original": {
         "owner": "heartpunk",
         "repo": "lean4-nix",
-        "rev": "016ac348e901dc8d924c0d768a5ca9aee86e1763",
+        "ref": "main",
         "type": "github"
       }
     },

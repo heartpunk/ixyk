@@ -13,7 +13,7 @@
     nixpkgs.url = "github:NixOS/nixpkgs/e7a3ca8092b61ff85b6a45bf863ea2b2d6a661b3";
     ifrl.url = "github:heartpunk/ifrl/main";
     lean4-nix = {
-      url = "github:heartpunk/lean4-nix/016ac348e901dc8d924c0d768a5ca9aee86e1763";
+      url = "github:heartpunk/lean4-nix/main";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
