@@ -29,6 +29,9 @@ from extractor.artifact import Declaration
         "90",
         "c3",
         "4893",
+        "50",
+        "58",
+        "48f7d0",
     ],
 )
 def test_independent_inputs(hexcode):
