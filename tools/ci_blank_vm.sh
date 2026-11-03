@@ -17,13 +17,23 @@ sudo test -c /dev/kvm
 echo 'Installing VM host tools (network timeout: 30 seconds; retries: 3).'
 apt_options=(-o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30 -o Acquire::Retries=3)
 sudo apt-get "${apt_options[@]}" update -qq
-sudo apt-get "${apt_options[@]}" install -y --no-install-recommends qemu-system-x86 qemu-utils cloud-image-utils
+sudo apt-get "${apt_options[@]}" install -y --no-install-recommends qemu-system-x86 qemu-utils cloud-image-utils ubuntu-keyring gpgv
 cd "$state"
-echo 'Downloading the pinned Ubuntu cloud image.'
+echo 'Downloading the current Ubuntu cloud image and published checksum.'
+image_base=https://cloud-images.ubuntu.com/releases/jammy/release
+image_name=ubuntu-22.04-server-cloudimg-amd64.img
+curl --fail --location --retry 3 --connect-timeout 30 --max-time 60 \
+  "$image_base/SHA256SUMS" --output SHA256SUMS
+curl --fail --location --retry 3 --connect-timeout 30 --max-time 60 \
+  "$image_base/SHA256SUMS.gpg" --output SHA256SUMS.gpg
+gpgv --keyring /usr/share/keyrings/ubuntu-cloudimage-keyring.gpg SHA256SUMS.gpg SHA256SUMS
+image_sha256=$(awk -v name="*$image_name" '$2 == name { print $1 }' SHA256SUMS)
+[[ "$image_sha256" =~ ^[0-9a-f]{64}$ ]]
+echo "Ubuntu image: $image_base/$image_name sha256:$image_sha256"
 curl --fail --location --retry 3 --connect-timeout 30 --max-time 300 \
-  https://cloud-images.ubuntu.com/jammy/20260829/jammy-server-cloudimg-amd64.img \
+  "$image_base/$image_name" \
   --output base.img
-echo '46c966c646ab2e73af6ce8a2bdd20fefbc20f851794bbd46de31d2d1103b72c0  base.img' | sha256sum --check
+echo "$image_sha256  base.img" | sha256sum --check
 qemu-img create -f qcow2 -F qcow2 -b "$state/base.img" guest.qcow2 32G
 ssh-keygen -q -t ed25519 -N '' -f key
 cat > user-data <<CONFIG

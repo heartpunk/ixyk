@@ -1,0 +1,35 @@
+version: 2
+
+multi-ecosystem-groups:
+  suite-dependencies:
+    schedule:
+      interval: "weekly"
+
+updates:
+  - package-ecosystem: "nix"
+    directory: "/"
+    patterns: ["*"]
+    multi-ecosystem-group: "suite-dependencies"
+
+  - package-ecosystem: "bazel"
+    directories:
+      - "/"
+      - "/third_party/arpy"
+      - "/third_party/mulpyplexer"
+    patterns: ["*"]
+    multi-ecosystem-group: "suite-dependencies"
+
+  - package-ecosystem: "pip"
+    directory: "/extractor"
+    patterns: ["*"]
+    multi-ecosystem-group: "suite-dependencies"
+
+  - package-ecosystem: "docker-compose"
+    directory: "/"
+    patterns: ["*"]
+    multi-ecosystem-group: "suite-dependencies"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    patterns: ["*"]
+    multi-ecosystem-group: "suite-dependencies"
