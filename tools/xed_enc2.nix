@@ -20,6 +20,7 @@ in pkgs.stdenv.mkDerivation {
   };
   nativeBuildInputs = [ pkgs.python3 ];
   PYTHONPATH = "${mbuild}";
+  patches = [ ./xed_no_checked_enc2.patch ];
   postPatch = ''
     cp ${./xed_enc2_dispatch.py} pysrc/ixyk_enc2_dispatch.py
     substituteInPlace pysrc/enc2gen.py \
@@ -30,7 +31,7 @@ in pkgs.stdenv.mkDerivation {
   '';
   buildPhase = ''
     runHook preBuild
-    python3 mfile.py --enc2 -j "$NIX_BUILD_CORES" || {
+    python3 mfile.py --enc2 --no-enc2-checked -j "$NIX_BUILD_CORES" || {
       find obj -name ENC2-ERR.txt -exec cat {} \;
       exit 1
     }
