@@ -24,6 +24,11 @@ updates:
     patterns: ["*"]
     multi-ecosystem-group: "suite-dependencies"
 
+  - package-ecosystem: "docker-compose"
+    directory: "/"
+    patterns: ["*"]
+    multi-ecosystem-group: "suite-dependencies"
+
   - package-ecosystem: "github-actions"
     directory: "/"
     patterns: ["*"]
